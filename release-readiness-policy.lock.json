@@ -5,7 +5,7 @@
     {
       "path": "scripts/check_release_readiness.mjs",
       "role": "consumer release-readiness policy declaration",
-      "sha256": "c2d9b661d84480fe7a02f340752a16e632ece7e1f09f740ac5a941af5cb2a9ad"
+      "sha256": "ede89050d90892f1df074fc98ef40cb278ce8e9b9d6101831b7d31142ee2a42b"
     },
     {
       "path": "scripts/check-platform-facade-pins.mjs",
@@ -35,7 +35,7 @@
     {
       "path": "scripts/ci-workflow-policy.test.mjs",
       "role": "workflow policy tests",
-      "sha256": "e8fb28f15eda8147fc521d1a34bc7acdc2ec79ebeb13040bb777917d2032ed1e"
+      "sha256": "644975ca26cbe0f4f0f978a71c8fb980e8862ecaf60c0a116d41ac8a66402e0e"
     },
     {
       "path": "scripts/build_swift_xcframework.sh",
@@ -61,6 +61,16 @@
       "path": "scripts/verify_swift_release_artifact.mjs",
       "role": "Swift binary artifact verifier",
       "sha256": "342c0fd3b3e87f21c21341253bfffc47b99552ed5f56c5c7ccec4f1aa3eb31b0"
+    },
+    {
+      "path": "scripts/verify_swift_release_preflight.mjs",
+      "role": "Swift release evidence verifier",
+      "sha256": "6877165de2b627a371edd44203f55c2751ce24f633e03b9b664f5b23d02291ee"
+    },
+    {
+      "path": "scripts/verify_swift_release_preflight.test.mjs",
+      "role": "Swift release evidence verifier tests",
+      "sha256": "90d963a91ad1dfe24a516e070deb973ca12355530ccd71b05d6edeceba38e5ec"
     },
     {
       "path": "scripts/release-readiness/core.mjs",
@@ -100,12 +110,12 @@
     {
       "path": ".github/workflows/swift-package-preflight.yml",
       "role": "Swift binary package preflight workflow",
-      "sha256": "f46996d02c7968cea769c1349d65b94cb7f8e12d7d7ad419dd0c33c8f3dfd229"
+      "sha256": "219b0cbfaa465255a46c02d4ea1683a69e681ad29275908910139b42b7e56688"
     },
     {
       "path": ".github/workflows/swift-package-release.yml",
       "role": "Swift binary package release workflow",
-      "sha256": "643f5799dc083f4240aa6bcc5e05779b66785b080bb0339aca41e3f4c647c818"
+      "sha256": "6d747b590bb82828976dbe36b4ce80ed37dbce8f2e4bd85db9cf926b80604a0c"
     },
     {
       "path": "scripts/test-modern-soundness-regressions.sh",

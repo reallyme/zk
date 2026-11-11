@@ -335,16 +335,16 @@ test("Swift binary release promotes the pinned XCFramework verified by preflight
     /--local-artifact-path build\/swift\/ReallyMeZKPlatformFFI[.]xcframework/u,
   );
   assert.match(preflight, /swift test -Xswiftc -warnings-as-errors[\s\S]*?name: Upload verified Swift release candidate/u);
-  for (const workflow of [preflight, release]) {
-    assert.match(workflow, /run-consumer-check[.]mjs --policy-only\s*$/mu);
-  }
-  assert.match(release, /RELEASE_ATTESTATION_PREFLIGHT_WORKFLOW: swift-package-preflight[.]yml/u);
+  assert.match(preflight, /run-consumer-check[.]mjs --policy-only\s*$/mu);
+  assert.match(preflight, /scripts\/verify_swift_release_preflight[.]test[.]mjs/u);
+  assert.equal([...release.matchAll(/node scripts\/verify_swift_release_preflight[.]mjs/gu)].length, 2);
+  assert.doesNotMatch(release, /verify_release_attestation[.]mjs|prepare_swift_binary_manifest[.]mjs/u);
   assert.match(
     release,
     /actions\/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c/u,
   );
-  assert.match(release, /scripts\/prepare_swift_binary_manifest[.]mjs/u);
   assert.match(release, /scripts\/verify_swift_release_artifact[.]mjs/u);
+  assert.match(release, /git tag "v\$\{RELEASE_VERSION\}" "\$\{RELEASE_SHA\}"/u);
   assert.match(release, /gh release create "v\$\{RELEASE_VERSION\}"/u);
 });
 

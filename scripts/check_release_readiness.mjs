@@ -1644,16 +1644,16 @@ readiness.assertTextPolicy({
     {
       path: ".github/workflows/swift-package-release.yml",
       required: [
-        "RELEASE_ATTESTATION_PREFLIGHT_WORKFLOW: swift-package-preflight.yml",
+        "scripts/verify_swift_release_preflight.mjs",
+        "SWIFT_PREFLIGHT_RUN_ID: ${{ needs.verify-release-sha.outputs.preflight_run_id }}",
         "actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c",
-        "scripts/prepare_swift_binary_manifest.mjs",
         "scripts/verify_swift_release_artifact.mjs",
         "scripts/verify_sdk_release_version.mjs",
         "gh release create \"v${RELEASE_VERSION}\"",
         "build/swift/ReallyMeZKPlatformFFI.xcframework.zip",
         "build/swift/ReallyMeZKPlatformFFI.xcframework.build.tsv",
       ],
-      forbidden: [],
+      forbidden: ["scripts/verify_release_attestation.mjs", "scripts/prepare_swift_binary_manifest.mjs"],
     },
     {
       path: ".github/workflows/rust-ci.yml",

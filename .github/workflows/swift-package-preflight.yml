@@ -112,7 +112,7 @@ jobs:
           cp packages/swift/ReallyMeZKPlatformFFI.xcframework.build.tsv build/swift/
           swift package compute-checksum build/swift/ReallyMeZKPlatformFFI.xcframework.zip > build/swift/ReallyMeZKPlatformFFI.xcframework.checksum
       - name: Test Swift release tooling
-        run: node --test scripts/prepare_swift_binary_manifest.test.mjs scripts/verify_swift_release_artifact.test.mjs scripts/verify_release_attestation.test.mjs
+        run: node --test scripts/prepare_swift_binary_manifest.test.mjs scripts/verify_swift_release_artifact.test.mjs scripts/verify_swift_release_preflight.test.mjs
       - name: Checkout release-readiness runner
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
