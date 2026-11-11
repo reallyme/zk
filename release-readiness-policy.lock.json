@@ -5,7 +5,7 @@
     {
       "path": "scripts/check_release_readiness.mjs",
       "role": "consumer release-readiness policy declaration",
-      "sha256": "6f2836f9b31c1dc766624a38a004c503906f0d4c522d649fb6aaee26d0c50292"
+      "sha256": "f897f991682697beda2e4d9024e5a81434436778257bf3f0ab3e9d358231db92"
     },
     {
       "path": "scripts/check-platform-facade-pins.mjs",
@@ -285,12 +285,12 @@
     {
       "path": "scripts/publish_github_release.mjs",
       "role": "canonical GitHub release publisher",
-      "sha256": "e87d3904570d611fd1c5b1e6854a26df13975675a42b581b4804357473cdb4ef"
+      "sha256": "f9ae61bacc8dacd65c1fa980a7e9081e03a223ad1e5cba11dd5a712317b71ab9"
     },
     {
       "path": "scripts/publish_github_release.test.mjs",
       "role": "canonical release identity and asset admission tests",
-      "sha256": "0976512a44ef5c64631cc5806d7f23d4716d296faa80cd01472056dc3fd066a8"
+      "sha256": "7669d255b7815f3b5cf47d2ad21f082d91db2f2e45665ec250143e67d747435e"
     }
   ],
   "requiredFragments": [
@@ -363,7 +363,9 @@
         "reallyme-zk-v${version}",
         "release-tag-target-mismatch",
         "release-asset-conflict",
-        "legacy-release-exists"
+        "legacy-release-exists",
+        "discoverReleases(root, request)",
+        "release-inventory-limit-exceeded"
       ]
     }
   ]

@@ -18,17 +18,21 @@ const MAX_ASSETS = 100;
 const MAX_ASSET_BYTES = 2 * 1024 * 1024 * 1024;
 const MAX_RESPONSE_BYTES = 2 * 1024 * 1024;
 const HASH_BUFFER_BYTES = 1024 * 1024;
+const RELEASE_PAGE_SIZE = 25;
+const MAX_RELEASE_PAGES = 20;
+const MAX_RELEASE_TAG_LENGTH = 256;
 
 export class GitHubReleaseError extends Error {
-  constructor(code) {
+  constructor(code, httpStatus) {
     super(code);
     this.name = "GitHubReleaseError";
     this.code = code;
+    this.httpStatus = httpStatus;
   }
 }
 
-const fail = (code) => {
-  throw new GitHubReleaseError(code);
+const fail = (code, httpStatus) => {
+  throw new GitHubReleaseError(code, httpStatus);
 };
 const isRecord = (value) => value !== null && typeof value === "object" && !Array.isArray(value);
 const isId = (value) => Number.isSafeInteger(value) && value > 0;
@@ -56,7 +60,9 @@ const requestGitHub = (method, path, fields = {}, optional = false) => {
     // A failed lookup is absence only when GitHub explicitly returns 404.
     // Authentication, transport, and server failures must never admit creation.
     if (optional && isRecord(response) && response.status === "404") return null;
-    fail("github-request-failed");
+    const status = isRecord(response) && typeof response.status === "string" && /^[1-5][0-9]{2}$/u.test(response.status)
+      ? Number(response.status) : undefined;
+    fail("github-request-failed", status);
   }
   return response;
 };
@@ -119,6 +125,24 @@ const parseRelease = (value, tag) => {
   return value;
 };
 
+const discoverReleases = (root, request) => {
+  const releases = new Map();
+  // GitHub's tag lookup exposes published releases only. The authenticated
+  // inventory includes drafts, which must be reused after an interrupted run.
+  for (let page = 1; page <= MAX_RELEASE_PAGES; page += 1) {
+    const response = request("GET", `${root}/releases?per_page=${RELEASE_PAGE_SIZE}&page=${page}`);
+    if (!Array.isArray(response) || response.length > RELEASE_PAGE_SIZE) fail("invalid-release-inventory");
+    for (const release of response) {
+      if (!isRecord(release) || !isId(release.id) || typeof release.tag_name !== "string" ||
+          release.tag_name.length < 1 || release.tag_name.length > MAX_RELEASE_TAG_LENGTH) fail("invalid-release-inventory");
+      if (releases.has(release.tag_name)) fail("duplicate-release-identity");
+      releases.set(release.tag_name, release.id);
+    }
+    if (response.length < RELEASE_PAGE_SIZE) return releases;
+  }
+  fail("release-inventory-limit-exceeded");
+};
+
 export function publishGitHubRelease({
   mode, assetPaths = [], swiftVersionAlias = false,
   env = process.env, request = requestGitHub, upload = uploadGitHub,
@@ -158,8 +182,9 @@ export function publishGitHubRelease({
     }
   };
   requireMain();
+  const releases = discoverReleases(root, request);
   // Refuse a second public identity even if an older workflow is still present.
-  if (request("GET", `${root}/releases/tags/v${env.RELEASE_VERSION}`, {}, true) !== null) {
+  if (releases.has(`v${env.RELEASE_VERSION}`)) {
     fail("legacy-release-exists");
   }
   const alias = `v${env.RELEASE_VERSION}`;
@@ -169,7 +194,9 @@ export function publishGitHubRelease({
   }
   let tagRef = request("GET", `${root}/git/ref/tags/${tag}`, {}, true);
   if (tagRef !== null) requireTag(tagRef);
-  let release = parseRelease(request("GET", `${root}/releases/tags/${tag}`, {}, true), tag);
+  const releaseId = releases.get(tag);
+  let release = releaseId === undefined ? null : parseRelease(request("GET", `${root}/releases/${releaseId}`), tag);
+  if (releaseId !== undefined && release?.id !== releaseId) fail("release-identity-changed");
   if (release !== null && tagRef === null) fail("release-tag-missing");
   const missingAssets = (current) => assets.filter((asset) => {
     const existing = current?.assets.find((candidate) => candidate.name === asset.name);
@@ -195,7 +222,7 @@ export function publishGitHubRelease({
   for (const asset of missing) upload(repository, tag, asset.path);
   requireMain();
   requireTag(request("GET", `${root}/git/ref/tags/${tag}`));
-  const verified = parseRelease(request("GET", `${root}/releases/tags/${tag}`), tag);
+  const verified = parseRelease(request("GET", `${root}/releases/${release.id}`), tag);
   if (verified === null || verified.id !== release.id) fail("release-identity-changed");
   missing = missingAssets(verified);
   if (missing.length !== 0) fail("release-assets-missing-after-upload");
@@ -226,7 +253,9 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     const tag = publishGitHubRelease({ mode, assetPaths, swiftVersionAlias });
     console.log(`Verified GitHub release: ${tag}`);
   } catch (error) {
-    console.error(`GitHub release failed: ${error instanceof GitHubReleaseError ? error.code : "unexpected-failure"}`);
+    const code = error instanceof GitHubReleaseError ? error.code : "unexpected-failure";
+    const status = error instanceof GitHubReleaseError && error.httpStatus !== undefined ? `:http-${error.httpStatus}` : "";
+    console.error(`GitHub release failed: ${code}${status}`);
     process.exitCode = 1;
   }
 }

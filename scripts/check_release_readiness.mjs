@@ -1665,6 +1665,8 @@ readiness.assertTextPolicy({
         "legacy-release-exists",
         "release-assets-missing-after-upload",
         "release-sha-is-not-current-main",
+        "discoverReleases(root, request)",
+        "release-inventory-limit-exceeded",
       ],
       forbidden: ["--clobber", "throw new Error", "git push"],
     },

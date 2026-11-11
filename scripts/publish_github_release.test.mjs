@@ -35,9 +35,16 @@ const fixture = (t) => {
       return { ref: "refs/heads/main", object: { sha: state.main } };
     }
     if (method === "GET" && path.endsWith("/releases/tags/v0.3.1")) return clone(state.legacy);
+    if (method === "GET" && path.includes("/releases?")) {
+      return [state.release, state.legacy === null ? null : { ...state.legacy, tag_name: "v0.3.1" }]
+        .filter((release) => release !== null).map(clone);
+    }
     if (method === "GET" && path.endsWith(`/git/ref/tags/${TAG}`)) return clone(state.tag);
     if (method === "GET" && path.endsWith("/git/ref/tags/v0.3.1")) return clone(state.alias);
-    if (method === "GET" && path.endsWith(`/releases/tags/${TAG}`)) return clone(state.release);
+    if (method === "GET" && path.endsWith(`/releases/tags/${TAG}`)) {
+      return state.release?.draft === false ? clone(state.release) : null;
+    }
+    if (method === "GET" && path.endsWith("/releases/7")) return clone(state.release);
     if (method === "GET" && path.endsWith(`/commits/${TAG}`)) return { sha: SHA };
     if (method === "POST" && path.endsWith("/git/refs")) {
       if (fields.ref === "refs/tags/v0.3.1") {
@@ -105,6 +112,54 @@ test("two package lanes merge assets into one release and reruns are idempotent"
   assert.equal(f.state.uploads.length, 2);
   assert.equal(f.state.alias.object.sha, SHA);
   assert.equal(f.state.alias.ref, "refs/tags/v0.3.1");
+});
+
+test("resumes an uploaded draft using its ID when published tag lookup returns 404", (t) => {
+  const f = fixture(t);
+  f.invoke({ mode: "prepare", assetPaths: [] });
+  for (const path of f.paths) f.upload(ENV.GITHUB_REPOSITORY, TAG, path);
+  assert.equal(f.request("GET", `repos/reallyme/zk/releases/tags/${TAG}`), null);
+  f.state.calls.length = 0;
+  assert.equal(f.invoke({ swiftVersionAlias: true }), TAG);
+  assert.equal(f.state.release.id, 7);
+  assert.equal(f.state.release.draft, false);
+  assert.equal(f.state.uploads.length, 2);
+  assert.equal(f.state.calls.filter((call) => call.method === "POST" && call.path.endsWith("/releases")).length, 0);
+  assert.equal(f.state.calls.some((call) => call.path.includes("/releases/tags/")), false);
+  assert.ok(f.state.calls.some((call) => call.method === "GET" && call.path.endsWith("/releases/7")));
+});
+
+test("finds an existing draft after a complete first inventory page", (t) => {
+  const f = fixture(t);
+  f.invoke({ mode: "prepare", assetPaths: [] });
+  const visited = [];
+  const request = (method, path, ...rest) => {
+    if (path.includes("/releases?")) {
+      const page = Number(new URL(`https://api.github.com/${path}`).searchParams.get("page"));
+      visited.push(page);
+      return page === 1 ? Array.from({ length: 25 }, (_, index) => ({ id: index + 100, tag_name: `older-${index}` }))
+        : [clone(f.state.release)];
+    }
+    return f.request(method, path, ...rest);
+  };
+  assert.equal(f.invoke({ request }), TAG);
+  assert.deepEqual(visited, [1, 2]);
+  assert.equal(f.state.release.id, 7);
+});
+
+test("rejects malformed, duplicate, and incomplete release inventories before mutation", (t) => {
+  const f = fixture(t);
+  for (const response of [{}, [null], [{ id: 0, tag_name: TAG }], [{ id: 1, tag_name: "x".repeat(257) }]]) {
+    assert.throws(() => f.invoke({ request: (method, path, ...rest) => path.includes("/releases?")
+      ? response : f.request(method, path, ...rest) }), rejects("invalid-release-inventory"));
+  }
+  assert.throws(() => f.invoke({ request: (method, path, ...rest) => path.includes("/releases?")
+    ? [{ id: 1, tag_name: TAG }, { id: 2, tag_name: TAG }] : f.request(method, path, ...rest) }),
+  rejects("duplicate-release-identity"));
+  assert.throws(() => f.invoke({ request: (method, path, ...rest) => path.includes("/releases?")
+    ? Array.from({ length: 25 }, (_, index) => ({ id: index + 1, tag_name: `${path}-${index}` }))
+    : f.request(method, path, ...rest) }), rejects("release-inventory-limit-exceeded"));
+  assert.deepEqual(f.mutations(), []);
 });
 
 test("Swift aliases never create another release or overwrite an existing version", (t) => {
@@ -196,7 +251,7 @@ test("rejects malformed, duplicate, or unpinned remote asset metadata", (t) => {
     f.state.release = clone(original);
     mutate(f.state.release);
     assert.throws(() => f.invoke(), (error) => error instanceof GitHubReleaseError &&
-      ["invalid-release-response", "invalid-release-asset"].includes(error.code));
+      ["invalid-release-response", "invalid-release-asset", "invalid-release-inventory", "legacy-release-exists"].includes(error.code));
   }
 });
 
@@ -223,12 +278,13 @@ if (path.endsWith("/git/ref/heads/main")) {
 }
 `);
   chmodSync(executable, 0o700);
-  for (const status of ["401", "403", "500"]) {
+  for (const status of ["401", "403", "404", "500", "403:untrusted-context"]) {
     const result = spawnSync(process.execPath, ["scripts/publish_github_release.mjs", "--prepare"], {
       encoding: "utf8", env: { ...process.env, ...ENV, PATH: `${bin}:${process.env.PATH}`, FAILURE_STATUS: status },
     });
     assert.equal(result.status, 1);
-    assert.match(result.stderr, /GitHub release failed: github-request-failed/u);
+    const suffix = /^[1-5][0-9]{2}$/u.test(status) ? `:http-${status}` : "";
+    assert.equal(result.stderr, `GitHub release failed: github-request-failed${suffix}\n`);
     assert.equal(result.stdout, "");
   }
 });
@@ -268,10 +324,12 @@ if (args[0] === "release") {
     fields[key] = args[i] === "--field" ? JSON.parse(value) : value;
   }
   if (method === "GET" && endpoint.endsWith("/git/ref/heads/main")) respond({ref:"refs/heads/main",object:{sha:"${SHA}"}});
+  else if (method === "GET" && endpoint.includes("/releases?")) respond(state.release === null ? [] : [state.release]);
   else if (method === "GET" && endpoint.endsWith("/releases/tags/v0.3.1")) respond(null);
   else if (method === "GET" && endpoint.endsWith("/git/ref/tags/${TAG}")) respond(state.tag);
   else if (method === "GET" && endpoint.endsWith("/git/ref/tags/v0.3.1")) respond(state.alias);
-  else if (method === "GET" && endpoint.endsWith("/releases/tags/${TAG}")) respond(state.release);
+  else if (method === "GET" && endpoint.endsWith("/releases/tags/${TAG}")) respond(state.release?.draft === false ? state.release : null);
+  else if (method === "GET" && endpoint.endsWith("/releases/7")) respond(state.release);
   else if (method === "POST" && endpoint.endsWith("/git/refs")) {
     assert.ok(["refs/tags/${TAG}","refs/tags/v0.3.1"].includes(fields.ref)); assert.equal(fields.sha,"${SHA}");
     const key = fields.ref === "refs/tags/${TAG}" ? "tag" : "alias";
