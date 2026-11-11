@@ -24,8 +24,7 @@ use super::{dispatch_operation, PlatformContext, PlatformCrsMode};
 const DEMO_ASSET_ROOT_ENV: &str = "REALLYME_ZK_DEMO_ASSET_ROOT";
 
 mod status_qualified_native;
-const DEFAULT_DEMO_ASSET_RELATIVE_ROOT: &str =
-    "release-artifacts/modern-v1-bb-6.0.0/ios-demo-resources/zk_demo";
+const DEFAULT_DEMO_ASSET_RELATIVE_ROOT: &str = "build/native/ios-demo-resources/zk_demo";
 
 /// Exercise the actual mobile operation boundary with proof bytes generated
 /// from the reviewed prepared sources. The fixture table is transient and is

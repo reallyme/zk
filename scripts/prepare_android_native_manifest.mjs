@@ -10,7 +10,7 @@ import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = fileURLToPath(new URL("..", import.meta.url));
-const artifactRoot = resolve(root, "release-artifacts/modern-v1-bb-6.0.0");
+const artifactRoot = resolve(root, "build/native");
 const manifestPath = resolve(root, "packages/kotlin/android-native/build.gradle.kts");
 const MAX_NATIVE_LIBRARY_BYTES = 268_435_456;
 

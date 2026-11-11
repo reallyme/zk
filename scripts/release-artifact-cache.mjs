@@ -3,7 +3,6 @@
 //
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-import { createHash } from "node:crypto";
 import {
   createWriteStream,
   existsSync,
@@ -17,76 +16,16 @@ import {
   statSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
-import { dirname, join, relative, resolve } from "node:path";
+import { dirname, join, relative } from "node:path";
 import { spawnSync } from "node:child_process";
-import { fileURLToPath } from "node:url";
 import { Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
-import { stageStaticUpload } from "./static-upload-package.mjs";
+import { synchronizeStaticMirror, sha256File as hashArtifactFile, StaticUploadError } from "./static-upload-package.mjs";
+import { artifacts, mirrorArtifacts, artifactByPath, localPath, artifactRoot, mirrorRoot, repositoryRoot } from "./release-artifact-manifest.mjs";
 import { downloadR2Artifact, R2ArtifactError } from "./r2-artifact-source.mjs";
 
-const repositoryRoot = resolve(fileURLToPath(new URL("..", import.meta.url)));
 const stackId = "modern-v1-bb-6.0.0";
-const defaultArtifactRoot = resolve(repositoryRoot, "release-artifacts", stackId);
-const artifactRoot = resolve(process.env.REALLYME_ZK_LOCAL_ARTIFACT_ROOT ?? defaultArtifactRoot);
 const defaultArtifactBaseUrl = "https://static.reallyme.net/zk";
-
-const artifacts = [
-  {
-    path: "swiftpm/ReallyMeZKPlatformFFI.xcframework.zip",
-    remotePath: "swift/60505f149fcf345a3c6132478aeed05dbc8ee8a7b245d96a7fedeeee4d27d341/ReallyMeZKPlatformFFI.xcframework.zip",
-    sha256: "60505f149fcf345a3c6132478aeed05dbc8ee8a7b245d96a7fedeeee4d27d341",
-    distribution: true,
-    label: "SwiftPM binary target XCFramework",
-  },
-  {
-    path: "rust-cli/darwin-arm64/reallyme-zk",
-    remotePath: "cli/macos-arm64/aabec6a9db4ef63177c48faa7217cbaa87fa8d9ab472af273b4a7904dd3d84bf/reallyme-zk",
-    sha256: "aabec6a9db4ef63177c48faa7217cbaa87fa8d9ab472af273b4a7904dd3d84bf",
-    distribution: true,
-    label: "Rust CLI darwin arm64 binary",
-  },
-  {
-    path: "mobile-circuit-artifacts-persona-credential-evidence-v1.tar",
-    remotePath: "circuits/74990876329b137dc0bc073360423d64d08b8f0a50872639c4ed0dbfcffe89a9/mobile-circuits.tar",
-    sha256: "74990876329b137dc0bc073360423d64d08b8f0a50872639c4ed0dbfcffe89a9",
-    distribution: true,
-    label: "Mobile circuit runtime artifact package",
-  },
-  {
-    path: "cdn/crs/bn254_g1.prover",
-    remotePath: "crs/0f238856e55722f15a4d64ef0de12b4260e218245590bd3a6c900aee188de8e5/bn254_g1.prover",
-    sha256: "0f238856e55722f15a4d64ef0de12b4260e218245590bd3a6c900aee188de8e5",
-    distribution: true,
-    label: "BN254 prover CRS",
-  },
-  {
-    path: "cdn/crs/bn254_g1.dat",
-    remotePath: "crs/ea6069e3563ad79f186d1c0088499309cbdaeb54254346760ffec7fe15ae49cd/bn254_g1.dat",
-    sha256: "ea6069e3563ad79f186d1c0088499309cbdaeb54254346760ffec7fe15ae49cd",
-    distribution: true,
-    label: "BN254 full G1 source CRS",
-  },
-  {
-    path: "cdn/crs/bn254_g2.dat",
-    remotePath: "crs/01797bfc4de5a96f0e516a9ea4537d18786dc30cb991aca4274c95822b69c32f/bn254_g2.dat",
-    sha256: "01797bfc4de5a96f0e516a9ea4537d18786dc30cb991aca4274c95822b69c32f",
-    distribution: true,
-    label: "BN254 verifier G2 CRS",
-  },
-  {
-    path: "android-platform-jni/arm64-v8a/libreallyme_zk_platform_jni.so",
-    sha256: "b7f7069cf1a859c5cb9ff27b29bb5dc5b5d04164fc00e8dcbf9dbf255f1c716b",
-    distribution: false,
-    label: "Android JNI library before AAR packaging",
-  },
-  {
-    path: "android-platform-jni/arm64-v8a/libc++_shared.so",
-    sha256: "7466ed097631a564ed6bff0b47768caa76bf03270d2047b5a65c03f497b824df",
-    distribution: false,
-    label: "Android C++ runtime before AAR packaging",
-  },
-];
 
 validateArtifactManifest();
 
@@ -121,7 +60,8 @@ if (swiftOnly && mobileOnly) {
 if ((argumentsByName.has("--upload-list") || argumentsByName.has("--stage-upload")) && !distributionOnly) {
   fail("--upload-list and --stage-upload require --distribution-only");
 }
-const selectedArtifacts = artifacts.filter(
+const inventory = distributionOnly && !swiftOnly && !mobileOnly ? mirrorArtifacts : artifacts;
+const selectedArtifacts = inventory.filter(
   (artifact) =>
     (!distributionOnly || artifact.distribution) &&
     (!swiftOnly || artifact.path === "swiftpm/ReallyMeZKPlatformFFI.xcframework.zip") &&
@@ -139,12 +79,11 @@ if (argumentsByName.has("--upload-list")) {
 
 if (argumentsByName.has("--stage-upload")) {
   try {
-    const manifest = stageStaticUpload({
-      rows: uploadArtifactRows(selectedArtifacts),
-      artifactRoot,
-      outputRoot: join(repositoryRoot, "release-artifacts", "r2-upload"),
+    const objects = synchronizeStaticMirror({
+      rows: uploadArtifactRows(mirrorArtifacts),
+      outputRoot: mirrorRoot,
     });
-    console.log(`Prepared ${manifest.objects.length} static release objects for bucket static`);
+    console.log(`R2 mirror ready at ${mirrorRoot} (${objects.length} objects)`);
   } catch (error) {
     fail(error?.code ?? "static-upload-staging-failed");
   }
@@ -180,6 +119,13 @@ if (
     !argumentsByName.has("--stage-upload") &&
     !argumentsByName.has("--verify-remote"))
 ) {
+  if (distributionOnly && !swiftOnly && !mobileOnly) {
+    try {
+      synchronizeStaticMirror({ rows: uploadArtifactRows(mirrorArtifacts), outputRoot: mirrorRoot, checkOnly: true });
+    } catch (error) {
+      fail(error?.code ?? "mirror-verification-failed");
+    }
+  }
   checkArtifacts(selectedArtifacts);
 }
 
@@ -255,7 +201,7 @@ async function verifyRemoteArtifacts(verifiedArtifacts) {
     fail("REALLYME_ZK_RELEASE_ARTIFACT_BASE_URL is required for --verify-remote");
   }
 
-  const temporaryRoot = mkdtempSync(join(tmpdir(), "reallyme-zk-release-artifacts-"));
+  const temporaryRoot = mkdtempSync(join(tmpdir(), "reallyme-zk-origin-check-"));
   try {
     for (const artifact of verifiedArtifacts) {
       const outputPath = join(temporaryRoot, artifact.path);
@@ -268,9 +214,11 @@ async function verifyRemoteArtifacts(verifiedArtifacts) {
 }
 
 async function downloadArtifact(baseUrl, artifact, outputPath) {
-  const temporaryPath = `${outputPath}.download`;
   mkdirSync(dirname(outputPath), { recursive: true });
-  rmSync(temporaryPath, { force: true });
+  const temporaryRoot = mkdtempSync(join(dirname(mirrorRoot), ".artifact-download-"));
+  const temporaryPath = join(temporaryRoot, "payload");
+  const cleanup = () => rmSync(temporaryRoot, { recursive: true, force: true });
+  process.once("exit", cleanup);
 
   await downloadFromSource(baseUrl, remoteArtifactPath(artifact), temporaryPath);
   const actual = sha256File(temporaryPath);
@@ -279,6 +227,8 @@ async function downloadArtifact(baseUrl, artifact, outputPath) {
     fail(`downloaded ${artifact.path} has SHA-256 ${actual}`);
   }
   renameSync(temporaryPath, outputPath);
+  cleanup();
+  process.removeListener("exit", cleanup);
 }
 
 async function downloadFromSource(baseUrl, remotePath, temporaryPath) {
@@ -346,7 +296,7 @@ function remoteArtifactPath(artifact) {
 }
 
 function validateArtifactManifest() {
-  for (const artifact of artifacts) {
+  for (const artifact of mirrorArtifacts) {
     if (!artifact.distribution) {
       continue;
     }
@@ -371,6 +321,7 @@ function unpackSwiftXcframework() {
   }
   // The local SwiftPM target takes precedence over the pinned CDN target. A
   // plausible Info.plist alone must never admit a different local binary.
+  mkdirSync(artifactRoot, { recursive: true });
   const temporaryRoot = mkdtempSync(join(artifactRoot, ".swift-framework-"));
   const temporaryFramework = join(temporaryRoot, "ReallyMeZKPlatformFFI.xcframework");
   const result = spawnSync("ditto", ["-x", "-k", archivePath, temporaryRoot], {
@@ -412,6 +363,7 @@ function unpackMobilePublicCircuitArtifacts() {
   verifyMobilePublicCircuitArchiveListing(archivePath);
   // Extract into a fresh directory before trusting an existing cache. Checking
   // only index.pb leaves stale or extra files available to artifact consumers.
+  mkdirSync(artifactRoot, { recursive: true });
   const temporaryRoot = mkdtempSync(join(artifactRoot, ".mobile-public-"));
   const result = spawnSync("tar", ["-xf", archivePath, "-C", temporaryRoot], {
     cwd: repositoryRoot,
@@ -532,24 +484,16 @@ function checkArtifacts(checkedArtifacts) {
   console.log("release artifact cache check passed");
 }
 
-function artifactByPath(path) {
-  const artifact = artifacts.find((candidate) => candidate.path === path);
-  if (artifact === undefined) {
-    fail(`internal artifact manifest is missing ${path}`);
-  }
-  return artifact;
-}
-
-function localPath(path) {
-  return resolve(artifactRoot, path);
-}
-
 function displayPath(path) {
   return relative(repositoryRoot, path);
 }
 
 function sha256File(path) {
-  return createHash("sha256").update(readFileSync(path)).digest("hex");
+  try {
+    return hashArtifactFile(path);
+  } catch (error) {
+    fail(error instanceof StaticUploadError ? error.code : "artifact-read-failed");
+  }
 }
 
 function fail(reason) {

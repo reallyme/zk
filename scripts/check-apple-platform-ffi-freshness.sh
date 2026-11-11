@@ -6,7 +6,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
-LOCAL_ARTIFACT_ROOT="${REALLYME_ZK_LOCAL_ARTIFACT_ROOT:-${ROOT}/release-artifacts/modern-v1-bb-6.0.0}"
+LOCAL_ARTIFACT_ROOT="${REALLYME_ZK_LOCAL_ARTIFACT_ROOT:-${ROOT}/build/native}"
 OUTPUT_DIR="${OUTPUT_DIR:-${LOCAL_ARTIFACT_ROOT}/apple-platform-ffi}"
 XCFRAMEWORK_PATH="${OUTPUT_DIR}/ReallyMeZKPlatformFFI.xcframework"
 METADATA_PATH="${OUTPUT_DIR}/ReallyMeZKPlatformFFI.xcframework.build.tsv"

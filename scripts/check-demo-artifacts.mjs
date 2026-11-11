@@ -285,7 +285,7 @@ if (existsSync(demoResourcesPath)) {
 }
 
 if (existsSync(demoResourcesZkPath)) {
-  fail("sample app Resources/zk_demo must not be present; use release-artifacts/modern-v1-bb-6.0.0/ios-demo-resources/zk_demo");
+  fail("sample app Resources/zk_demo must not be present; use build/native/ios-demo-resources/zk_demo");
 }
 
 if (existsSync(demoProjectPath)) {

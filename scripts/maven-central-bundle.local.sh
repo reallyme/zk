@@ -6,7 +6,7 @@
 set -euo pipefail
 
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
-work_dir="${root}/build/maven-central-upload"
+work_dir="${root}/build/maven"
 version="$(sed -n 's/^version = "\([^"]*\)"$/\1/p' "${root}/packages/kotlin/build.gradle.kts")"
 unsigned=false
 if [[ "${1:-}" == "--unsigned" ]]; then

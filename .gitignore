@@ -51,7 +51,6 @@ LLMS.txt
 # Generated artifacts
 /coverage/
 /tarpaulin-report.html
-/release-artifacts/
 /zk-lane-logs/
 /local-audit-archive/
 *.log

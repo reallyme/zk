@@ -231,7 +231,7 @@ test("platform source tests run on their own capable runners", () => {
   assert.match(swift, /runs-on: xcode-27/u);
   assert.match(swift, /scripts\/build_swift_xcframework[.]sh/u);
   assert.match(swift, /prepare_swift_binary_manifest[.]mjs/u);
-  assert.match(swift, /--local-artifact-path build\/swift\/ReallyMeZKPlatformFFI[.]xcframework/u);
+  assert.match(swift, /--local-artifact-path build\/native\/apple-platform-ffi\/ReallyMeZKPlatformFFI[.]xcframework/u);
   assert.match(swift, /check-apple-platform-ffi-freshness[.]sh/u);
   assert.doesNotMatch(swift, /--hydrate --swift-only/u);
   assert.match(swift, /swift build -Xswiftc -warnings-as-errors/u);
@@ -287,7 +287,7 @@ test("Android native CI reuses verified upstream libraries and builds only on a 
   assert.match(mobile, /public-ci-artifacts-\$\{\{ github[.]sha \}\}/u);
   assert.match(
     mobile,
-    /ANDROID_ARM64_BB_LIB_DIR=.*release-artifacts\/modern-v1-bb-6[.]0[.]0\/android-barretenberg-static\/arm64-v8a/u,
+    /ANDROID_ARM64_BB_LIB_DIR=.*build\/native\/android-barretenberg-static\/arm64-v8a/u,
   );
   assert.match(mobile, /reallyme-zk-platform-ffi --features native --target/u);
   assert.match(mobile, /scripts\/build_android_platform_ffi_static[.]sh/u);
@@ -332,7 +332,7 @@ test("Swift binary release promotes the pinned XCFramework verified by preflight
   assert.match(preflight, /scripts\/verify_swift_release_artifact[.]mjs/u);
   assert.match(
     preflight,
-    /--local-artifact-path build\/swift\/ReallyMeZKPlatformFFI[.]xcframework/u,
+    /--local-artifact-path build\/native\/apple-platform-ffi\/ReallyMeZKPlatformFFI[.]xcframework/u,
   );
   assert.match(preflight, /swift test -Xswiftc -warnings-as-errors[\s\S]*?name: Upload verified Swift release candidate/u);
   assert.match(preflight, /run-consumer-check[.]mjs --policy-only\s*$/mu);
@@ -365,7 +365,7 @@ test("release gates use admitted inputs without probing public SDK download comp
   }
   assert.doesNotMatch(manifest, /github[.]com\/reallyme\/zk\/releases\/download/u);
   const inputs = jobSource(rust, "public-artifacts");
-  assert.match(inputs, /key: mobile-inputs-\$\{\{ hashFiles\('zk\/scripts\/release-artifact-cache[.]mjs'\) \}\}/u);
+  assert.match(inputs, /key: mobile-inputs-\$\{\{ hashFiles\('zk\/scripts\/release-artifact-cache[.]mjs', 'zk\/scripts\/release-artifact-manifest[.]mjs'\) \}\}/u);
   assert.ok(inputs.indexOf("name: Cache pinned circuit and CRS downloads") < inputs.indexOf("--hydrate --mobile-only"));
   assert.match(inputs, /REALLYME_ZK_ARTIFACT_TRANSPORT: \$\{\{ github[.]event_name == 'pull_request' && 'cdn' \|\| 'r2' \}\}/u);
   for (const secret of ["R2_ENDPOINT", "R2_ACCESS_KEY_ID", "R2_SECRET_ACCESS_KEY"]) {
@@ -541,7 +541,7 @@ test("Rust CI proves the hash-pinned toolchain and Noir regressions", () => {
   );
   assert.match(
     rustCi,
-    /local_artifact_root="\$\{PWD\}\/release-artifacts\/modern-v1-bb-6[.]0[.]0"/u,
+    /local_artifact_root="\$\{PWD\}\/build\/native"/u,
   );
   assert.match(
     rustCi,

@@ -44,7 +44,7 @@ const UNIVERSITY_CLAIM: &str = "052daff789976063a34b2ff97e457d57474e6c86f6a0ab6b
 const EMPLOYER_CLAIM: &str = "971a3625e73d57a42c2ec6713264895ded73ce552ebb7617689a0daad97b9002";
 const RETAINED_ARTIFACT_ROOT_ENV: &str = "REALLYME_ZK_RETAINED_ARTIFACT_ROOT";
 const DEFAULT_RETAINED_ARTIFACT_RELATIVE_ROOT: &str =
-    "release-artifacts/modern-v1-bb-6.0.0/mobile-demo-artifacts-persona-credential-evidence-v1-candidate";
+    "build/native/mobile-demo-artifacts-persona-credential-evidence-v1-candidate";
 const COMMON_CREDENTIAL_ROOT_IDENTITY_MANIFEST: &str =
     "vectors/common-credential-root-artifact-identities-v1.tsv";
 const MAX_IDENTITY_MANIFEST_BYTES: u64 = 4 * 1024;

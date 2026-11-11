@@ -5,7 +5,7 @@
     {
       "path": "scripts/check_release_readiness.mjs",
       "role": "consumer release-readiness policy declaration",
-      "sha256": "ede89050d90892f1df074fc98ef40cb278ce8e9b9d6101831b7d31142ee2a42b"
+      "sha256": "acb8ba9f6228cbdb6ba683c19dbdebaf889f43a45cda0fbdeeecc671cf5af71b"
     },
     {
       "path": "scripts/check-platform-facade-pins.mjs",
@@ -35,17 +35,17 @@
     {
       "path": "scripts/ci-workflow-policy.test.mjs",
       "role": "workflow policy tests",
-      "sha256": "644975ca26cbe0f4f0f978a71c8fb980e8862ecaf60c0a116d41ac8a66402e0e"
+      "sha256": "1e92b4aadd346a2fc7c1cad958c9b9ad2ad8fba5ebdd40081f61e42738ff52c0"
     },
     {
       "path": "scripts/build_swift_xcframework.sh",
       "role": "Swift binary artifact builder",
-      "sha256": "a5fe32fb7661f3fb1cf6aea5c17ba23400779f667f042e3c93fae24790690f0f"
+      "sha256": "dd215d3cd560257dc3fd09714656fba7f036101d3c0a05b60c908e7f67595061"
     },
     {
       "path": "scripts/install_apple_barretenberg_static_archives.sh",
       "role": "Apple Barretenberg static archive installer",
-      "sha256": "7fda8fd0e9446b01695e2cc168102bb90fefba07082cdc2df377a21a6ff00b35"
+      "sha256": "e1f6d32f48dea633cfb8be3793c7599237e1d46f913737eda37f03a18ae2d88e"
     },
     {
       "path": "scripts/prepare_swift_binary_manifest.mjs",
@@ -85,7 +85,7 @@
     {
       "path": ".github/workflows/rust-ci.yml",
       "role": "primary policy and exact-commit CI workflow",
-      "sha256": "10e4e02039179d71911e863b8e6eb2495b9d3104835b2b5e4deedfc0585447e5"
+      "sha256": "62eb51688aab0bdd942b820e822465ce9ea830836dacd9adb6e358f4dd7ccabc"
     },
     {
       "path": ".github/workflows/fuzz.yml",
@@ -110,12 +110,12 @@
     {
       "path": ".github/workflows/swift-package-preflight.yml",
       "role": "Swift binary package preflight workflow",
-      "sha256": "6fb7d4fc0431f10b4e23b3da88504e0338903b127bc2368d4ea49e76a2cda3ac"
+      "sha256": "0b87c6f5db8d8f01cda65fa0e495a1b526367d36a021750170daba2d0512c679"
     },
     {
       "path": ".github/workflows/swift-package-release.yml",
       "role": "Swift binary package release workflow",
-      "sha256": "9705a5f1136ed414b3a81ec84ac120e64fabd2c8be44cafb0b2f7c0fb9e44033"
+      "sha256": "5d3e87c0a87f9aa793b45ec36ce7422fdfefc52282a222e2708d2d003fff4473"
     },
     {
       "path": "scripts/test-modern-soundness-regressions.sh",
@@ -135,12 +135,12 @@
     {
       "path": "scripts/static-upload-package.mjs",
       "role": "bounded immutable static release upload staging",
-      "sha256": "6bf3a20274483ca5192433c136cf783c0291ecef744f2ebfdd8ce9d5e81b5103"
+      "sha256": "b9387662ac1bd2eb393f60a1c43b10df04d655889a34ec900d45eff767d59907"
     },
     {
       "path": "scripts/static-upload-package.test.mjs",
       "role": "static release staging positive and rejection coverage",
-      "sha256": "032fb1f2c21fd81c66cfd9d5e8c40854e78d91172342dfc7b6b20df1ee60210d"
+      "sha256": "c11415f1a4b134d9378b4eb17acace35f8cbb56adc03436381b982f513f8d82a"
     },
     {
       "path": ".gitleaks.toml",
@@ -160,7 +160,7 @@
     {
       "path": "scripts/prepare_android_native_manifest.mjs",
       "role": "current-source Android CI manifest binder",
-      "sha256": "948446d9b733644d9f841e880a0369959058e82b0eceae0ca19b9b15be2992d1"
+      "sha256": "3b203995fcf067929465d62c4d0ae733fdb403afa993ea53c333c560535919bb"
     },
     {
       "path": "scripts/prepare_android_native_manifest.test.mjs",
@@ -170,12 +170,12 @@
     {
       "path": "scripts/release-artifact-cache.mjs",
       "role": "distribution manifest and artifact admission",
-      "sha256": "dab9fa37ae62d31dade61326343a3d3b7d53ad996fac200cd6e23ab31eaf4eb3"
+      "sha256": "8ad31cdc4a5580ffcd27a95f96a4905c9a22e76858856ea3b8e378691311c3bc"
     },
     {
       "path": "scripts/release-artifact-cache.test.mjs",
       "role": "artifact admission and authenticated transport tests",
-      "sha256": "ac8e861059840d63702909ff6a81f616c232496ade31782c4cb65899389bc58e"
+      "sha256": "b51db95a357e18358ebddf90289c7bbb1bd7c56861344b785992ad4e7a35b627"
     },
     {
       "path": "scripts/check-platform-ffi-symbols.sh",
@@ -245,12 +245,37 @@
     {
       "path": "scripts/build_android_barretenberg_static_archive.sh",
       "role": "pinned Android upstream builder and cache admission",
-      "sha256": "8f96e2f7e753546c33c5c78921c83f8d878ccff5f76df1420baecf15c55ed605"
+      "sha256": "b15756946f234bd6d6a7d0befc34d9b3918c5c73bcf3cb8f529cb918f312e609"
     },
     {
       "path": "scripts/android-upstream-cache.test.mjs",
       "role": "Android cache tampering and compiler-free admission tests",
       "sha256": "2ef49a7156dc53a81d3b3734e19c18e79e7ccd31a6fa22ee8e7ab2d47631a7c5"
+    },
+    {
+      "path": "scripts/release-artifact-manifest.mjs",
+      "role": "runtime artifact identities and canonical build paths",
+      "sha256": "b461c5cb758b8a41321121460c6eece66c18c5ec90e291dc7b0b94e6b02dc831"
+    },
+    {
+      "path": "scripts/release-artifact-manifest.test.mjs",
+      "role": "canonical artifact key and output path regressions",
+      "sha256": "22b5f9cd012d9b79c8df8f03a687c74de53d6632944f94d7f4be9fd7f989d3f2"
+    },
+    {
+      "path": "scripts/build_apple_platform_ffi_xcframework.sh",
+      "role": "native Apple framework build and metadata normalization",
+      "sha256": "f812c227121185a8869284b2c4cdc2d1551c3c4aa5222d6427843ff36e84ac3c"
+    },
+    {
+      "path": "scripts/normalize_xcframework_info.py",
+      "role": "deterministic XCFramework slice metadata",
+      "sha256": "33f067dc219a150c957c4569979f2769adca1bae9aa5ffdaa59d9a7bd718153f"
+    },
+    {
+      "path": "scripts/normalize_xcframework_info.test.mjs",
+      "role": "XCFramework metadata and ZIP timezone regressions",
+      "sha256": "9009bc63c46d661a5281ec67dee23011e84bbb3565b7a197b93df709efac999f"
     }
   ],
   "requiredFragments": [

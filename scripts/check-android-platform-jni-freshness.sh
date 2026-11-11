@@ -6,7 +6,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
-LOCAL_ARTIFACT_ROOT="${REALLYME_ZK_LOCAL_ARTIFACT_ROOT:-${ROOT}/release-artifacts/modern-v1-bb-6.0.0}"
+LOCAL_ARTIFACT_ROOT="${REALLYME_ZK_LOCAL_ARTIFACT_ROOT:-${ROOT}/build/native}"
 PLATFORM_FFI_DIR="${PLATFORM_FFI_DIR:-${LOCAL_ARTIFACT_ROOT}/android-platform-ffi/arm64-v8a}"
 OUTPUT_ROOT="${OUTPUT_ROOT:-${LOCAL_ARTIFACT_ROOT}/android-platform-jni}"
 EXPECTED_CARGO_FEATURES="${EXPECTED_CARGO_FEATURES:-native}"

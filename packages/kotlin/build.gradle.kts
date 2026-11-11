@@ -64,7 +64,7 @@ publishing {
             url =
                 uri(
                     rootProject.layout.projectDirectory
-                        .dir("../../release-artifacts/modern-v1-bb-6.0.0/android-maven")
+                        .dir("../../build/maven/repository")
                         .asFile,
                 )
         }
@@ -91,7 +91,7 @@ publishing {
 tasks.register("publishKotlinProviderPublicationsToLocalReleaseArtifactsRepository") {
     group = "publishing"
     description =
-        "Publishes the ZK Kotlin provider modules and Android native AAR into the versioned release-artifacts Maven repository."
+        "Publishes the ZK Kotlin provider modules and Android native AAR into the local build/maven repository."
     dependsOn(
         ":proto-generated:publishReleasePublicationToLocalReleaseArtifactsRepository",
         ":proto-codec:publishReleasePublicationToLocalReleaseArtifactsRepository",

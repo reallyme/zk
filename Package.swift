@@ -12,7 +12,7 @@ let ffiArtifactLocalPathOverride = ""
 
 let packageRoot = URL(fileURLWithPath: #filePath).deletingLastPathComponent().path
 let defaultPlatformFFIRelativePath =
-  "release-artifacts/modern-v1-bb-6.0.0/apple-platform-ffi/ReallyMeZKPlatformFFI.xcframework"
+  "build/native/apple-platform-ffi/ReallyMeZKPlatformFFI.xcframework"
 let platformFFIRelativePath =
   ffiArtifactLocalPathOverride.isEmpty
   ? defaultPlatformFFIRelativePath : ffiArtifactLocalPathOverride

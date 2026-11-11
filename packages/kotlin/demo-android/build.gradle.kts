@@ -24,7 +24,7 @@ val generatedClaimBundle4DiagnosticAssetsFile = generatedClaimBundle4DiagnosticA
 val demoFixtureDir = rootProject.layout.projectDirectory.dir("../../vectors/demo-flow-inputs/v1")
 val mobileDemoArtifactsDir =
     rootProject.layout.projectDirectory.dir(
-        "../../release-artifacts/modern-v1-bb-6.0.0/mobile-demo-artifacts-persona-credential-evidence-v1-candidate",
+        "../../build/native/mobile-demo-artifacts-persona-credential-evidence-v1-candidate",
     )
 val commonCredentialRootMobileFixturesDir =
     rootProject.layout.projectDirectory.dir(

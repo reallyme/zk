@@ -9,7 +9,7 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
 MACOS_BB_LIB_DIR="${MACOS_BB_LIB_DIR:-}"
 IOS_BB_LIB_DIR="${IOS_BB_LIB_DIR:-}"
 IOS_SIM_BB_LIB_DIR="${IOS_SIM_BB_LIB_DIR:-}"
-LOCAL_ARTIFACT_ROOT="${REALLYME_ZK_LOCAL_ARTIFACT_ROOT:-${ROOT}/release-artifacts/modern-v1-bb-6.0.0}"
+LOCAL_ARTIFACT_ROOT="${REALLYME_ZK_LOCAL_ARTIFACT_ROOT:-${ROOT}/build/native}"
 OUTPUT_DIR="${OUTPUT_DIR:-${LOCAL_ARTIFACT_ROOT}/apple-platform-ffi}"
 TARGET_DIR="${CARGO_TARGET_DIR:-${ROOT}/target}"
 if [[ "${TARGET_DIR}" != /* ]]; then
@@ -262,6 +262,8 @@ xcodebuild -create-xcframework \
   -library "${TARGET_DIR}/aarch64-apple-ios-sim/${CARGO_PROFILE}/libreallyme_zk_platform_ffi.a" \
   -headers "${HEADER_DIR}" \
   -output "${XCFRAMEWORK_PATH}"
+
+python3 "${ROOT}/scripts/normalize_xcframework_info.py" "${XCFRAMEWORK_PATH}/Info.plist"
 
 write_metadata
 printf '%s\n' "${XCFRAMEWORK_PATH}"

@@ -15,7 +15,7 @@ toolchain-pinned Barretenberg archive directories and packages the platform
 ABI header with a Clang module map. The output is:
 
 ```text
-release-artifacts/modern-v1-bb-6.0.0/apple-platform-ffi/ReallyMeZKPlatformFFI.xcframework
+build/native/apple-platform-ffi/ReallyMeZKPlatformFFI.xcframework
 ```
 
 The root Swift package provides `ReallyMeZKKit` and
@@ -44,13 +44,13 @@ match the hashes in `circuits/toolchain-lock.json`.
 static library and header, with metadata recording the mobile Cargo profile:
 
 ```text
-release-artifacts/modern-v1-bb-6.0.0/android-platform-ffi/arm64-v8a
+build/native/android-platform-ffi/arm64-v8a
 ```
 
 `scripts/build_android_platform_jni.sh` links that library into:
 
 ```text
-release-artifacts/modern-v1-bb-6.0.0/android-platform-jni/arm64-v8a/libreallyme_zk_platform_jni.so
+build/native/android-platform-jni/arm64-v8a/libreallyme_zk_platform_jni.so
 ```
 
 The JNI build copies `libc++_shared.so` and applies
@@ -66,8 +66,8 @@ Then select `-PreallymeZkAndroidNativePackageMode=diagnostic-exact-source`
 in Gradle. Diagnostic outputs are kept separate:
 
 ```text
-release-artifacts/modern-v1-bb-6.0.0/android-platform-ffi-diagnostic
-release-artifacts/modern-v1-bb-6.0.0/android-platform-jni-diagnostic
+build/native/android-platform-ffi-diagnostic
+build/native/android-platform-jni-diagnostic
 ```
 
 The build scripts reject a diagnostic library in the production output. The
@@ -132,29 +132,48 @@ GPG signing key and sign the prepared files:
 ```
 
 The signing step verifies the prepared files and writes
-`build/maven-central-upload/out/reallyme-maven-central-0.3.1.zip` for manual
+`build/maven/out/reallyme-maven-central-0.3.1.zip` for manual
 upload in the Central Portal.
 
-### Static artifact upload
+### Local output layout and R2 upload
 
-Prepare the exact upload directory from the canonical artifact inventory:
+Generated outputs have one layout under `build/`:
+
+| Directory | Contents |
+| --- | --- |
+| `build/r2/` | Exact R2 object tree, with `zk/` at its root |
+| `build/maven/` | Maven publication staging and signed release bundles |
+| `build/native/` | Native build inputs, libraries, and extracted runtime resources |
+| `build/swift/` | Swift build metadata and checksum used by release verification |
+| `build/cli/` | CLI build metadata |
+
+`scripts/release-artifact-manifest.mjs` defines the runtime artifact identities
+and resolves their canonical paths. Builds and downloads place distribution
+files directly in `build/r2/zk/{swift,circuits,cli,crs}/`. The mirror includes the
+Swift archives required by published SDK versions.
+
+Verify the complete inventory and remove obsolete local keys or stray files:
 
 ```sh
 node scripts/release-artifact-cache.mjs --stage-upload --distribution-only
 ```
 
-The script stages packages in `release-artifacts/r2-upload/`. Move any previous
-package out of that directory before staging the next one. Upload the contents
-of `release-artifacts/r2-upload/objects/` into the root of bucket `static`,
-retaining the `zk/` prefix. If the dashboard is already open at `static / zk`,
-upload the contents of `release-artifacts/r2-upload/objects/zk/` there.
-A recursive upload creates the prefixes automatically.
+The command validates every required payload before removing extra entries.
+`build/r2/` contains only bucket objects. Upload its contents into the root of
+bucket `static`, retaining the `zk/` prefix. When the dashboard is open at
+`static / zk`, the corresponding local directory is `build/r2/zk/`.
+For a Swift-only update, upload the single newly pinned ZIP under
+`build/r2/zk/swift/<sha256>/`. Existing circuit, CLI, CRS, and published Swift
+objects retain their bytes and keys.
 
-`upload-manifest.json` lists every object key, URL, source-relative path, byte
-count, SHA-256, content type, and cache header. `SHA256SUMS` verifies the staged
-files locally. Both review files are outside `objects/` and are not uploaded.
+Check the mirror without changing it:
 
-Set object HTTP metadata from the manifest. Immutable successful responses
+```sh
+node scripts/release-artifact-cache.mjs --check --distribution-only
+```
+
+Set `Content-Type` to `application/zip` for ZIP archives, `application/x-tar`
+for circuit archives, and `application/octet-stream` for other payloads. Immutable successful responses
 use `Cache-Control: public, max-age=31536000, immutable`. Configure the custom
 domain's cache rule to cover every artifact extension and allow cross-origin
 `GET` and `HEAD` for browser consumers. Preserve byte-range requests for binary

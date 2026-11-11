@@ -26,7 +26,7 @@ import { normalizeModernProgram } from "./normalize-modern-program.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const artifactRoot = resolve(process.env.REALLYME_ZK_LOCAL_ARTIFACT_ROOT ??
-  join(root, "release-artifacts/modern-v1-bb-6.0.0"));
+  join(root, "build/native"));
 const candidate = resolve(process.argv[2] ?? "");
 const approvedCandidate = join(artifactRoot, "mobile-demo-artifacts-persona-credential-evidence-v1-candidate");
 const sourceLock = join(root, "circuits/modern-circuit-source-lock.tsv");

@@ -36,7 +36,7 @@ publishing {
             url =
                 uri(
                     rootProject.layout.projectDirectory
-                        .dir("../../release-artifacts/modern-v1-bb-6.0.0/android-maven")
+                        .dir("../../build/maven/repository")
                         .asFile,
                 )
         }

@@ -6,7 +6,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
-LOCAL_ARTIFACT_ROOT="${REALLYME_ZK_LOCAL_ARTIFACT_ROOT:-${ROOT}/release-artifacts/modern-v1-bb-6.0.0}"
+LOCAL_ARTIFACT_ROOT="${REALLYME_ZK_LOCAL_ARTIFACT_ROOT:-${ROOT}/build/native}"
 OUTPUT_ARG="${1:-${LOCAL_ARTIFACT_ROOT}/ios-demo-resources/zk_demo}"
 OUTPUT_PARENT="$(dirname "${OUTPUT_ARG}")"
 mkdir -p "${OUTPUT_PARENT}"

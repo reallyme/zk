@@ -24,8 +24,8 @@ export REALLYME_COMMON_CREDENTIAL_ROOT_DIRECT_POST_SECOND_FIXTURE_ROOT="${REALLY
 export REALLYME_COMMON_CREDENTIAL_ROOT_DIRECT_POST_SECOND_STAGE_REQUEST_ROOT="${REALLYME_COMMON_CREDENTIAL_ROOT_DIRECT_POST_SECOND_STAGE_REQUEST_ROOT:-$ROOT_DIR/target/common-credential-root-openid4vp-second-request-stage-requests-current}"
 export REALLYME_BN254_G1_PATH="${REALLYME_BN254_G1_PATH:-$HOME/.bb-crs/bn254_g1.dat}"
 export REALLYME_BN254_G2_PATH="${REALLYME_BN254_G2_PATH:-$HOME/.bb-crs/bn254_g2.dat}"
-export REALLYME_BARRETENBERG_LIB_DIR="${REALLYME_BARRETENBERG_LIB_DIR:-$ROOT_DIR/release-artifacts/modern-v1-bb-6.0.0/apple-static-libs/darwinArm64}"
-common_credential_root_release_root="${REALLYME_ZK_COMMON_CREDENTIAL_ROOT_RELEASE_ROOT:-$ROOT_DIR/release-artifacts/modern-v1-bb-6.0.0/ios-demo-resources/zk_demo}"
+export REALLYME_BARRETENBERG_LIB_DIR="${REALLYME_BARRETENBERG_LIB_DIR:-$ROOT_DIR/build/native/apple-static-libs/darwinArm64}"
+common_credential_root_release_root="${REALLYME_ZK_COMMON_CREDENTIAL_ROOT_RELEASE_ROOT:-$ROOT_DIR/build/native/ios-demo-resources/zk_demo}"
 for required_asset in release-index.pb crs/bn254_g1.prover crs/bn254_g2; do
   if [[ ! -f "$common_credential_root_release_root/$required_asset" ]]; then
     echo "missing linked common-credential-root release asset: $common_credential_root_release_root/$required_asset" >&2

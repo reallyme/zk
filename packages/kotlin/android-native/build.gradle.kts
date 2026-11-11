@@ -35,7 +35,7 @@ val diagnosticExactSourceMode = nativePackageMode.map { it == "diagnostic-exact-
 check(nativePackageMode.get() == "production" || diagnosticExactSourceMode.get()) {
     "unsupported Android native package mode"
 }
-val localArtifactRoot = rootProject.layout.projectDirectory.dir("../../release-artifacts/modern-v1-bb-6.0.0")
+val localArtifactRoot = rootProject.layout.projectDirectory.dir("../../build/native")
 val androidJniDirectory =
     localArtifactRoot.dir(
         if (diagnosticExactSourceMode.get()) {
@@ -62,7 +62,7 @@ val publishedAndroidReleaseAar =
     if (centralStaging.isPresent) {
         layout.projectDirectory.file("${centralStaging.get()}/$publishedAndroidAarPath")
     } else {
-        localArtifactRoot.file("android-maven/$publishedAndroidAarPath")
+        rootProject.layout.projectDirectory.file("../../build/maven/repository/$publishedAndroidAarPath")
     }
 val symbolCheckScript = rootProject.layout.projectDirectory.file("../../scripts/check-platform-ffi-symbols.sh")
 val freshnessCheckScript = rootProject.layout.projectDirectory.file("../../scripts/check-android-platform-jni-freshness.sh")
@@ -203,7 +203,7 @@ publishing {
     repositories {
         maven {
             name = "localReleaseArtifacts"
-            url = uri(localArtifactRoot.dir("android-maven").asFile)
+            url = uri(rootProject.layout.projectDirectory.dir("../../build/maven/repository").asFile)
         }
     }
     publications {

@@ -6,8 +6,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
-LOCAL_ARTIFACT_ROOT="${REALLYME_ZK_LOCAL_ARTIFACT_ROOT:-${ROOT}/release-artifacts/modern-v1-bb-6.0.0}"
-OUTPUT_DIR="${OUTPUT_DIR:-${LOCAL_ARTIFACT_ROOT}/rust-cli/darwin-arm64}"
+OUTPUT_DIR="${OUTPUT_DIR:-${ROOT}/build/cli}"
 METADATA_PATH="${OUTPUT_DIR}/reallyme-zk.build.tsv"
 CARGO_PROFILE="${CARGO_PROFILE:-release}"
 CLI_FEATURES="${CLI_FEATURES:-}"
@@ -71,6 +70,11 @@ if strings "${OUTPUT_DIR}/${BIN}" | grep -E '/Users/|Documents/GitHub|/private/t
   fail "Rust CLI binary contains build-host paths"
 fi
 
+BINARY_SHA256="$(sha256_file "${OUTPUT_DIR}/${BIN}")"
+R2_BIN="$(node "${ROOT}/scripts/release-artifact-manifest.mjs" rust-cli/darwin-arm64/reallyme-zk "${BINARY_SHA256}")"
+mkdir -p "$(dirname "${R2_BIN}")"
+mv "${OUTPUT_DIR}/${BIN}" "${R2_BIN}"
+
 {
   printf 'key\tvalue\n'
   printf 'format\trust-cli-darwin-arm64-v1\n'
@@ -78,7 +82,7 @@ fi
   printf 'cargo_features\t%s\n' "${CLI_FEATURES:-none}"
   printf 'target_triple\t%s\n' "${TARGET_TRIPLE}"
   printf 'source_path_remapping\thome-to-source-root-v1\n'
-  printf 'binary_sha256\t%s\n' "$(sha256_file "${OUTPUT_DIR}/${BIN}")"
+  printf 'binary_sha256\t%s\n' "${BINARY_SHA256}"
 } >"${METADATA_PATH}"
 
-printf '%s\n' "${OUTPUT_DIR}/${BIN}"
+printf '%s\n' "${R2_BIN}"

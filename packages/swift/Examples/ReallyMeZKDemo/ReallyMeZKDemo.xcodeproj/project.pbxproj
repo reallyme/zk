@@ -48,8 +48,8 @@
 		84FDE3EA2D08F4FF0099E3F7 /* ReallyMeZKDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ReallyMeZKDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		84FDE3FC2D08F5000099E3F7 /* ReallyMeZKDemoTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ReallyMeZKDemoTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		84FDE4062D08F5000099E3F7 /* ReallyMeZKDemoUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ReallyMeZKDemoUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		84FEE0042F7400000099E3F7 /* ReallyMeZKPlatformFFI.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = ReallyMeZKPlatformFFI.xcframework; path = "../../../../release-artifacts/modern-v1-bb-6.0.0/apple-platform-ffi/ReallyMeZKPlatformFFI.xcframework"; sourceTree = SOURCE_ROOT; };
-		84FEE0062F7400000099E3F7 /* zk_demo */ = {isa = PBXFileReference; lastKnownFileType = folder; name = zk_demo; path = "../../../../release-artifacts/modern-v1-bb-6.0.0/ios-demo-resources/zk_demo"; sourceTree = SOURCE_ROOT; };
+		84FEE0042F7400000099E3F7 /* ReallyMeZKPlatformFFI.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = ReallyMeZKPlatformFFI.xcframework; path = "../../../../build/native/apple-platform-ffi/ReallyMeZKPlatformFFI.xcframework"; sourceTree = SOURCE_ROOT; };
+		84FEE0062F7400000099E3F7 /* zk_demo */ = {isa = PBXFileReference; lastKnownFileType = folder; name = zk_demo; path = "../../../../build/native/ios-demo-resources/zk_demo"; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */

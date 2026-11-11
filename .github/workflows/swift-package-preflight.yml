@@ -108,9 +108,9 @@ jobs:
           set -euo pipefail
           node scripts/release-artifact-cache.mjs --hydrate --distribution-only --swift-only
           mkdir -p build/swift
-          cp release-artifacts/modern-v1-bb-6.0.0/swiftpm/ReallyMeZKPlatformFFI.xcframework.zip build/swift/
+          archive="$(node scripts/release-artifact-manifest.mjs swiftpm/ReallyMeZKPlatformFFI.xcframework.zip)"
           cp packages/swift/ReallyMeZKPlatformFFI.xcframework.build.tsv build/swift/
-          swift package compute-checksum build/swift/ReallyMeZKPlatformFFI.xcframework.zip > build/swift/ReallyMeZKPlatformFFI.xcframework.checksum
+          swift package compute-checksum "$archive" > build/swift/ReallyMeZKPlatformFFI.xcframework.checksum
       - name: Test Swift release tooling
         run: node --test scripts/prepare_swift_binary_manifest.test.mjs scripts/verify_swift_release_artifact.test.mjs scripts/verify_swift_release_preflight.test.mjs
       - name: Checkout release-readiness runner
@@ -125,20 +125,24 @@ jobs:
           RELEASE_VERSION: ${{ inputs.version }}
         run: |
           node scripts/verify_sdk_release_version.mjs "${RELEASE_VERSION}"
-          node scripts/verify_swift_release_artifact.mjs build/swift/ReallyMeZKPlatformFFI.xcframework.zip build/swift/ReallyMeZKPlatformFFI.xcframework.checksum Package.swift "${RELEASE_VERSION}"
+          archive="$(node scripts/release-artifact-manifest.mjs swiftpm/ReallyMeZKPlatformFFI.xcframework.zip)"
+          node scripts/verify_swift_release_artifact.mjs "$archive" build/swift/ReallyMeZKPlatformFFI.xcframework.checksum Package.swift "${RELEASE_VERSION}"
           node .release-readiness/scripts/run-consumer-check.mjs --policy-only
       - name: Extract the verified Swift release candidate
         env:
-          OUTPUT_DIR: ${{ github.workspace }}/build/swift
+          OUTPUT_DIR: ${{ github.workspace }}/build/native/apple-platform-ffi
         run: |
-          ditto -x -k build/swift/ReallyMeZKPlatformFFI.xcframework.zip build/swift
+          archive="$(node scripts/release-artifact-manifest.mjs swiftpm/ReallyMeZKPlatformFFI.xcframework.zip)"
+          mkdir -p build/native/apple-platform-ffi
+          ditto -x -k "$archive" build/native/apple-platform-ffi
+          cp packages/swift/ReallyMeZKPlatformFFI.xcframework.build.tsv build/native/apple-platform-ffi/
           scripts/check-apple-platform-ffi-freshness.sh
       - name: Prepare local SwiftPM binary manifest
         env:
           RELEASE_VERSION: ${{ inputs.version }}
         run: |
           checksum="$(cat build/swift/ReallyMeZKPlatformFFI.xcframework.checksum)"
-          node scripts/prepare_swift_binary_manifest.mjs "${RELEASE_VERSION}" "${checksum}" --local-artifact-path build/swift/ReallyMeZKPlatformFFI.xcframework
+          node scripts/prepare_swift_binary_manifest.mjs "${RELEASE_VERSION}" "${checksum}" --local-artifact-path build/native/apple-platform-ffi/ReallyMeZKPlatformFFI.xcframework
       - name: Test Swift package with linked binary target
         run: swift test -Xswiftc -warnings-as-errors
 
@@ -147,7 +151,7 @@ jobs:
         with:
           name: swift-xcframework-${{ inputs.version }}-${{ needs.verify-source-sha.outputs.release_sha }}
           path: |
-            build/swift/ReallyMeZKPlatformFFI.xcframework.zip
+            build/r2/zk/swift/
             build/swift/ReallyMeZKPlatformFFI.xcframework.checksum
             build/swift/ReallyMeZKPlatformFFI.xcframework.build.tsv
           if-no-files-found: error

@@ -11,24 +11,24 @@ import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 
 const script = fileURLToPath(new URL("./release-artifact-cache.mjs", import.meta.url));
-const sealedArchive = fileURLToPath(new URL(
-  "../release-artifacts/modern-v1-bb-6.0.0/mobile-circuit-artifacts-persona-credential-evidence-v1.tar",
-  import.meta.url,
-));
-const swiftArchive = fileURLToPath(new URL(
-  "../release-artifacts/modern-v1-bb-6.0.0/swiftpm/ReallyMeZKPlatformFFI.xcframework.zip",
-  import.meta.url,
-));
+import { artifactByPath, localPath } from "./release-artifact-manifest.mjs";
+const sealedArchive = localPath("mobile-circuit-artifacts-persona-credential-evidence-v1.tar");
+const swiftArchive = localPath("swiftpm/ReallyMeZKPlatformFFI.xcframework.zip");
+function mirrorPath(root, path) {
+  const destination = join(root, "r2", "zk", artifactByPath(path).remotePath);
+  mkdirSync(destination.slice(0, destination.lastIndexOf("/")), { recursive: true });
+  return destination;
+}
 
 test("mobile cache admission rejects extra files while preserving the existing directory", {
   skip: !existsSync(sealedArchive),
 }, () => {
   const artifactRoot = mkdtempSync(join(tmpdir(), "reallyme-zk-public-cache-test-"));
   try {
-    copyFileSync(sealedArchive, join(artifactRoot, "mobile-circuit-artifacts-persona-credential-evidence-v1.tar"));
+    copyFileSync(sealedArchive, mirrorPath(artifactRoot, "mobile-circuit-artifacts-persona-credential-evidence-v1.tar"));
     const run = () => spawnSync(process.execPath, [script, "--unpack-mobile-public-artifacts"], {
       encoding: "utf8",
-      env: { ...process.env, REALLYME_ZK_LOCAL_ARTIFACT_ROOT: artifactRoot },
+      env: { ...process.env, REALLYME_ZK_LOCAL_ARTIFACT_ROOT: artifactRoot, REALLYME_ZK_R2_MIRROR_ROOT: join(artifactRoot, "r2") },
     });
     assert.equal(run().status, 0);
     assert.equal(run().status, 0);
@@ -57,12 +57,10 @@ test("Swift cache admission rejects an altered local XCFramework", {
 }, () => {
   const artifactRoot = mkdtempSync(join(tmpdir(), "reallyme-zk-swift-cache-test-"));
   try {
-    const archiveDirectory = join(artifactRoot, "swiftpm");
-    mkdirSync(archiveDirectory);
-    copyFileSync(swiftArchive, join(archiveDirectory, "ReallyMeZKPlatformFFI.xcframework.zip"));
+    copyFileSync(swiftArchive, mirrorPath(artifactRoot, "swiftpm/ReallyMeZKPlatformFFI.xcframework.zip"));
     const run = () => spawnSync(process.execPath, [script, "--unpack-swift-xcframework"], {
       encoding: "utf8",
-      env: { ...process.env, REALLYME_ZK_LOCAL_ARTIFACT_ROOT: artifactRoot },
+      env: { ...process.env, REALLYME_ZK_LOCAL_ARTIFACT_ROOT: artifactRoot, REALLYME_ZK_R2_MIRROR_ROOT: join(artifactRoot, "r2") },
     });
     assert.equal(run().status, 0);
     assert.equal(run().status, 0);
@@ -102,11 +100,12 @@ test("artifact manifest rejects a stale content-addressed remote path", () => {
     const temporaryScript = join(temporaryRoot, "release-artifact-cache.mjs");
     copyFileSync(new URL("./static-upload-package.mjs", import.meta.url), join(temporaryRoot, "static-upload-package.mjs"));
     copyFileSync(new URL("./r2-artifact-source.mjs", import.meta.url), join(temporaryRoot, "r2-artifact-source.mjs"));
-    const source = readFileSync(script, "utf8").replace(
+    copyFileSync(script, temporaryScript);
+    const source = readFileSync(new URL("./release-artifact-manifest.mjs", import.meta.url), "utf8").replace(
       /swift\/[a-f0-9]{64}\/ReallyMeZKPlatformFFI[.]xcframework[.]zip/u,
       "swift/0000000000000000000000000000000011111111111111111111111111111111/ReallyMeZKPlatformFFI.xcframework.zip",
     );
-    writeFileSync(temporaryScript, source);
+    writeFileSync(join(temporaryRoot, "release-artifact-manifest.mjs"), source);
     const result = spawnSync(process.execPath, [temporaryScript, "--list"], { encoding: "utf8" });
     assert.notEqual(result.status, 0);
     assert.match(result.stderr, /content-addressed remote path does not encode its SHA-256/u);
@@ -144,7 +143,7 @@ test("upload list rejects ambiguous or unauthenticated CDN bases", () => {
   }
 });
 
-test("static distribution contains only the six content-addressed runtime objects", () => {
+test("R2 inventory contains the runtime objects and the published Swift archive", () => {
   const result = spawnSync(process.execPath, [script, "--list", "--distribution-only"], {
     encoding: "utf8",
   });
@@ -161,6 +160,7 @@ test("static distribution contains only the six content-addressed runtime object
     "crs/<sha256>/bn254_g1.dat",
     "crs/<sha256>/bn254_g1.prover",
     "crs/<sha256>/bn254_g2.dat",
+    "swift/<sha256>/ReallyMeZKPlatformFFI.xcframework.zip",
     "swift/<sha256>/ReallyMeZKPlatformFFI.xcframework.zip",
   ]);
 });
@@ -195,6 +195,7 @@ test("rejected public downloads report only bounded edge diagnostics", () => {
         env: {
           ...process.env,
           REALLYME_ZK_LOCAL_ARTIFACT_ROOT: join(temporaryRoot, "cache"),
+          REALLYME_ZK_R2_MIRROR_ROOT: join(temporaryRoot, "r2"),
           REALLYME_ZK_ARTIFACT_TRANSPORT: "cdn",
         },
         timeout: 10_000,
@@ -224,6 +225,7 @@ test("R2 cache hydration fails closed without credentials and never falls back t
         env: {
           ...process.env,
           REALLYME_ZK_LOCAL_ARTIFACT_ROOT: join(temporaryRoot, "cache"),
+          REALLYME_ZK_R2_MIRROR_ROOT: join(temporaryRoot, "r2"),
           REALLYME_ZK_ARTIFACT_TRANSPORT: transport,
           R2_ENDPOINT: endpoint,
           R2_ACCESS_KEY_ID: "",
@@ -243,14 +245,14 @@ test("R2 cache hydration fails closed without credentials and never falls back t
 test("R2 CLI downloads pass through the pinned cache admission and reject altered bytes", {
   skip: ![
     sealedArchive,
-    new URL("../release-artifacts/modern-v1-bb-6.0.0/cdn/crs/bn254_g1.prover", import.meta.url),
-    new URL("../release-artifacts/modern-v1-bb-6.0.0/cdn/crs/bn254_g2.dat", import.meta.url),
+    localPath("cdn/crs/bn254_g1.prover"),
+    localPath("cdn/crs/bn254_g2.dat"),
   ].every(existsSync),
 }, () => {
   const temporaryRoot = mkdtempSync(join(tmpdir(), "reallyme-zk-r2-cli-cache-"));
   try {
     const command = join(temporaryRoot, "aws");
-    const sourceRoot = fileURLToPath(new URL("../release-artifacts/modern-v1-bb-6.0.0/", import.meta.url));
+    const sourceRoot = fileURLToPath(new URL("../build/r2/", import.meta.url));
     const cache = join(temporaryRoot, "cache");
     const preload = join(temporaryRoot, "no-network.mjs");
     writeFileSync(preload, "globalThis.fetch = () => { process.exit(93); };\n");
@@ -263,14 +265,9 @@ const key = argument("--key");
 if (argument("--bucket") !== "static" || !key.startsWith("zk/") ||
     process.env.AWS_ACCESS_KEY_ID !== "fixture-access" ||
     process.env.AWS_SECRET_ACCESS_KEY !== "fixture-secret") process.exit(94);
-const paths = {
-  "mobile-circuits.tar": "mobile-circuit-artifacts-persona-credential-evidence-v1.tar",
-  "bn254_g1.prover": "cdn/crs/bn254_g1.prover",
-  "bn254_g2.dat": "cdn/crs/bn254_g2.dat",
-};
-const path = paths[key.split("/").at(-1)];
-if (path === undefined) process.exit(95);
-copyFileSync(join(${JSON.stringify(sourceRoot)}, path), args.at(-1));
+const allowed = new Set(["mobile-circuits.tar", "bn254_g1.prover", "bn254_g2.dat"]);
+if (!allowed.has(key.split("/").at(-1))) process.exit(95);
+copyFileSync(join(${JSON.stringify(sourceRoot)}, key), args.at(-1));
 console.error("private-cli-diagnostic");
 `;
     writeFileSync(command, fixture);
@@ -281,6 +278,7 @@ console.error("private-cli-diagnostic");
         ...process.env,
         PATH: temporaryRoot,
         REALLYME_ZK_LOCAL_ARTIFACT_ROOT: cache,
+        REALLYME_ZK_R2_MIRROR_ROOT: join(cache, "r2"),
         REALLYME_ZK_ARTIFACT_TRANSPORT: "r2",
         R2_ENDPOINT: "https://00000000000000000000000000000000.r2.cloudflarestorage.com",
         R2_ACCESS_KEY_ID: "fixture-access",
@@ -295,7 +293,7 @@ console.error("private-cli-diagnostic");
 
     // A successful origin response is insufficient: modified bytes must never
     // replace a digest-admitted artifact, even when downloaded with credentials.
-    const archive = join(cache, "mobile-circuit-artifacts-persona-credential-evidence-v1.tar");
+    const archive = mirrorPath(cache, "mobile-circuit-artifacts-persona-credential-evidence-v1.tar");
     unlinkSync(archive);
     writeFileSync(command, `${fixture}\nwriteFileSync(args.at(-1), "changed bytes");\n`);
     const rejected = run();

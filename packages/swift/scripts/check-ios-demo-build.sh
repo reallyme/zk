@@ -9,7 +9,7 @@ PACKAGE_ROOT="$(cd "$(dirname "$0")/.." && pwd -P)"
 ROOT="$(cd "${PACKAGE_ROOT}/../.." && pwd -P)"
 DEMO_PROJECT="${PACKAGE_ROOT}/Examples/ReallyMeZKDemo/ReallyMeZKDemo.xcodeproj"
 DERIVED_DATA_PATH="${ROOT}/target/ios-demo-derived-data"
-LOCAL_ARTIFACT_ROOT="${REALLYME_ZK_LOCAL_ARTIFACT_ROOT:-${ROOT}/release-artifacts/modern-v1-bb-6.0.0}"
+LOCAL_ARTIFACT_ROOT="${REALLYME_ZK_LOCAL_ARTIFACT_ROOT:-${ROOT}/build/native}"
 
 node "${ROOT}/scripts/stage-demo-mobile-assets.mjs" \
   "${LOCAL_ARTIFACT_ROOT}/ios-demo-resources/zk_demo"

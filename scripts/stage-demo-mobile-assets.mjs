@@ -22,13 +22,15 @@ import { spawnSync } from "node:child_process";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { localPath } from "./release-artifact-manifest.mjs";
+
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const localArtifactRoot = resolve(
   process.env.REALLYME_ZK_LOCAL_ARTIFACT_ROOT ??
-    join(root, "release-artifacts/modern-v1-bb-6.0.0"),
+    join(root, "build/native"),
 );
 const generatedArtifactRoot = resolve(localArtifactRoot, "mobile-demo-artifacts-persona-credential-evidence-v1-candidate");
-const publicCircuitArchivePath = resolve(localArtifactRoot, "mobile-circuit-artifacts-persona-credential-evidence-v1.tar");
+const publicCircuitArchivePath = localPath("mobile-circuit-artifacts-persona-credential-evidence-v1.tar");
 const defaultCrsRoot = process.env.REALLYME_ZK_DEMO_CRS_DIR ?? `${process.env.HOME}/.bb-crs`;
 const expectedReleaseIndexSha256 =
   "9260afdb9a3a0133a679af141a310b6aacbf2e814724692ca964d2711ae49ce7";

@@ -64,8 +64,7 @@ const RELEASE_INDEX_SHA256_HEX: &str =
     "9260afdb9a3a0133a679af141a310b6aacbf2e814724692ca964d2711ae49ce7";
 const VERIFIER_CRS_G2_BYTES: usize = 128;
 const COMMON_CREDENTIAL_ROOT_LANE: &str = "sha256";
-const COMMON_CREDENTIAL_ROOT_RELEASE_ROOT: &str =
-    "release-artifacts/modern-v1-bb-6.0.0/ios-demo-resources/zk_demo";
+const COMMON_CREDENTIAL_ROOT_RELEASE_ROOT: &str = "build/native/ios-demo-resources/zk_demo";
 pub(crate) fn expect_common_credential_root_direct_post_accepts_once(
     provider: Arc<BarretenbergBundleProvider<NativeBarretenbergBackend, StageResolver>>,
     stage_request_root: &Path,

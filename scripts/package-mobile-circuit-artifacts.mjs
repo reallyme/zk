@@ -18,19 +18,19 @@ import {
   rmSync,
   statSync,
   utimesSync,
-  writeFileSync,
 } from "node:fs";
-import { dirname, join, relative, resolve } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+
+import { artifactByPath, localPath } from "./release-artifact-manifest.mjs";
 
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const artifactRoot = resolve(
   process.env.REALLYME_ZK_LOCAL_ARTIFACT_ROOT ??
-    join(repositoryRoot, "release-artifacts/modern-v1-bb-6.0.0"),
+    join(repositoryRoot, "build/native"),
 );
 const sourceRoot = join(artifactRoot, "mobile-demo-artifacts-persona-credential-evidence-v1-candidate");
-const archivePath = join(artifactRoot, "mobile-circuit-artifacts-persona-credential-evidence-v1.tar");
-const digestPath = `${archivePath}.sha256`;
+const archivePath = localPath("mobile-circuit-artifacts-persona-credential-evidence-v1.tar");
 
 if (process.argv.length !== 2) {
   fail("this command does not accept arguments");
@@ -72,7 +72,7 @@ if (paths.length !== 103) {
 }
 
 const stagingRoot = mkdtempSync(join(artifactRoot, ".mobile-circuit-package-"));
-const temporaryArchive = `${archivePath}.partial`;
+const temporaryArchive = join(artifactRoot, ".mobile-circuits.tar.partial");
 try {
   for (const path of paths) {
     const target = join(stagingRoot, path);
@@ -102,9 +102,12 @@ try {
   if (result.error !== undefined || result.status !== 0) {
     fail("could not create mobile circuit artifact archive");
   }
+  const digest = createHash("sha256").update(readFileSync(temporaryArchive)).digest("hex");
+  if (digest !== artifactByPath("mobile-circuit-artifacts-persona-credential-evidence-v1.tar").sha256) {
+    fail("mobile circuit archive differs from the reviewed release pin");
+  }
+  mkdirSync(dirname(archivePath), { recursive: true });
   renameSync(temporaryArchive, archivePath);
-  const digest = createHash("sha256").update(readFileSync(archivePath)).digest("hex");
-  writeFileSync(digestPath, `${digest}  ${relative(artifactRoot, archivePath)}\n`);
   console.log(`${archivePath}\t${digest}`);
 } finally {
   rmSync(stagingRoot, { recursive: true, force: true });

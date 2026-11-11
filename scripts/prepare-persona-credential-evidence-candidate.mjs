@@ -34,7 +34,7 @@ const lock = JSON.parse(readFileSync(join(root, "circuits/toolchain-lock.json"),
 const pair = lock.candidateMatchedPair;
 const candidate = resolve(process.argv[2] ?? "");
 const artifactRoot = resolve(process.env.REALLYME_ZK_LOCAL_ARTIFACT_ROOT ??
-  join(root, "release-artifacts/modern-v1-bb-6.0.0"));
+  join(root, "build/native"));
 const expectedCandidate = join(
   artifactRoot, "mobile-demo-artifacts-persona-credential-evidence-v1-candidate",
 );

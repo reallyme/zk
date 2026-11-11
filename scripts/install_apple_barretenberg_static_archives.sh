@@ -6,7 +6,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
-STACK_ROOT="${REALLYME_ZK_LOCAL_ARTIFACT_ROOT:-${ROOT}/release-artifacts/modern-v1-bb-6.0.0}"
+STACK_ROOT="${REALLYME_ZK_LOCAL_ARTIFACT_ROOT:-${ROOT}/build/native}"
 ARCHIVE_ROOT="${REALLYME_ZK_APPLE_STATIC_ARCHIVE_ROOT:-${STACK_ROOT}/apple-static-archives}"
 LIB_ROOT="${REALLYME_ZK_APPLE_STATIC_LIB_ROOT:-${STACK_ROOT}/apple-static-libs}"
 AZTEC_DOWNLOAD_BASE_URL="${AZTEC_DOWNLOAD_BASE_URL:-https://github.com/AztecProtocol/aztec-packages/releases/download/v6.0.0}"
