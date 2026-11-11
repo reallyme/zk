@@ -5,7 +5,7 @@
     {
       "path": "scripts/check_release_readiness.mjs",
       "role": "consumer release-readiness policy declaration",
-      "sha256": "29d6be7d1bcf3b639dc0f2810a33c6cfba07705942bba00bf600104fbb438ba6"
+      "sha256": "c2d9b661d84480fe7a02f340752a16e632ece7e1f09f740ac5a941af5cb2a9ad"
     },
     {
       "path": "scripts/check-platform-facade-pins.mjs",
@@ -35,7 +35,7 @@
     {
       "path": "scripts/ci-workflow-policy.test.mjs",
       "role": "workflow policy tests",
-      "sha256": "34bfe06fc1b60b663f0400b0a8c99dd5a85ec1b16764f3d109a7ccac3aee1681"
+      "sha256": "e8fb28f15eda8147fc521d1a34bc7acdc2ec79ebeb13040bb777917d2032ed1e"
     },
     {
       "path": "scripts/build_swift_xcframework.sh",
@@ -75,7 +75,7 @@
     {
       "path": ".github/workflows/rust-ci.yml",
       "role": "primary policy and exact-commit CI workflow",
-      "sha256": "b2d121794b82069c29364e02406daad3e210c30ee1ad32058584d8d57627264a"
+      "sha256": "293da5c9fe68fb6c682548a255cb0a6ace02aa99a424568c658b918c27de4d33"
     },
     {
       "path": ".github/workflows/fuzz.yml",
@@ -100,12 +100,12 @@
     {
       "path": ".github/workflows/swift-package-preflight.yml",
       "role": "Swift binary package preflight workflow",
-      "sha256": "f874a5686cd6137ec1d06f2c82db51a4d3e9bbdd00deeda1d2797440b4ef3331"
+      "sha256": "f46996d02c7968cea769c1349d65b94cb7f8e12d7d7ad419dd0c33c8f3dfd229"
     },
     {
       "path": ".github/workflows/swift-package-release.yml",
       "role": "Swift binary package release workflow",
-      "sha256": "aec3bc5f9ae0e6e166e5461289a7190f45438b046e0c07876255c45bf3b677ce"
+      "sha256": "643f5799dc083f4240aa6bcc5e05779b66785b080bb0339aca41e3f4c647c818"
     },
     {
       "path": "scripts/test-modern-soundness-regressions.sh",

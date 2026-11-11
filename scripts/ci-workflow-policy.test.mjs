@@ -310,13 +310,19 @@ test("Android native CI reuses verified upstream libraries and builds only on a 
     "b498017ff17aa277f09fb7f0913c087404c0739bf6323b18ab44b118b5efc51a");
 });
 
-test("Swift binary release promotes a preflight-built XCFramework", () => {
+test("Swift binary release promotes the pinned XCFramework verified by preflight", () => {
   const preflight = readWorkflow("swift-package-preflight.yml");
   const release = readWorkflow("swift-package-release.yml");
   assert.match(preflight, /runs-on: xcode-27/u);
+  assert.match(
+    preflight,
+    /uses: dtolnay\/rust-toolchain@2c7215f132e9ebf062739d9130488b56d53c060c[^\n]*\n +with:\n +toolchain: 1[.]99[.]0\n +components: llvm-tools-preview[\s\S]*?name: Verify SwiftPM manifest and pinned release archive/u,
+  );
   assert.doesNotMatch(preflight, /scripts\/build_swift_xcframework[.]sh/u);
-  assert.match(preflight, /swift-provider-source-/u);
-  assert.match(preflight, /run-id: \$\{\{ needs[.]verify-source-sha[.]outputs[.]rust_ci_run_id \}\}/u);
+  assert.match(preflight, /REALLYME_ZK_ARTIFACT_TRANSPORT: r2/u);
+  assert.match(preflight, /release-artifact-cache[.]mjs --hydrate --distribution-only --swift-only/u);
+  assert.match(preflight, /packages\/swift\/ReallyMeZKPlatformFFI[.]xcframework[.]build[.]tsv/u);
+  assert.match(preflight, /scripts\/check-apple-platform-ffi-freshness[.]sh/u);
   assert.match(preflight, /node scripts\/verify_required_ci[.]mjs/u);
   assert.match(preflight, /REQUIRED_CI_WAIT_SECONDS: "0"/u);
   assert.match(
@@ -328,7 +334,10 @@ test("Swift binary release promotes a preflight-built XCFramework", () => {
     preflight,
     /--local-artifact-path build\/swift\/ReallyMeZKPlatformFFI[.]xcframework/u,
   );
-  assert.match(preflight, /swift test -Xswiftc -warnings-as-errors/u);
+  assert.match(preflight, /swift test -Xswiftc -warnings-as-errors[\s\S]*?name: Upload verified Swift release candidate/u);
+  for (const workflow of [preflight, release]) {
+    assert.match(workflow, /run-consumer-check[.]mjs --policy-only\s*$/mu);
+  }
   assert.match(release, /RELEASE_ATTESTATION_PREFLIGHT_WORKFLOW: swift-package-preflight[.]yml/u);
   assert.match(
     release,

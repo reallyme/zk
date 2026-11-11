@@ -68,7 +68,7 @@ source_closure_file_hash_lines() {
         -not -path '*/src/bin/*' \
         -not -path '*/target/*' \
         -print
-    } | sort | while IFS= read -r source_path; do
+    } | LC_ALL=C sort | while IFS= read -r source_path; do
       printf '%s\t%s\n' "${source_path}" "$(sha256_file "${ROOT}/${source_path}")"
     done
   )

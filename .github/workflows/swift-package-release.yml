@@ -122,7 +122,7 @@ jobs:
         run: |
           node scripts/verify_sdk_release_version.mjs "${RELEASE_VERSION}"
           node scripts/verify_swift_release_artifact.mjs build/swift/ReallyMeZKPlatformFFI.xcframework.zip build/swift/ReallyMeZKPlatformFFI.xcframework.checksum Package.swift "${RELEASE_VERSION}"
-          node .release-readiness/scripts/run-consumer-check.mjs --release-packages --policy-only
+          node .release-readiness/scripts/run-consumer-check.mjs --policy-only
 
   swift-release:
     name: SwiftPM release tag

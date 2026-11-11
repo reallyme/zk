@@ -1626,8 +1626,11 @@ readiness.assertTextPolicy({
       required: [
         "scripts/verify_required_ci.mjs",
         'REQUIRED_CI_WAIT_SECONDS: "0"',
-        "swift-provider-source-${{ needs.verify-source-sha.outputs.release_sha }}",
-        "run-id: ${{ needs.verify-source-sha.outputs.rust_ci_run_id }}",
+        "components: llvm-tools-preview",
+        "REALLYME_ZK_ARTIFACT_TRANSPORT: r2",
+        "scripts/release-artifact-cache.mjs --hydrate --distribution-only --swift-only",
+        "packages/swift/ReallyMeZKPlatformFFI.xcframework.build.tsv",
+        "scripts/check-apple-platform-ffi-freshness.sh",
         "swift-xcframework-${{ inputs.version }}-${{ needs.verify-source-sha.outputs.release_sha }}",
         "scripts/prepare_swift_binary_manifest.mjs",
         "scripts/verify_swift_release_artifact.mjs",
