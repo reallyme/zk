@@ -1,0 +1,38 @@
+{
+  "name": "@reallyme/zk-bbjs-provider",
+  "version": "0.1.0",
+  "private": false,
+  "type": "module",
+  "description": "Optional ReallyMe ZK provider adapter for Aztec Barretenberg bb.js",
+  "license": "MIT OR Apache-2.0",
+  "main": "./src/index.mjs",
+  "types": "./src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "import": "./src/index.mjs"
+    }
+  },
+  "files": [
+    "LICENSE-APACHE",
+    "LICENSE-MIT",
+    "README.md",
+    "src/index.d.ts",
+    "src/index.mjs"
+  ],
+  "peerDependencies": {
+    "@aztec-foundation/bb.js": "6.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@aztec-foundation/bb.js": {
+      "optional": true
+    }
+  },
+  "scripts": {
+    "test": "node --test test/*.test.mjs"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "sideEffects": false
+}

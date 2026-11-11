@@ -1,0 +1,10 @@
+# Vendored from noir-lang/poseidon v0.2.0 at commit
+# 4bc50d88dd8d94a00a95730fd76501e676417abf.
+
+[package]
+name = "poseidon"
+type = "lib"
+authors = [""]
+compiler_version = ">=0.34.0"
+
+[dependencies]

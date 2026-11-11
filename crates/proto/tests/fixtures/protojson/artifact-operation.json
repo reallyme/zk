@@ -1,0 +1,1 @@
+{"getArtifactManifest":{"circuitRef":{"credentialHashAlgorithm":"ZK_CREDENTIAL_HASH_ALGORITHM_SHA256","family":"ZK_CIRCUIT_FAMILY_CREDENTIAL_SUBJECT_CLAIM_V1","stage":"ZK_CIRCUIT_STAGE_CLAIM","circuitRevision":1},"proofSuite":"ZK_PROOF_SUITE_BARRETENBERG_ULTRA_HONK_KECCAK_ZK_NO_IPA"}}

@@ -1,0 +1,53 @@
+# SPDX-FileCopyrightText: Copyright © 2026 ReallyMe Technologies Limited. All rights reserved
+#
+# SPDX-License-Identifier: MIT OR Apache-2.0
+
+[package]
+name = "reallyme-zk-backend-bb"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[features]
+default = []
+native = []
+wasm = []
+dev-cli = ["dep:thiserror"]
+
+[[bin]]
+name = "check-public-inputs"
+path = "src/bin/check-public-inputs.rs"
+required-features = ["dev-cli"]
+
+[[bin]]
+name = "write-retained-bbapi-command"
+path = "src/bin/write-retained-bbapi-command.rs"
+required-features = ["native", "dev-cli"]
+
+[dependencies]
+base64 = { workspace = true }
+flate2 = { workspace = true }
+libc = { workspace = true }
+reallyme-zk-artifacts = { path = "../artifacts", version = "0.3.0", default-features = false }
+reallyme-zk-api = { path = "../api", version = "0.3.0", default-features = false }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+thiserror = { workspace = true, optional = true }
+zeroize = { workspace = true }
+
+[dev-dependencies]
+crypto-p256 = { workspace = true, features = ["native"] }
+reallyme-zk-noir-witness-core = { path = "../noir-witness-core", version = "0.1.0", default-features = false }
+reallyme-zk-proto-codec = { path = "../proto-codec", version = "0.1.0", default-features = false, features = ["native"] }
+thiserror = { workspace = true }
+
+[build-dependencies]
+cc = { workspace = true }
+serde_json = { workspace = true }
+sha2 = { workspace = true }
+
+[lints]
+workspace = true

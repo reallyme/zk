@@ -1,0 +1,54 @@
+# SPDX-FileCopyrightText: Copyright © 2026 ReallyMe Technologies Limited. All rights reserved
+#
+# SPDX-License-Identifier: MIT OR Apache-2.0
+
+title = "ReallyMe ZK secret scanning"
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "generic-api-key"
+
+# These are public circuit and protobuf identifiers, not credential values.
+# Match both the exact identifier and its owning file so other findings remain
+# actionable, including findings elsewhere in these same files.
+[[rules.allowlists]]
+description = "Public circuit family identifier"
+condition = "AND"
+paths = [
+  '''^crates/noir-witness-core/tests/circuit_boundary_contracts\.rs$''',
+  '''^scripts/check-mobile-demo-fixture-pins\.test\.mjs$''',
+  '''^scripts/generate-claim-family-fixtures\.py$''',
+  '''^scripts/test-claim-family-fixed-depth\.py$''',
+]
+regexes = ['''^private_persona_claim_v1$''']
+
+[[rules.allowlists]]
+description = "Public Swift circuit family case"
+condition = "AND"
+paths = ['''^packages/swift/Tests/ReallyMeZKTests/ReallyMeZKNativeTransportTestSupport\.swift$''']
+regexes = ['''^\.?privatePersonaClaimV1$''']
+
+[[rules.allowlists]]
+description = "Public Swift proof suite case"
+condition = "AND"
+paths = ['''^packages/swift/Tests/ReallyMeZKTests/ReallyMeZKStatusQualifiedClaimBundleTests\.swift$''']
+regexes = ['''^\.?barretenbergUltraHonkPoseidon2ZkNoIpa$''']
+
+[[rules.allowlists]]
+description = "Public protobuf field identifier"
+condition = "AND"
+paths = ['''^scripts/proto-hardening/zk-scalar-policy\.mjs$''']
+regexes = ['''^holder_signature_p256_raw$''']
+
+# These reviewed source-lock digests are public artifact integrity metadata.
+# Keep the earlier digest for history scans.
+[[rules.allowlists]]
+description = "Pinned public circuit source-lock digest"
+condition = "AND"
+paths = ['''^scripts/stage-demo-mobile-assets\.mjs$''']
+regexes = [
+  '''^008071546d5e0b72413ebd1bb7effaddc8301d707e13d16aa34f59cf173f88b0$''',
+  '''^ca4d51a94243c36af605a90429ff6605984d6158a724c290189e57d55d2e129a$''',
+]

@@ -1,0 +1,11 @@
+# SPDX-FileCopyrightText: Copyright © 2026 ReallyMe Technologies Limited. All rights reserved
+#
+# SPDX-License-Identifier: MIT OR Apache-2.0
+#
+# Deterministic synthetic keys only. Never use these keys for issuance.
+
+challenge = [49,50,51,52,53,54,55,56,57,48,49,50,51,52,53,54,55,56,57,48,49,50,51,52,53,54,55,56,57,48,49,50]
+audience_hash = [209,184,121,5,4,149,28,47,60,116,198,18,153,185,207,184,99,76,161,176,220,142,59,106,229,116,117,188,55,121,10,37]
+transaction_data_hash = [3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3]
+expiry_unix = 1750000000
+session_binding = [139,128,237,179,192,57,188,191,135,39,200,100,179,62,247,164,174,34,67,89,186,244,0,59,89,41,17,110,231,207,230,99]

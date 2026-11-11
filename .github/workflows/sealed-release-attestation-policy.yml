@@ -1,0 +1,71 @@
+# SPDX-FileCopyrightText: Copyright © 2026 ReallyMe Technologies Limited. All rights reserved
+#
+# SPDX-License-Identifier: MIT OR Apache-2.0
+
+name: Sealed Release Attestation Policy
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/sealed-release-attestation.yml"
+      - ".github/workflows/sealed-release-package-attestation.yml"
+      - ".github/workflows/sealed-release-attestation-policy.yml"
+      - "crates/artifact-package/**"
+      - "scripts/verify_sealed_release_candidate.mjs"
+      - "scripts/verify_sealed_release_candidate.test.mjs"
+      - "scripts/check-release-readiness-policy-lock.mjs"
+      - "scripts/check-release-readiness-policy-lock.test.mjs"
+      - "scripts/check_release_readiness.mjs"
+      - "release-readiness-policy.lock.json"
+      - "README.md"
+      - "**/*.md"
+      - "docs/**"
+      - "provider_manifest.json"
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/sealed-release-attestation.yml"
+      - ".github/workflows/sealed-release-package-attestation.yml"
+      - ".github/workflows/sealed-release-attestation-policy.yml"
+      - "crates/artifact-package/**"
+      - "scripts/verify_sealed_release_candidate.mjs"
+      - "scripts/verify_sealed_release_candidate.test.mjs"
+      - "scripts/check-release-readiness-policy-lock.mjs"
+      - "scripts/check-release-readiness-policy-lock.test.mjs"
+      - "scripts/check_release_readiness.mjs"
+      - "release-readiness-policy.lock.json"
+      - "README.md"
+      - "**/*.md"
+      - "docs/**"
+      - "provider_manifest.json"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sealed-release-attestation-policy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  policy:
+    name: release workflow policy
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout ZK
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Install Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "26"
+
+      - name: Pinned release-readiness policy
+        run: >-
+          npm exec --yes
+          --package=https://codeload.github.com/reallyme/release-readiness/tar.gz/18a6d91d99837e80f92e41fe04effb0b043d754e
+          -- reallyme-release-readiness --policy-only

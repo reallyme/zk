@@ -1,0 +1,28 @@
+# SPDX-FileCopyrightText: Copyright © 2026 ReallyMe Technologies Limited. All rights reserved
+#
+# SPDX-License-Identifier: MIT OR Apache-2.0
+
+[package]
+name = "reallyme-zk-root-status-authority"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+description = "Durable single-feed ReallyMe root status publication."
+
+[target.'cfg(unix)'.dependencies]
+buffa = { workspace = true }
+libc = { workspace = true }
+reallyme-zk-api = { path = "../api", version = "0.3.0", default-features = false, features = ["native"] }
+reallyme-zk-proto = { path = "../proto", version = "0.3.0", default-features = false, features = ["generated"] }
+reallyme-zk-proto-codec = { path = "../proto-codec", version = "0.1.0", default-features = false, features = ["native"] }
+thiserror = { workspace = true }
+zeroize = { workspace = true }
+
+[target.'cfg(unix)'.dev-dependencies]
+crypto-p256 = { workspace = true, features = ["native"] }
+
+[lints]
+workspace = true

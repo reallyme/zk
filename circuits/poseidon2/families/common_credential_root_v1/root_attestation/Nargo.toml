@@ -1,0 +1,10 @@
+# SPDX-FileCopyrightText: Copyright © 2026 ReallyMe Technologies Limited. All rights reserved
+#
+# SPDX-License-Identifier: MIT OR Apache-2.0
+
+[package]
+name = "credential_common_credential_root_v1_attestation_poseidon2"
+type = "bin"
+version = "0.1.0"
+
+[dependencies]

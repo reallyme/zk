@@ -1,0 +1,9 @@
+{
+  global:
+    Java_me_really_zk_JniReallyMeZkPlatformNativeBridge_nativeContextCreate;
+    Java_me_really_zk_JniReallyMeZkPlatformNativeBridge_nativeContextCreateWithCrsFiles;
+    Java_me_really_zk_JniReallyMeZkPlatformNativeBridge_nativeDispatch;
+    Java_me_really_zk_JniReallyMeZkPlatformNativeBridge_nativeContextDestroy;
+  local:
+    *;
+};

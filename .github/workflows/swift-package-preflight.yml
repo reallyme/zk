@@ -1,0 +1,150 @@
+# SPDX-FileCopyrightText: Copyright © 2026 ReallyMe Technologies Limited. All rights reserved
+#
+# SPDX-License-Identifier: MIT OR Apache-2.0
+
+name: Swift Package Preflight
+run-name: Swift package preflight ${{ inputs.version }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_sha:
+        description: Optional exact main commit SHA to certify. Leave blank to use current origin/main.
+        required: false
+        type: string
+        default: ""
+      version:
+        description: Release version without leading v
+        required: true
+        type: string
+        default: 0.3.0
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: swift-package-preflight-${{ inputs.version }}
+  cancel-in-progress: false
+
+jobs:
+  verify-source-sha:
+    name: verify source SHA
+    runs-on: ubuntu-24.04
+    outputs:
+      release_sha: ${{ steps.resolve.outputs.release_sha }}
+      rust_ci_run_id: ${{ steps.required-ci.outputs.rust_ci_run_id }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: false
+      - id: resolve
+        name: Resolve release SHA
+        env:
+          RELEASE_SHA_INPUT: ${{ inputs.release_sha }}
+        run: |
+          git fetch --no-tags origin main
+          if [ -n "${RELEASE_SHA_INPUT}" ]; then
+            if [[ ! "${RELEASE_SHA_INPUT}" =~ ^[0-9a-f]{40}$ ]]; then
+              echo "::error::release_sha must be blank or a lowercase 40-character commit SHA"
+              exit 1
+            fi
+            release_sha="${RELEASE_SHA_INPUT}"
+          else
+            release_sha="$(git rev-parse origin/main)"
+          fi
+          if [ "$(git rev-parse origin/main)" != "${release_sha}" ]; then
+            echo "::error::resolved release SHA is not the current origin/main tip"
+            exit 1
+          fi
+          if [ "${GITHUB_SHA}" != "${release_sha}" ]; then
+            echo "::error::resolved release SHA does not match the workflow run head SHA"
+            exit 1
+          fi
+          git checkout --detach "${release_sha}"
+          echo "release_sha=${release_sha}" >> "${GITHUB_OUTPUT}"
+
+      - name: Install Node.js for release evidence admission
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "26"
+      - name: Require completed exact-commit release qualification
+        id: required-ci
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_SHA: ${{ steps.resolve.outputs.release_sha }}
+          REQUIRED_CI_WAIT_SECONDS: "0"
+          REQUIRED_CI_WRITE_GITHUB_OUTPUT: "1"
+        run: node scripts/verify_required_ci.mjs
+
+  swift-package:
+    name: swift package preflight
+    needs: verify-source-sha
+    runs-on: xcode-27
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.verify-source-sha.outputs.release_sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Install Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "26"
+      # Promote only the provider produced by successful exact-commit release
+      # qualification. Preflight tests those bytes instead of rebuilding them.
+      - name: Download the tested current-source Swift provider
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: swift-provider-source-${{ needs.verify-source-sha.outputs.release_sha }}
+          path: build/swift
+          run-id: ${{ needs.verify-source-sha.outputs.rust_ci_run_id }}
+          github-token: ${{ github.token }}
+
+      # Preserve the exact tested candidate before Package.swift is rewritten.
+      # The credentialed release job promotes these bytes without rebuilding.
+      - name: Upload Swift release candidate
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: swift-xcframework-${{ inputs.version }}-${{ needs.verify-source-sha.outputs.release_sha }}
+          path: |
+            build/swift/ReallyMeZKPlatformFFI.xcframework.zip
+            build/swift/ReallyMeZKPlatformFFI.xcframework.checksum
+            build/swift/ReallyMeZKPlatformFFI.xcframework.build.tsv
+          if-no-files-found: error
+          retention-days: 7
+      - name: Test Swift release tooling
+        run: node --test scripts/prepare_swift_binary_manifest.test.mjs scripts/verify_swift_release_artifact.test.mjs scripts/verify_release_attestation.test.mjs
+      - name: Checkout release-readiness runner
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: reallyme/release-readiness
+          ref: 18a6d91d99837e80f92e41fe04effb0b043d754e
+          path: .release-readiness
+          persist-credentials: false
+      - name: Bind manifest to Swift release candidate
+        env:
+          RELEASE_VERSION: ${{ inputs.version }}
+        run: |
+          checksum="$(cat build/swift/ReallyMeZKPlatformFFI.xcframework.checksum)"
+          node scripts/prepare_swift_binary_manifest.mjs "${RELEASE_VERSION}" "${checksum}"
+      - name: Verify generated SwiftPM manifest and release candidate
+        env:
+          RELEASE_VERSION: ${{ inputs.version }}
+        run: |
+          node scripts/verify_sdk_release_version.mjs "${RELEASE_VERSION}"
+          node scripts/verify_swift_release_artifact.mjs build/swift/ReallyMeZKPlatformFFI.xcframework.zip build/swift/ReallyMeZKPlatformFFI.xcframework.checksum Package.swift "${RELEASE_VERSION}"
+          node .release-readiness/scripts/run-consumer-check.mjs --release-packages --policy-only
+      - name: Extract the verified Swift release candidate
+        run: ditto -x -k build/swift/ReallyMeZKPlatformFFI.xcframework.zip build/swift
+      - name: Prepare local SwiftPM binary manifest
+        env:
+          RELEASE_VERSION: ${{ inputs.version }}
+        run: |
+          checksum="$(cat build/swift/ReallyMeZKPlatformFFI.xcframework.checksum)"
+          node scripts/prepare_swift_binary_manifest.mjs "${RELEASE_VERSION}" "${checksum}" --local-artifact-path build/swift/ReallyMeZKPlatformFFI.xcframework
+      - name: Test Swift package with linked binary target
+        run: swift test -Xswiftc -warnings-as-errors

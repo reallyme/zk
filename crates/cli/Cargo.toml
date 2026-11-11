@@ -1,0 +1,40 @@
+# SPDX-FileCopyrightText: Copyright © 2026 ReallyMe Technologies Limited. All rights reserved
+#
+# SPDX-License-Identifier: MIT OR Apache-2.0
+
+[package]
+name = "reallyme-zk-cli"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+description = "Production-oriented ReallyMe ZK command-line orchestration."
+
+[[bin]]
+name = "reallyme-zk"
+path = "src/main.rs"
+
+[features]
+default = []
+native = ["reallyme-zk-backend-bb/native"]
+wasm = []
+
+[dependencies]
+reallyme-zk-artifacts = { path = "../artifacts", version = "0.3.0", default-features = false }
+reallyme-zk-api = { path = "../api", version = "0.3.0", default-features = false }
+reallyme-zk-backend-bb = { path = "../backend-bb", version = "0.1.0", default-features = false }
+reallyme-zk-noir-witness-core = { path = "../noir-witness-core", version = "0.1.0", default-features = false }
+reallyme-zk-proto-codec = { path = "../proto-codec", version = "0.1.0", default-features = false }
+thiserror = { workspace = true }
+zeroize = { workspace = true }
+
+[dev-dependencies]
+base64 = { workspace = true }
+flate2 = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+
+[lints]
+workspace = true

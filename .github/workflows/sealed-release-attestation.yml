@@ -1,0 +1,158 @@
+# SPDX-FileCopyrightText: Copyright © 2026 ReallyMe Technologies Limited. All rights reserved
+#
+# SPDX-License-Identifier: MIT OR Apache-2.0
+
+name: Sealed Release Attestation
+
+on:
+  workflow_call:
+    inputs:
+      artifact_name:
+        description: Same-run artifact containing the complete sealed release root
+        required: true
+        type: string
+      expected_index_sha256:
+        description: Reviewed lowercase SHA-256 of the canonical index.pb
+        required: true
+        type: string
+      release_sha:
+        description: Exact current-main source commit that produced the release
+        required: true
+        type: string
+      release_version:
+        description: Semver release directory token without leading v
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  admit:
+    name: admit canonical index without signing credentials
+    if: >-
+      github.repository == 'reallyme/zk' &&
+      github.ref == 'refs/heads/main' &&
+      github.workflow_ref == 'reallyme/zk/.github/workflows/sealed-release-package-attestation.yml@refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    permissions:
+      actions: read
+      contents: read
+    steps:
+      - name: Checkout ZK release source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: zk
+          ref: ${{ inputs.release_sha }}
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Require exact current-main release identity
+        env:
+          ARTIFACT_NAME: ${{ inputs.artifact_name }}
+          RELEASE_SHA: ${{ inputs.release_sha }}
+          RELEASE_VERSION: ${{ inputs.release_version }}
+          EXPECTED_INDEX_SHA256: ${{ inputs.expected_index_sha256 }}
+        run: |
+          if [[ ! "${ARTIFACT_NAME}" =~ ^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$ ]]; then
+            echo "::error::artifact_name is invalid"
+            exit 1
+          fi
+          if [[ ! "${RELEASE_SHA}" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "::error::release_sha must be a lowercase 40-character commit SHA"
+            exit 1
+          fi
+          if [[ ! "${RELEASE_VERSION}" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]; then
+            echo "::error::release_version must be canonical semver"
+            exit 1
+          fi
+          if [[ ! "${EXPECTED_INDEX_SHA256}" =~ ^[0-9a-f]{64}$ ]]; then
+            echo "::error::expected_index_sha256 must be lowercase SHA-256"
+            exit 1
+          fi
+          if [ "$(git -C zk rev-parse HEAD)" != "${RELEASE_SHA}" ]; then
+            echo "::error::checkout does not match release_sha"
+            exit 1
+          fi
+          if [ "${GITHUB_SHA}" != "${RELEASE_SHA}" ]; then
+            echo "::error::caller run head does not match release_sha"
+            exit 1
+          fi
+
+      - name: Download same-run sealed release
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: ${{ inputs.artifact_name }}
+          path: zk/build/sealed-release
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@2c7215f132e9ebf062739d9130488b56d53c060c # master
+        with:
+          toolchain: 1.99.0
+
+      - name: Admit release and reviewed index digest
+        env:
+          RELEASE_VERSION: ${{ inputs.release_version }}
+          EXPECTED_INDEX_SHA256: ${{ inputs.expected_index_sha256 }}
+        run: >-
+          cargo run --locked -p reallyme-zk-artifact-package
+          --bin check-release-index-attestation --
+          "${GITHUB_WORKSPACE}/zk/build/sealed-release"
+          "${RELEASE_VERSION}" "${EXPECTED_INDEX_SHA256}"
+        working-directory: zk
+
+      - name: Recompute manifest source-tree identities
+        env:
+          RELEASE_VERSION: ${{ inputs.release_version }}
+        run: >-
+          cargo run --locked -p reallyme-zk-release-assembly
+          --bin check-release-source-attestation --
+          "${GITHUB_WORKSPACE}/zk"
+          "${GITHUB_WORKSPACE}/zk/build/sealed-release"
+          "${RELEASE_VERSION}"
+        working-directory: zk
+
+      - name: Retain admitted canonical index
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: reallyme-zk-release-index-${{ inputs.release_version }}-${{ inputs.release_sha }}
+          path: zk/build/sealed-release/v1/${{ inputs.release_version }}/index.pb
+          if-no-files-found: error
+          retention-days: 90
+
+  attest:
+    name: attest admitted canonical index
+    needs: admit
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    environment: sealed-release-attestation
+    permissions:
+      actions: read
+      attestations: write
+      contents: read
+      id-token: write
+    steps:
+      - name: Download admitted index from this run
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: reallyme-zk-release-index-${{ inputs.release_version }}-${{ inputs.release_sha }}
+          path: admitted-index
+
+      - name: Recheck the exact approved index bytes
+        shell: bash
+        env:
+          RELEASE_SHA: ${{ inputs.release_sha }}
+          EXPECTED_INDEX_SHA256: ${{ inputs.expected_index_sha256 }}
+        run: |
+          set -euo pipefail
+          test "${GITHUB_SHA}" = "${RELEASE_SHA}"
+          test -f admitted-index/index.pb
+          printf '%s  %s\n' "${EXPECTED_INDEX_SHA256}" admitted-index/index.pb |
+            sha256sum --check --strict
+
+      - name: Attest canonical release index
+        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+        with:
+          subject-name: reallyme-zk-release-index-${{ inputs.release_version }}.pb
+          subject-digest: sha256:${{ inputs.expected_index_sha256 }}

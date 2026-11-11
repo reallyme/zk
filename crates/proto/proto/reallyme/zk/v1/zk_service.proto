@@ -1,0 +1,19 @@
+// SPDX-FileCopyrightText: Copyright © 2026 ReallyMe Technologies Limited. All rights reserved
+//
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
+syntax = "proto3";
+
+package reallyme.zk.v1;
+
+import "reallyme/zk/v1/manifest.proto";
+
+// Transport-neutral provider surface over the canonical operation envelope.
+//
+// This declaration is intentionally separate from manifest.proto so message
+// generation remains independent of Connect, HTTP, IPC, or platform runtime
+// choices. Runtime adapters may consume this service schema, but they must not
+// add transport dependencies to reallyme-zk-proto.
+service ZkProviderService {
+  rpc ZkProviderOperation(ZkProviderOperationRequest) returns (ZkProviderOperationResponse);
+}

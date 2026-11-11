@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: Copyright © 2026 ReallyMe Technologies Limited. All rights reserved
+#
+# SPDX-License-Identifier: MIT OR Apache-2.0
+
+artifacts/
+target/
+corpus/*/*
+!corpus/artifact_contracts/malformed-wire
+!corpus/claim_proof_contracts/malformed-wire
+!corpus/persona_evidence_contracts/synthetic-presentation-auth
+!corpus/proof_contracts/malformed-wire
+!corpus/protojson_contracts/malicious-secret-operation
+!corpus/protojson_contracts/valid-artifact-request
+!corpus/protojson_contracts/valid-backend-response
+!corpus/provider_operation/valid-artifact-json
+!corpus/public_input_abi/field-like
+!corpus/root_status_contracts/synthetic-path-assignment

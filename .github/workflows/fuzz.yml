@@ -1,0 +1,158 @@
+# SPDX-FileCopyrightText: Copyright © 2026 ReallyMe Technologies Limited. All rights reserved
+#
+# SPDX-License-Identifier: MIT OR Apache-2.0
+
+name: Fuzz
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/fuzz.yml"
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - "crates/**"
+      - "fuzz/**"
+      - "scripts/run-fuzz-smoke.sh"
+      - "!**/*.md"
+  push:
+    branches: [main]
+    paths-ignore:
+      - "**/*.md"
+  schedule:
+    - cron: "23 4 * * 2"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fuzz-${{ github.event_name }}-${{ github.event_name == 'workflow_dispatch' && github.run_id || github.ref }}
+  cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' }}
+
+env:
+  CARGO_FUZZ_VERSION: 0.13.2
+  FUZZ_TOOLCHAIN: nightly-2026-09-15
+
+jobs:
+  build:
+    name: Build fuzz targets once
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: zk
+          persist-credentials: false
+
+      - name: Install pinned nightly
+        uses: dtolnay/rust-toolchain@2c7215f132e9ebf062739d9130488b56d53c060c # master
+        with:
+          toolchain: ${{ env.FUZZ_TOOLCHAIN }}
+
+      - name: Cache fuzz build
+        uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
+        with:
+          workspaces: zk/fuzz
+          cache-bin: false
+
+      - name: Install cargo-fuzz
+        run: cargo install cargo-fuzz --version "$CARGO_FUZZ_VERSION" --locked
+
+      - name: Build all fuzz targets from the committed lockfile
+        working-directory: zk
+        run: |
+          cargo "+$FUZZ_TOOLCHAIN" metadata --locked --manifest-path fuzz/Cargo.toml --format-version 1
+          cargo "+$FUZZ_TOOLCHAIN" fuzz build
+
+      - name: Stage fuzz executables
+        working-directory: zk
+        run: |
+          host_target="$(rustc "+$FUZZ_TOOLCHAIN" -vV | sed -n 's/^host: //p')"
+          test -n "$host_target"
+          mkdir -p fuzz-binaries
+          while IFS= read -r fuzz_target; do
+            test -n "$fuzz_target"
+            cp "fuzz/target/${host_target}/release/${fuzz_target}" "fuzz-binaries/${fuzz_target}"
+          done < <(cargo "+$FUZZ_TOOLCHAIN" fuzz list)
+
+      - name: Exercise every target before merging
+        if: github.event_name == 'pull_request' || github.event_name == 'push'
+        working-directory: zk
+        env:
+          REALLYME_ZK_FUZZ_BINARY_DIRECTORY: fuzz-binaries
+          REALLYME_ZK_FUZZ_MAX_TOTAL_TIME: "20"
+          REALLYME_ZK_FUZZ_RSS_LIMIT_MB: "4096"
+        run: scripts/run-fuzz-smoke.sh
+
+      - name: Upload fuzz executables
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: fuzz-executables-${{ github.sha }}
+          path: zk/fuzz-binaries
+          if-no-files-found: error
+          retention-days: 1
+
+      - name: Record executable digests
+        working-directory: zk
+        run: sha256sum fuzz-binaries/*
+
+  scheduled:
+    name: scheduled fuzz (${{ matrix.target }})
+    needs: build
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - artifact_contracts
+          - claim_proof_contracts
+          - persona_evidence_contracts
+          - proof_contracts
+          - protojson_contracts
+          - provider_operation
+          - public_input_abi
+          - root_status_contracts
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: zk
+          persist-credentials: false
+
+      - name: Download prebuilt fuzz executables
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: fuzz-executables-${{ github.sha }}
+          path: fuzz-executables
+
+      - name: Run time-boxed fuzz target without rebuilding
+        working-directory: zk
+        env:
+          REALLYME_ZK_FUZZ_BINARY_DIRECTORY: ${{ github.workspace }}/fuzz-executables
+          REALLYME_ZK_FUZZ_MAX_TOTAL_TIME: "300"
+          REALLYME_ZK_FUZZ_RSS_LIMIT_MB: "4096"
+          REALLYME_ZK_FUZZ_TARGET: ${{ matrix.target }}
+        run: |
+          chmod 0755 "${{ github.workspace }}/fuzz-executables/${REALLYME_ZK_FUZZ_TARGET}"
+          scripts/run-fuzz-smoke.sh
+
+      - name: Retain evolved fuzz corpora
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: fuzz-corpus-${{ matrix.target }}-${{ github.run_id }}
+          path: zk/fuzz/corpus/${{ matrix.target }}
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload crash artifacts
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: fuzz-artifacts-${{ matrix.target }}-${{ github.run_id }}
+          path: zk/fuzz/artifacts/${{ matrix.target }}
+          if-no-files-found: ignore

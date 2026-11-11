@@ -1,0 +1,11 @@
+# SPDX-FileCopyrightText: Copyright © 2026 ReallyMe Technologies Limited. All rights reserved
+#
+# SPDX-License-Identifier: MIT OR Apache-2.0
+
+[package]
+name = "credential_persona_credential_evidence_v1_claim_root_poseidon2"
+type = "bin"
+version = "0.1.0"
+
+[dependencies]
+poseidon2 = { path = "../../../../vendor/poseidon-v0.2.0" }

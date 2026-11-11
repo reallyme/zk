@@ -1,0 +1,161 @@
+# SPDX-FileCopyrightText: Copyright © 2026 ReallyMe Technologies Limited. All rights reserved
+#
+# SPDX-License-Identifier: MIT OR Apache-2.0
+
+# Rust build artifacts
+/target
+target/
+**/target/
+*.rmeta
+*.rlib
+*.prof*
+*.gcda
+*.gcno
+*.profraw
+*.d
+
+# OS/editor noise
+.DS_Store
+**/.DS_Store
+*.swp
+*.swo
+*~
+
+# Local environment
+.env
+.env.*
+!.env.example
+.secrets/
+**/.secrets/
+
+# Local developer state
+/.release-readiness/
+/.agents/
+llms.txt
+LLMS.txt
+
+# Generated artifacts
+/coverage/
+/tarpaulin-report.html
+/release-artifacts/
+/zk-lane-logs/
+/local-audit-archive/
+proptest-regressions/
+/circuits/sha256/families/common_credential_root_v1/common_credential_root/
+/circuits/sha256/families/common_credential_root_v1/root_assurance/
+/circuits/sha256/families/common_credential_root_v1/subject_link/
+/circuits/poseidon2/families/common_credential_root_v1/common_credential_root/
+/circuits/poseidon2/families/common_credential_root_v1/root_assurance/
+/circuits/poseidon2/families/common_credential_root_v1/subject_link/
+
+# Noir / Barretenberg generated artifacts
+**/target/
+**/proof
+!**/src/proof/
+!**/src/proof/**
+**/public_inputs
+!**/src/public_inputs/
+!**/src/public_inputs/**
+**/vk
+**/*.acir
+**/*.brillig
+
+# Generated Rust/source artifacts
+**/generated
+**/generated/**
+**/src/generated
+**/src/generated/**
+!crates/proto/src/generated/
+!crates/proto/src/generated/**
+!packages/swift/Sources/Generated/
+!packages/swift/Sources/Generated/**
+**/src/pb
+**/src/pb/**
+**/src/prost
+**/src/prost/**
+**/*_grpc.rs
+**/*.grpc.rs
+**/*_pb.rs
+**/*.pb.rs
+**/*_tonic.rs
+**/*.tonic.rs
+**/*_prost.rs
+**/*.prost.rs
+**/*_generated.rs
+**/*.generated.rs
+**/*.gen.rs
+**/*.protos.rs
+**/*.capnp.rs
+
+# JavaScript tooling
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-store/
+.yarn/
+!.yarn/patches/
+!.yarn/plugins/
+!.yarn/releases/
+!.yarn/sdks/
+!.yarn/versions/
+.turbo/
+.vite/
+dist/
+coverage/
+
+# Swift Package Manager
+.build/
+**/.build/
+.swiftpm/
+**/.swiftpm/
+
+# Swift/Xcode local state
+DerivedData/
+**/DerivedData/
+*.xcresult/
+**/*.xcresult/
+*.xctestrun
+**/*.xctestrun
+*.xcuserstate
+**/*.xcuserstate
+xcuserdata/
+**/xcuserdata/
+*.xcworkspace/xcuserdata/
+**/*.xcworkspace/xcuserdata/
+
+# Generated demo proof assets
+packages/swift/Examples/ReallyMeZKDemo/ReallyMeZKDemo/Resources/zk_demo/
+packages/kotlin/demo-android/src/main/assets/zk_demo/
+
+# Gradle/Kotlin
+.gradle/
+**/.gradle/
+.kotlin/
+**/.kotlin/
+build/
+**/build/
+local.properties
+**/local.properties
+*.iml
+**/*.iml
+*.hprof
+hs_err_pid*
+.idea/
+**/.idea/
+captures/
+**/captures/
+externalNativeBuild/
+**/externalNativeBuild/
+.cxx/
+**/.cxx/
+
+AGENTS.md
+
+# Python fixture generators and conformance helpers
+__pycache__/
+*.py[cod]
+
+# Generated runtime packages staged for manual distribution uploads
+artifacts/uploads/

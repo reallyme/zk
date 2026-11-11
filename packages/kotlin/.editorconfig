@@ -1,0 +1,9 @@
+# SPDX-FileCopyrightText: Copyright © 2026 ReallyMe Technologies Limited. All rights reserved
+#
+# SPDX-License-Identifier: MIT OR Apache-2.0
+
+root = true
+
+[*.{kt,kts}]
+# Keep automatic wrapping consistent with the Detekt source policy.
+max_line_length = 120

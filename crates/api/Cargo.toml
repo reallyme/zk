@@ -1,0 +1,41 @@
+# SPDX-FileCopyrightText: Copyright © 2026 ReallyMe Technologies Limited. All rights reserved
+#
+# SPDX-License-Identifier: MIT OR Apache-2.0
+
+[package]
+name = "reallyme-zk-api"
+version = "0.3.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+documentation = "https://docs.rs/reallyme-zk-api"
+keywords = ["zero-knowledge", "identity", "proof", "cryptography"]
+categories = ["cryptography", "authentication"]
+publish = true
+description = "ReallyMe proof-system-agnostic ZK circuit registry and prover/verifier traits."
+include = ["/src/**/*.rs", "/Cargo.toml", "/README.md", "/LICENSE-MIT", "/LICENSE-APACHE"]
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[features]
+default = []
+native = ["crypto-csprng/native", "crypto-p256/native", "crypto-poseidon2/native"]
+wasm = ["crypto-csprng/wasm", "crypto-p256/wasm", "crypto-poseidon2/wasm"]
+
+[dependencies]
+crypto-core = { workspace = true }
+crypto-csprng = { workspace = true }
+crypto-hkdf = { workspace = true }
+crypto-p256 = { workspace = true }
+crypto-poseidon2 = { workspace = true }
+crypto-sha2-256 = { workspace = true }
+secrecy = { workspace = true }
+subtle = { workspace = true }
+thiserror = { workspace = true }
+zeroize = { workspace = true }
+
+[lints]
+workspace = true

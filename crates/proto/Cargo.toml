@@ -1,0 +1,46 @@
+# SPDX-FileCopyrightText: Copyright © 2026 ReallyMe Technologies Limited. All rights reserved
+#
+# SPDX-License-Identifier: MIT OR Apache-2.0
+
+[package]
+name = "reallyme-zk-proto"
+version = "0.3.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+documentation = "https://docs.rs/reallyme-zk-proto"
+keywords = ["zero-knowledge", "protobuf", "identity", "proof"]
+categories = ["encoding", "authentication"]
+publish = true
+description = "ReallyMe ZK protobuf contracts generated with Buffa."
+include = [
+    "/proto/**/*.proto",
+    "/src/**/*.rs",
+    "/tests/**/*",
+    "/Cargo.toml",
+    "/README.md",
+    "/LICENSE-MIT",
+    "/LICENSE-APACHE",
+]
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[features]
+default = []
+generated = ["dep:base64", "dep:buffa", "dep:reallyme-codec", "dep:serde", "dep:zeroize"]
+
+[dependencies]
+base64 = { workspace = true, optional = true }
+buffa = { workspace = true, optional = true }
+reallyme-codec = { workspace = true, optional = true, features = ["base64"] }
+serde = { workspace = true, optional = true }
+zeroize = { workspace = true, optional = true }
+
+[dev-dependencies]
+serde_json = { workspace = true }
+
+[lints]
+workspace = true

@@ -1,0 +1,1640 @@
+// SPDX-FileCopyrightText: Copyright © 2026 ReallyMe Technologies Limited. All rights reserved
+//
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
+syntax = "proto3";
+
+package reallyme.zk.v1;
+
+import "reallyme/zk/v1/capabilities.proto";
+
+// Stable, fixed-size hash bytes. The hash function is specified by the field
+// carrying this value.
+message Digest {
+  bytes value = 1;
+}
+
+// Canonical protobuf manifest digest; distinct from a derived artifact-set identity.
+message ZkArtifactManifestDigest {
+  bytes value = 1;
+}
+
+// Domain-separated identity derived from exact source, bytecode and verification-key pins.
+message ZkArtifactSetIdentity {
+  bytes value = 1;
+}
+
+// Registered circuit identifiers. String identifiers remain canonical in proof
+// formats; this enum is for manifest and vector metadata.
+enum ZkCircuitId {
+  ZK_CIRCUIT_ID_UNSPECIFIED = 0;
+  ZK_CIRCUIT_ID_CREDENTIAL_SUBJECT_CLAIM_V1 = 1;
+  ZK_CIRCUIT_ID_PRIVATE_PERSONA_CLAIM_V1 = 2;
+  ZK_CIRCUIT_ID_COMMON_CREDENTIAL_ROOT_V1 = 3;
+  ZK_CIRCUIT_ID_PERSONA_CREDENTIAL_EVIDENCE_V1 = 4;
+}
+
+// Credential commitment hash; independent of the proof-suite transcript hash.
+enum ZkCredentialHashAlgorithm {
+  ZK_CREDENTIAL_HASH_ALGORITHM_UNSPECIFIED = 0;
+  ZK_CREDENTIAL_HASH_ALGORITHM_SHA256 = 1;
+  ZK_CREDENTIAL_HASH_ALGORITHM_POSEIDON2 = 2;
+}
+
+// Imported VC circuit family.
+enum ZkCircuitFamily {
+  ZK_CIRCUIT_FAMILY_UNSPECIFIED = 0;
+  ZK_CIRCUIT_FAMILY_CREDENTIAL_SUBJECT_CLAIM_V1 = 1;
+  ZK_CIRCUIT_FAMILY_PRIVATE_PERSONA_CLAIM_V1 = 2;
+  ZK_CIRCUIT_FAMILY_COMMON_CREDENTIAL_ROOT_V1 = 3;
+  ZK_CIRCUIT_FAMILY_PERSONA_CREDENTIAL_EVIDENCE_V1 = 4;
+}
+
+// Stage within an imported circuit family.
+enum ZkCircuitStage {
+  ZK_CIRCUIT_STAGE_UNSPECIFIED = 0;
+  ZK_CIRCUIT_STAGE_SESSION = 1;
+  ZK_CIRCUIT_STAGE_CREDENTIAL_ENVELOPE = 2;
+  ZK_CIRCUIT_STAGE_CREDENTIAL_ROOT = 3;
+  ZK_CIRCUIT_STAGE_CLAIM = 4;
+  ZK_CIRCUIT_STAGE_CLAIM_BUNDLE_4 = 5;
+  ZK_CIRCUIT_STAGE_ROOT_ATTESTATION = 6;
+  ZK_CIRCUIT_STAGE_ROOT_STATUS = 7;
+  ZK_CIRCUIT_STAGE_LINEAGE = 8;
+  ZK_CIRCUIT_STAGE_ISSUER_CREDENTIAL_STATUS = 9;
+  ZK_CIRCUIT_STAGE_PRIVATE_PERSONA_CLAIM = 10;
+  ZK_CIRCUIT_STAGE_PUBLIC_PERSONA_CLAIM = 11;
+  ZK_CIRCUIT_STAGE_PUBLIC_SESSION = 12;
+  ZK_CIRCUIT_STAGE_EVIDENCE_ISSUER_ENVELOPE = 13;
+  ZK_CIRCUIT_STAGE_EVIDENCE_CLAIM_ROOT = 14;
+  ZK_CIRCUIT_STAGE_EVIDENCE_SIGNED_VALIDITY = 15;
+  ZK_CIRCUIT_STAGE_EVIDENCE_PUBLIC_CLAIM = 16;
+  ZK_CIRCUIT_STAGE_EVIDENCE_PRIVATE_CLAIM = 17;
+  ZK_CIRCUIT_STAGE_EVIDENCE_CURRENT_STATE = 18;
+}
+
+// Common credential root v1 persona mode.
+enum ZkCommonCredentialRootPersonaMode {
+  ZK_COMMON_CREDENTIAL_ROOT_PERSONA_MODE_UNSPECIFIED = 0;
+  ZK_COMMON_CREDENTIAL_ROOT_PERSONA_MODE_PRIVATE_PERSONA_V1 = 1;
+  ZK_COMMON_CREDENTIAL_ROOT_PERSONA_MODE_PUBLIC_PERSONA_V1 = 2;
+}
+
+// Ordered proof slot in a common-credential-root v1 presentation.
+enum ZkCommonCredentialRootProofSlot {
+  ZK_COMMON_CREDENTIAL_ROOT_PROOF_SLOT_UNSPECIFIED = 0;
+  ZK_COMMON_CREDENTIAL_ROOT_PROOF_SLOT_ROOT_ATTESTATION = 1;
+  ZK_COMMON_CREDENTIAL_ROOT_PROOF_SLOT_ROOT_STATUS = 2;
+  ZK_COMMON_CREDENTIAL_ROOT_PROOF_SLOT_LINEAGE_0 = 3;
+  ZK_COMMON_CREDENTIAL_ROOT_PROOF_SLOT_LINEAGE_1 = 4;
+  ZK_COMMON_CREDENTIAL_ROOT_PROOF_SLOT_SELECTED_CLAIM_0 = 5;
+  ZK_COMMON_CREDENTIAL_ROOT_PROOF_SLOT_SELECTED_CLAIM_1 = 6;
+  ZK_COMMON_CREDENTIAL_ROOT_PROOF_SLOT_SESSION = 7;
+  ZK_COMMON_CREDENTIAL_ROOT_PROOF_SLOT_ISSUER_CREDENTIAL_STATUS_0 = 8;
+  ZK_COMMON_CREDENTIAL_ROOT_PROOF_SLOT_ISSUER_CREDENTIAL_STATUS_1 = 9;
+}
+
+// Kind of staged claim-proof bundle exposed by platform providers.
+enum ZkClaimProofBundleKind {
+  ZK_CLAIM_PROOF_BUNDLE_KIND_UNSPECIFIED = 0;
+  ZK_CLAIM_PROOF_BUNDLE_KIND_CREDENTIAL_SUBJECT_CLAIM_V1 = 1;
+  ZK_CLAIM_PROOF_BUNDLE_KIND_PRIVATE_PERSONA_CLAIM_V1 = 2;
+}
+
+// Holder key exposed by a persona credential evidence proof. The private persona itself
+// remains hidden when the proof exposes a one-time presentation key.
+enum ZkPersonaCredentialEvidenceMode {
+  ZK_PERSONA_CREDENTIAL_EVIDENCE_MODE_UNSPECIFIED = 0;
+  ZK_PERSONA_CREDENTIAL_EVIDENCE_MODE_PUBLIC_PERSONA_V1 = 1;
+  ZK_PERSONA_CREDENTIAL_EVIDENCE_MODE_PRIVATE_PERSONA_ONE_TIME_V1 = 2;
+}
+
+// Request protocols are kept distinct in the signed request transcript. A
+// verifier authenticates the corresponding origin before constructing it.
+enum ZkPersonaCredentialEvidenceRequestProtocol {
+  ZK_PERSONA_CREDENTIAL_EVIDENCE_REQUEST_PROTOCOL_UNSPECIFIED = 0;
+  ZK_PERSONA_CREDENTIAL_EVIDENCE_REQUEST_PROTOCOL_REALLYME_DIRECT_V1 = 1;
+  ZK_PERSONA_CREDENTIAL_EVIDENCE_REQUEST_PROTOCOL_OPENID4VP_V1 = 2;
+}
+
+enum ZkPersonaCredentialEvidenceResponseMode {
+  ZK_PERSONA_CREDENTIAL_EVIDENCE_RESPONSE_MODE_UNSPECIFIED = 0;
+  ZK_PERSONA_CREDENTIAL_EVIDENCE_RESPONSE_MODE_DIRECT = 1;
+  ZK_PERSONA_CREDENTIAL_EVIDENCE_RESPONSE_MODE_DIRECT_POST = 2;
+  ZK_PERSONA_CREDENTIAL_EVIDENCE_RESPONSE_MODE_DIRECT_POST_JWT = 3;
+  ZK_PERSONA_CREDENTIAL_EVIDENCE_RESPONSE_MODE_FRAGMENT = 4;
+  ZK_PERSONA_CREDENTIAL_EVIDENCE_RESPONSE_MODE_FORM_POST = 5;
+  ZK_PERSONA_CREDENTIAL_EVIDENCE_RESPONSE_MODE_DC_API = 6;
+  ZK_PERSONA_CREDENTIAL_EVIDENCE_RESPONSE_MODE_DC_API_JWT = 7;
+}
+
+// The verified request, before protocol-specific delivery. OpenID4VP and the
+// ReallyMe direct API must derive these fields from their authenticated request
+// context; untrusted presentation fields cannot choose the verifier identity.
+// Every bytes field is an exact 32-byte digest, except nonce which is an exact
+// 32-byte verifier-generated challenge. The request expires at the exclusive
+// upper bound, and the verifier consumes the nonce once.
+message ZkPersonaCredentialEvidenceVerifierRequestV1 {
+  ZkPersonaCredentialEvidenceRequestProtocol protocol = 1;
+  ZkPersonaCredentialEvidenceResponseMode response_mode = 2;
+  bytes nonce = 3;
+  bytes audience_sha256 = 4;
+  bytes transaction_data_sha256 = 5;
+  bytes requested_claims_sha256 = 6;
+  bytes verifier_policy_sha256 = 7;
+  bytes transport_context_sha256 = 8;
+  uint64 issued_at_unix = 9;
+  uint64 expires_at_unix = 10;
+}
+
+// Single canonical holder-authentication transcript for both evidence modes.
+// Each digest is SHA-256 of a separately validated canonical package. The
+// signer is the public persona key or the one-time key authenticated by the
+// persona credential evidence proof. The signature is over SHA-256("RMPAUTH1" || Buffa protobuf
+// encoding of this message), never over independent unframed concatenations.
+message ZkPersonaCredentialEvidencePresentationAuthV1 {
+  ZkPersonaCredentialEvidenceMode mode_id = 1;
+  bytes evidence_proof_set_sha256 = 2;
+  bytes current_state_sha256 = 3;
+  bytes verifier_request_sha256 = 4;
+}
+
+// Four reusable credential-evidence stages and one separately refreshable
+// current-status stage. The selected-claim slot uses the public or private
+// authorization circuit specified by the evidence mode.
+enum ZkPersonaCredentialEvidenceProofSlot {
+  ZK_PERSONA_CREDENTIAL_EVIDENCE_PROOF_SLOT_UNSPECIFIED = 0;
+  ZK_PERSONA_CREDENTIAL_EVIDENCE_PROOF_SLOT_ISSUER_ENVELOPE = 1;
+  ZK_PERSONA_CREDENTIAL_EVIDENCE_PROOF_SLOT_CLAIM_ROOT = 2;
+  ZK_PERSONA_CREDENTIAL_EVIDENCE_PROOF_SLOT_SIGNED_VALIDITY = 3;
+  ZK_PERSONA_CREDENTIAL_EVIDENCE_PROOF_SLOT_SELECTED_CLAIM = 4;
+  ZK_PERSONA_CREDENTIAL_EVIDENCE_PROOF_SLOT_CURRENT_STATE = 5;
+}
+
+// Raw compiler-ordered field stream, kept separate from the compact
+// presentation public-input encoding. Every stage exposes one token-specific
+// join that includes the hidden credential subject key.
+message ZkPersonaCredentialEvidenceRawPublicInputs {
+  ZkPersonaCredentialEvidenceMode mode = 1;
+  ZkPersonaCredentialEvidenceProofSlot proof_slot = 2;
+  ZkCircuitRef circuit_ref = 3;
+  bytes raw_fields = 4;
+}
+
+message ZkPersonaCredentialEvidenceStageProof {
+  ZkPersonaCredentialEvidenceMode mode = 1;
+  ZkPersonaCredentialEvidenceProofSlot proof_slot = 2;
+  ZkCircuitRef circuit_ref = 3;
+  bytes proof = 4;
+  ZkPersonaCredentialEvidenceRawPublicInputs public_inputs = 5;
+  ZkArtifactSetIdentity artifact_set_identity_sha256 = 6;
+  ZkProofSuite proof_suite = 7;
+}
+
+// Exact credential evidence authenticated by the live holder signature.
+// Current status is deliberately separate so it can be refreshed later.
+message ZkPersonaCredentialEvidenceProofSet {
+  ZkPersonaCredentialEvidenceStageProof issuer_envelope = 1;
+  ZkPersonaCredentialEvidenceStageProof claim_root = 2;
+  ZkPersonaCredentialEvidenceStageProof signed_validity = 3;
+  ZkPersonaCredentialEvidenceStageProof selected_claim = 4;
+}
+
+// Native verification of one exact persona-credential-evidence stage under the sealed release
+// verification key. This operation does not accept a complete presentation:
+// callers still join every stage, authenticate current status and request,
+// verify the holder signature, and consume the verifier nonce.
+message ZkPersonaCredentialEvidenceStageVerifyOperation {
+  ZkPersonaCredentialEvidenceStageProof proof = 1;
+}
+
+// Prove one exact persona-credential-evidence stage with a short-lived Noir witness stack. The
+// witness is secret-bearing and is admitted only over binary protobuf at an
+// executable provider boundary. The returned proof is verified before release.
+message ZkPersonaCredentialEvidenceStageProveOperation {
+  ZkPersonaCredentialEvidenceMode mode = 1;
+  ZkCircuitRef circuit_ref = 2;
+  ZkProofSuite proof_suite = 3;
+  ZkWitness witness = 4;
+}
+
+// Hidden issuer credential material needed only to prove a fresh current-state
+// current-state proof. The credential binding is recomputed from these fields
+// and must match the four-proof evidence set before proving begins.
+message ZkPersonaCredentialEvidenceCurrentStateCredentialInput {
+  ZkInputBytes32 envelope_hash = 1;
+  ZkInputBytes32 claims_root = 2;
+  ZkInputP256PublicKey subject_public_key = 3;
+  ZkInputBytes64 issuer_validity_status_signature = 4;
+  uint64 valid_from = 5;
+  uint64 valid_until = 6;
+  uint64 status_index = 7;
+}
+
+// Authenticated current issuer-status feed plus the holder's private opening.
+// The issuer status authority, freshness, rollback floor, and feed identity
+// must be checked before this message is constructed.
+message ZkPersonaCredentialEvidenceCurrentStatusInput {
+  ZkInputBytes32 status_root = 1;
+  uint64 status_length = 2;
+  ZkInputBytes32 status_list_id = 3;
+  ZkInputBytes32 status_url_hash = 4;
+  ZkIssuerStatusPurpose status_purpose = 5;
+  uint64 issued_unix = 6;
+  uint64 expires_unix = 7;
+  ZkInputBytes32 status_chunk = 8;
+  uint32 path_length = 9;
+  repeated ZkInputBytes32 path = 10;
+}
+
+// Production SDK operation for the separately refreshable persona-credential-evidence
+// current-status proof. Unlike ZkPersonaCredentialEvidenceStageProveOperation, this accepts typed
+// credential and status material and keeps raw witness bytes inside the native
+// provider boundary.
+message ZkPersonaCredentialEvidenceCurrentStateProveOperation {
+  ZkPersonaCredentialEvidenceMode mode = 1;
+  ZkCircuitRef circuit_ref = 2;
+  ZkProofSuite proof_suite = 3;
+  ZkPersonaCredentialEvidenceProofSet evidence_proof_set = 4;
+  ZkPersonaCredentialEvidenceCurrentStateCredentialInput credential = 5;
+  ZkPersonaCredentialEvidenceCurrentStatusInput current_status = 6;
+  uint64 verification_time_unix = 7;
+}
+
+// Typed first-stage preparation from an issuer-authenticated credential and a
+// wallet-generated holder key. The issuer signatures and subject remain private
+// to the prover; the native provider derives the Noir witness internally.
+message ZkPersonaCredentialEvidenceIssuerEnvelopeProveOperation {
+  ZkPersonaCredentialEvidenceMode mode = 1;
+  ZkCircuitRef circuit_ref = 2;
+  ZkProofSuite proof_suite = 3;
+  ZkInputP256PublicKey issuer_public_key = 4;
+  ZkInputP256PublicKey holder_public_key = 5;
+  ZkInputBytes32 token_nonce = 6;
+  uint64 evidence_valid_from_unix = 7;
+  uint64 evidence_valid_until_unix = 8;
+  ZkInputBytes32 credential_binding = 9;
+  ZkInputBytes32 envelope_hash = 10;
+  ZkInputBytes32 claims_root = 11;
+  ZkInputP256PublicKey subject_public_key = 12;
+  ZkInputBytes64 issuer_envelope_signature = 13;
+  ZkInputBytes64 issuer_subject_binding_signature = 14;
+}
+
+// Prove the issuer-signed edge from the authenticated envelope to its hidden
+// claim tree. The same token fields must produce the same public PRECB2 join
+// as the issuer-envelope stage; the root signature remains prover-private.
+message ZkPersonaCredentialEvidenceClaimRootProveOperation {
+  ZkPersonaCredentialEvidenceMode mode = 1;
+  ZkCircuitRef circuit_ref = 2;
+  ZkProofSuite proof_suite = 3;
+  ZkInputP256PublicKey issuer_public_key = 4;
+  ZkInputP256PublicKey holder_public_key = 5;
+  ZkInputBytes32 token_nonce = 6;
+  uint64 evidence_valid_from_unix = 7;
+  uint64 evidence_valid_until_unix = 8;
+  ZkInputBytes32 credential_binding = 9;
+  ZkInputBytes32 envelope_hash = 10;
+  ZkInputBytes32 claims_root = 11;
+  ZkInputP256PublicKey subject_public_key = 12;
+  ZkInputBytes64 issuer_root_binding_signature = 13;
+}
+
+// Prove the issuer's immutable validity interval and signed status pointer
+// without fixing a current status root. A separate current-state proof binds
+// a fresh signed list to this pointer for each presentation.
+message ZkPersonaCredentialEvidenceSignedValidityProveOperation {
+  ZkPersonaCredentialEvidenceMode mode = 1;
+  ZkCircuitRef circuit_ref = 2;
+  ZkProofSuite proof_suite = 3;
+  ZkInputP256PublicKey issuer_public_key = 4;
+  ZkInputP256PublicKey holder_public_key = 5;
+  ZkInputBytes32 token_nonce = 6;
+  uint64 evidence_valid_from_unix = 7;
+  uint64 evidence_valid_until_unix = 8;
+  ZkInputBytes32 credential_binding = 9;
+  ZkInputBytes32 envelope_hash = 10;
+  ZkInputBytes32 claims_root = 11;
+  ZkInputP256PublicKey subject_public_key = 12;
+  ZkInputBytes64 issuer_validity_status_signature = 13;
+  uint64 valid_from_unix = 14;
+  uint64 valid_until_unix = 15;
+  uint64 status_index = 16;
+  ZkInputBytes32 status_list_id = 17;
+  ZkInputBytes32 status_url_hash = 18;
+  ZkIssuerStatusPurpose status_purpose = 19;
+}
+
+// Prove one issuer-committed claim and the subject-to-persona authorization.
+// Public mode requires persona_public_key to equal holder_public_key. Private
+// mode keeps persona_public_key hidden and additionally requires its PKAUTH1
+// signature authorizing the token's one-time holder key and proof interval.
+message ZkPersonaCredentialEvidenceSelectedClaimProveOperation {
+  ZkPersonaCredentialEvidenceMode mode = 1;
+  ZkCircuitRef circuit_ref = 2;
+  ZkProofSuite proof_suite = 3;
+  ZkInputP256PublicKey issuer_public_key = 4;
+  ZkInputP256PublicKey holder_public_key = 5;
+  ZkInputBytes32 token_nonce = 6;
+  uint64 evidence_valid_from_unix = 7;
+  uint64 evidence_valid_until_unix = 8;
+  ZkInputClaimDisclosure disclosure = 9;
+  ZkInputMerkleClaimProof claim_opening = 10;
+  ZkInputP256PublicKey subject_public_key = 11;
+  ZkInputBytes64 issuer_subject_binding_signature = 12;
+  ZkInputP256PublicKey persona_public_key = 13;
+  ZkInputBytes64 subject_persona_link_signature = 14;
+  ZkInputBytes64 persona_token_authorization_signature = 15;
+}
+
+message ZkPersonaCredentialEvidenceStageVerification {
+  ZkPersonaCredentialEvidenceMode mode = 1;
+  ZkPersonaCredentialEvidenceProofSlot proof_slot = 2;
+  ZkCircuitRef circuit_ref = 3;
+  ZkProofSuite proof_suite = 4;
+}
+
+// Common direct-API and OpenID4VP persona credential evidence. The verifier matches
+// `verifier_request` to its authenticated live request, fetches and validates
+// the current signed status feed independently, verifies all pinned proofs,
+// checks their join, and verifies the holder signature over `auth`.
+message ZkPersonaCredentialEvidencePresentation {
+  ZkPersonaCredentialEvidenceMode mode = 1;
+  ZkCredentialHashAlgorithm credential_hash_algorithm = 2;
+  ZkProofSuite proof_suite = 3;
+  ZkPersonaCredentialEvidenceStageProof issuer_envelope = 4;
+  ZkPersonaCredentialEvidenceStageProof claim_root = 5;
+  ZkPersonaCredentialEvidenceStageProof signed_validity = 6;
+  ZkPersonaCredentialEvidenceStageProof selected_claim = 7;
+  ZkPersonaCredentialEvidenceStageProof current_state = 8;
+  ZkPersonaCredentialEvidenceVerifierRequestV1 verifier_request = 9;
+  ZkPersonaCredentialEvidencePresentationAuthV1 auth = 10;
+  bytes holder_signature_p256_raw = 11;
+}
+
+// First half of platform protected-key authentication. The wallet must burn
+// a private one-time token before making this request. This operation checks
+// the exact proof joins and current request interval, then returns the digest
+// to sign. The verifier still independently verifies proofs and live status.
+message ZkPersonaCredentialEvidencePresentationSigningOperation {
+  ZkPersonaCredentialEvidenceProofSet evidence_proof_set = 1;
+  ZkPersonaCredentialEvidenceStageProof current_state = 2;
+  ZkPersonaCredentialEvidenceVerifierRequestV1 verifier_request = 3;
+  uint64 now_unix = 4;
+}
+
+message ZkPersonaCredentialEvidencePresentationSigningChallenge {
+  bytes digest_sha256 = 1;
+}
+
+// Second half of platform protected-key authentication. The native boundary
+// recomputes the canonical challenge and checks this raw low-S P-256 signature
+// against the holder key constrained by the selected claim proof.
+message ZkPersonaCredentialEvidencePresentationAssembleOperation {
+  ZkPersonaCredentialEvidenceProofSet evidence_proof_set = 1;
+  ZkPersonaCredentialEvidenceStageProof current_state = 2;
+  ZkPersonaCredentialEvidenceVerifierRequestV1 verifier_request = 3;
+  uint64 now_unix = 4;
+  bytes holder_signature_p256_raw = 5;
+}
+
+// Production stage emitted by a bridge proof bundle.
+enum ZkClaimProofBundleStage {
+  ZK_CLAIM_PROOF_BUNDLE_STAGE_UNSPECIFIED = 0;
+  ZK_CLAIM_PROOF_BUNDLE_STAGE_SESSION = 1;
+  ZK_CLAIM_PROOF_BUNDLE_STAGE_CREDENTIAL_ENVELOPE = 2;
+  ZK_CLAIM_PROOF_BUNDLE_STAGE_CREDENTIAL_ROOT = 3;
+  ZK_CLAIM_PROOF_BUNDLE_STAGE_CLAIM = 4;
+}
+
+// Fully specified proving and verification suite. New combinations require a
+// new enum value so transcript, ZK masking, and accumulation policy can never
+// be inherited from mutable platform defaults.
+enum ZkProofSuite {
+  ZK_PROOF_SUITE_UNSPECIFIED = 0;
+  ZK_PROOF_SUITE_BARRETENBERG_ULTRA_HONK_KECCAK_ZK_NO_IPA = 1;
+  ZK_PROOF_SUITE_BARRETENBERG_ULTRA_HONK_POSEIDON2_ZK_NO_IPA = 2;
+  ZK_PROOF_SUITE_BARRETENBERG_ULTRA_HONK_KECCAK_UNMASKED_NO_IPA = 3;
+  ZK_PROOF_SUITE_BARRETENBERG_ULTRA_HONK_POSEIDON2_UNMASKED_NO_IPA = 4;
+}
+
+// Versioned serialized witness representation transferred from the typed Noir
+// input generator to an injected proving backend. This enum does not describe
+// identity-domain fields; those remain owned by the in-repository typed
+// witness-input layer and never become a parallel protobuf domain model.
+enum ZkWitnessEncoding {
+  ZK_WITNESS_ENCODING_UNSPECIFIED = 0;
+  ZK_WITNESS_ENCODING_NOIR_WITNESS_STACK_V1 = 1;
+}
+
+// Deterministic mutation applied by a proving-vector harness to an otherwise
+// valid canonical operation. Keeping invalid cases as recipes allows strict
+// decoders to validate the base operation and avoids storing malformed or
+// unbounded transport values in release packages.
+enum ZkProvingVectorMutation {
+  ZK_PROVING_VECTOR_MUTATION_UNSPECIFIED = 0;
+  ZK_PROVING_VECTOR_MUTATION_NONE = 1;
+  ZK_PROVING_VECTOR_MUTATION_EMPTY_WITNESS = 2;
+  ZK_PROVING_VECTOR_MUTATION_WITNESS_TOO_LARGE = 3;
+  ZK_PROVING_VECTOR_MUTATION_MALFORMED_PUBLIC_INPUTS = 4;
+  ZK_PROVING_VECTOR_MUTATION_WRONG_NONCE = 5;
+  ZK_PROVING_VECTOR_MUTATION_WRONG_AUDIENCE = 6;
+  ZK_PROVING_VECTOR_MUTATION_UNSUPPORTED_TRANSACTION_DATA = 7;
+  ZK_PROVING_VECTOR_MUTATION_UNSUPPORTED_CIRCUIT_VERSION = 8;
+  ZK_PROVING_VECTOR_MUTATION_MISSING_STAGE_WITNESS = 9;
+  ZK_PROVING_VECTOR_MUTATION_REORDERED_STAGE_WITNESS = 10;
+  ZK_PROVING_VECTOR_MUTATION_CROSS_CIRCUIT_WITNESS = 11;
+  ZK_PROVING_VECTOR_MUTATION_WRONG_TRANSACTION_DATA = 12;
+}
+
+// Deterministic mutation applied to a valid post-manifest verification
+// operation. Mutations never replace the canonical base operation contract;
+// they let every provider execute the same negative case and compare the same
+// structured result.
+enum ZkVerificationVectorMutation {
+  ZK_VERIFICATION_VECTOR_MUTATION_UNSPECIFIED = 0;
+  ZK_VERIFICATION_VECTOR_MUTATION_NONE = 1;
+  ZK_VERIFICATION_VECTOR_MUTATION_EMPTY_PROOF = 2;
+  ZK_VERIFICATION_VECTOR_MUTATION_PROOF_TOO_LARGE = 3;
+  ZK_VERIFICATION_VECTOR_MUTATION_TAMPERED_PROOF = 4;
+  ZK_VERIFICATION_VECTOR_MUTATION_MALFORMED_PUBLIC_INPUTS = 5;
+  ZK_VERIFICATION_VECTOR_MUTATION_WRONG_NONCE = 6;
+  ZK_VERIFICATION_VECTOR_MUTATION_WRONG_AUDIENCE = 7;
+  ZK_VERIFICATION_VECTOR_MUTATION_UNSUPPORTED_TRANSACTION_DATA = 8;
+  ZK_VERIFICATION_VECTOR_MUTATION_STALE_ARTIFACT_MANIFEST = 9;
+  ZK_VERIFICATION_VECTOR_MUTATION_UNSUPPORTED_CIRCUIT_VERSION = 10;
+  ZK_VERIFICATION_VECTOR_MUTATION_DUPLICATE_STAGE = 11;
+  ZK_VERIFICATION_VECTOR_MUTATION_MISSING_STAGE = 12;
+  ZK_VERIFICATION_VECTOR_MUTATION_WRONG_STAGE = 13;
+  ZK_VERIFICATION_VECTOR_MUTATION_MIXED_HASH_LANE = 14;
+  ZK_VERIFICATION_VECTOR_MUTATION_WRONG_TRANSACTION_DATA = 15;
+  ZK_VERIFICATION_VECTOR_MUTATION_UNTRUSTED_ISSUER = 16;
+  ZK_VERIFICATION_VECTOR_MUTATION_PRESENTATION_EXPIRED = 17;
+  ZK_VERIFICATION_VECTOR_MUTATION_CREDENTIAL_STATUS_PRESENT = 18;
+  ZK_VERIFICATION_VECTOR_MUTATION_WRONG_BUNDLE_SESSION_BINDING = 19;
+}
+
+// Stable, non-sensitive reason for an expected ZK failure.
+enum ZkErrorReason {
+  ZK_ERROR_REASON_UNSPECIFIED = 0;
+  ZK_ERROR_REASON_UNKNOWN_CIRCUIT = 1;
+  ZK_ERROR_REASON_UNSUPPORTED_CIRCUIT = 2;
+  ZK_ERROR_REASON_EMPTY_INPUT = 3;
+  ZK_ERROR_REASON_PROOF_TOO_LARGE = 4;
+  ZK_ERROR_REASON_PUBLIC_INPUTS_TOO_LARGE = 5;
+  ZK_ERROR_REASON_LENGTH_OVERFLOW = 6;
+  ZK_ERROR_REASON_INVALID_PROOF_ENCODING = 7;
+  ZK_ERROR_REASON_INVALID_PROOF = 8;
+  ZK_ERROR_REASON_BINDING_MISMATCH = 9;
+  ZK_ERROR_REASON_ARTIFACT_MISMATCH = 10;
+  ZK_ERROR_REASON_BACKEND_UNAVAILABLE = 11;
+  ZK_ERROR_REASON_BACKEND_FAILURE = 12;
+  ZK_ERROR_REASON_INVALID_PUBLIC_INPUT_NAME = 13;
+  ZK_ERROR_REASON_PUBLIC_KEY_TOO_LARGE = 14;
+  ZK_ERROR_REASON_CLAIM_PAYLOAD_TOO_LARGE = 15;
+  ZK_ERROR_REASON_INVALID_CLAIM_PROOF_BUNDLE = 16;
+  ZK_ERROR_REASON_DUPLICATE_STAGE = 17;
+  ZK_ERROR_REASON_MISSING_STAGE = 18;
+  ZK_ERROR_REASON_STAGE_MISMATCH = 19;
+  ZK_ERROR_REASON_WITNESS_TOO_LARGE = 20;
+  ZK_ERROR_REASON_MALFORMED_PROTOBUF = 21;
+  ZK_ERROR_REASON_MALFORMED_JSON = 22;
+  ZK_ERROR_REASON_MISSING_OPERATION = 23;
+  ZK_ERROR_REASON_UNSUPPORTED_TRANSPORT = 24;
+  ZK_ERROR_REASON_MESSAGE_TOO_LARGE = 25;
+  ZK_ERROR_REASON_ARTIFACT_TOO_LARGE = 26;
+  ZK_ERROR_REASON_UNSUPPORTED_PROOF_SUITE = 27;
+  ZK_ERROR_REASON_UNTRUSTED_ISSUER = 28;
+  ZK_ERROR_REASON_PRESENTATION_EXPIRED = 29;
+  ZK_ERROR_REASON_PRESENTATION_EXPIRY_TOO_FAR = 30;
+  ZK_ERROR_REASON_RESOURCE_EXHAUSTED = 31;
+}
+
+// Circuit registry and selection failure detail.
+enum ZkCircuitErrorReason {
+  ZK_CIRCUIT_ERROR_REASON_UNSPECIFIED = 0;
+  ZK_CIRCUIT_ERROR_REASON_UNKNOWN_CIRCUIT = 1;
+  ZK_CIRCUIT_ERROR_REASON_UNSUPPORTED_CIRCUIT = 2;
+}
+
+// Input validation and bounded-buffer failure detail.
+enum ZkInputErrorReason {
+  ZK_INPUT_ERROR_REASON_UNSPECIFIED = 0;
+  ZK_INPUT_ERROR_REASON_EMPTY_INPUT = 1;
+  ZK_INPUT_ERROR_REASON_PROOF_TOO_LARGE = 2;
+  ZK_INPUT_ERROR_REASON_PUBLIC_INPUTS_TOO_LARGE = 3;
+  ZK_INPUT_ERROR_REASON_INVALID_PUBLIC_INPUT_NAME = 4;
+  ZK_INPUT_ERROR_REASON_PUBLIC_KEY_TOO_LARGE = 5;
+  ZK_INPUT_ERROR_REASON_CLAIM_PAYLOAD_TOO_LARGE = 6;
+  ZK_INPUT_ERROR_REASON_LENGTH_OVERFLOW = 7;
+  ZK_INPUT_ERROR_REASON_WITNESS_TOO_LARGE = 8;
+  ZK_INPUT_ERROR_REASON_RESOURCE_EXHAUSTED = 9;
+}
+
+// Proof encoding and verification failure detail.
+enum ZkProofErrorReason {
+  ZK_PROOF_ERROR_REASON_UNSPECIFIED = 0;
+  ZK_PROOF_ERROR_REASON_INVALID_PROOF_ENCODING = 1;
+  ZK_PROOF_ERROR_REASON_INVALID_PROOF = 2;
+  ZK_PROOF_ERROR_REASON_UNSUPPORTED_PROOF_SUITE = 3;
+}
+
+// Staged proof bundle failure detail.
+enum ZkClaimProofBundleErrorReason {
+  ZK_CLAIM_PROOF_BUNDLE_ERROR_REASON_UNSPECIFIED = 0;
+  ZK_CLAIM_PROOF_BUNDLE_ERROR_REASON_INVALID_PROOF_BUNDLE = 1;
+  ZK_CLAIM_PROOF_BUNDLE_ERROR_REASON_DUPLICATE_STAGE = 2;
+  ZK_CLAIM_PROOF_BUNDLE_ERROR_REASON_MISSING_STAGE = 3;
+  ZK_CLAIM_PROOF_BUNDLE_ERROR_REASON_STAGE_MISMATCH = 4;
+}
+
+// Presentation-session binding failure detail.
+enum ZkBindingErrorReason {
+  ZK_BINDING_ERROR_REASON_UNSPECIFIED = 0;
+  ZK_BINDING_ERROR_REASON_BINDING_MISMATCH = 1;
+  ZK_BINDING_ERROR_REASON_UNTRUSTED_ISSUER = 2;
+  ZK_BINDING_ERROR_REASON_PRESENTATION_EXPIRED = 3;
+  ZK_BINDING_ERROR_REASON_PRESENTATION_EXPIRY_TOO_FAR = 4;
+}
+
+// Artifact and manifest failure detail.
+enum ZkArtifactErrorReason {
+  ZK_ARTIFACT_ERROR_REASON_UNSPECIFIED = 0;
+  ZK_ARTIFACT_ERROR_REASON_ARTIFACT_MISMATCH = 1;
+  ZK_ARTIFACT_ERROR_REASON_ARTIFACT_TOO_LARGE = 2;
+}
+
+// Backend availability and execution failure detail.
+enum ZkBackendErrorReason {
+  ZK_BACKEND_ERROR_REASON_UNSPECIFIED = 0;
+  ZK_BACKEND_ERROR_REASON_BACKEND_UNAVAILABLE = 1;
+  ZK_BACKEND_ERROR_REASON_BACKEND_FAILURE = 2;
+}
+
+// Transport decoding and operation-envelope failure detail.
+enum ZkTransportErrorReason {
+  ZK_TRANSPORT_ERROR_REASON_UNSPECIFIED = 0;
+  ZK_TRANSPORT_ERROR_REASON_MALFORMED_PROTOBUF = 1;
+  ZK_TRANSPORT_ERROR_REASON_MALFORMED_JSON = 2;
+  ZK_TRANSPORT_ERROR_REASON_MISSING_OPERATION = 3;
+  ZK_TRANSPORT_ERROR_REASON_UNSUPPORTED_TRANSPORT = 4;
+  ZK_TRANSPORT_ERROR_REASON_MESSAGE_TOO_LARGE = 5;
+}
+
+// Structured ZK failure. The top-level reason is the stable identity-common
+// reason_code; detail keeps the oneof component that failed.
+message ZkError {
+  ZkErrorReason reason = 1;
+  oneof detail {
+    ZkCircuitErrorReason circuit_reason = 2;
+    ZkInputErrorReason input_reason = 3;
+    ZkProofErrorReason proof_reason = 4;
+    ZkClaimProofBundleErrorReason bundle_reason = 5;
+    ZkBindingErrorReason binding_reason = 6;
+    ZkArtifactErrorReason artifact_reason = 7;
+    ZkBackendErrorReason backend_reason = 8;
+    ZkTransportErrorReason transport_reason = 9;
+  }
+}
+
+// Exact imported source circuit selected for artifacts, vectors, and providers.
+message ZkCircuitRef {
+  ZkCredentialHashAlgorithm credential_hash_algorithm = 1;
+  ZkCircuitFamily family = 2;
+  ZkCircuitStage stage = 3;
+  uint32 circuit_revision = 4;
+}
+
+// One exact entry in the canonical semantic-capability registry. Entries are
+// emitted in ZkCircuitRef registry order and consumers reject missing,
+// duplicate, reordered, or capability-mismatched values.
+message ZkCapabilityRegistryEntry {
+  ZkCircuitRef circuit_ref = 1;
+  ZkCircuitCapabilities capabilities = 2;
+}
+
+// Canonical release-wide capability registry hashed by every artifact
+// manifest. The registry is generated exclusively from reallyme-zk-api; it is
+// not a second source of circuit semantics.
+message ZkCapabilityRegistry {
+  uint32 format_version = 1;
+  repeated ZkCapabilityRegistryEntry entries = 2;
+}
+
+// Hash-pinned artifact manifest for a production circuit version.
+message ZkArtifactManifest {
+  ZkCircuitId circuit_id = 1;
+  ZkCircuitRef circuit_ref = 2;
+  ZkCredentialHashAlgorithm credential_hash_algorithm = 3;
+  ZkProofSuite proof_suite = 4;
+  string nargo_version = 5;
+  string barretenberg_version = 6;
+  Digest noir_source_sha256 = 7;
+  Digest bytecode_sha256 = 8;
+  Digest verification_key_sha256 = 9;
+  Digest capability_registry_sha256 = 10;
+  repeated Digest vector_set_sha256 = 11;
+  ZkCircuitCapabilities capabilities = 12;
+}
+
+// Exact circuit public inputs in the canonical compact provider encoding.
+// Values follow Noir declaration order; u8 arrays are concatenated as bytes,
+// and u32/u64 values use fixed-width big-endian encoding. Linked backend
+// adapters convert between this representation and backend field elements.
+message ZkPublicInputs {
+  bytes encoded = 1;
+}
+
+// Raw Barretenberg public-input fields for one common-credential-root v1 proof slot.
+// This is intentionally separate from ZkPublicInputs: common-credential-root composition
+// needs exact raw field streams that exceed the compact four-stage ABI limit.
+message ZkCommonCredentialRootRawPublicInputs {
+  ZkCommonCredentialRootPersonaMode persona_mode = 1;
+  ZkCommonCredentialRootProofSlot slot = 2;
+  ZkCircuitRef circuit_ref = 3;
+  bytes raw_fields = 4;
+}
+
+// Named public input for format adapters that need semantic labels.
+message NamedPublicInput {
+  string name = 1;
+  bytes value = 2;
+}
+
+// Proof metadata used by VP/OpenID4VCI adapter boundaries.
+message ZkProofMetadata {
+  ZkCircuitId circuit_id = 1;
+  string circuit_id_string = 2;
+  ZkCircuitRef circuit_ref = 3;
+  ZkProofSuite proof_suite = 4;
+  bytes verification_key_sha256 = 5;
+}
+
+// Proof bytes and public inputs for one circuit invocation.
+message ZkProofPackage {
+  ZkCircuitId circuit_id = 1;
+  string circuit_id_string = 2;
+  ZkCircuitRef circuit_ref = 3;
+  ZkProofSuite proof_suite = 4;
+  bytes proof = 5;
+  ZkPublicInputs public_inputs = 6;
+  repeated NamedPublicInput named_public_inputs = 7;
+  oneof artifact_identity {
+    ZkArtifactManifestDigest artifact_manifest_sha256 = 8;
+    ZkArtifactSetIdentity artifact_set_identity_sha256 = 9;
+  }
+}
+
+// Raw proof bytes and exact raw public-input fields for one common-credential-root proof
+// slot. This package intentionally does not reuse ZkProofPackage because the
+// common-credential-root ABI composes Barretenberg field streams directly instead of the
+// compact production ZkPublicInputs representation.
+message ZkCommonCredentialRootRawProofPackage {
+  ZkCommonCredentialRootPersonaMode persona_mode = 1;
+  ZkCommonCredentialRootProofSlot slot = 2;
+  ZkCircuitRef circuit_ref = 3;
+  bytes proof = 4;
+  ZkCommonCredentialRootRawPublicInputs public_inputs = 5;
+  ZkProofSuite proof_suite = 6;
+  oneof artifact_identity {
+    ZkArtifactSetIdentity artifact_set_identity_sha256 = 7;
+    ZkArtifactManifestDigest artifact_manifest_sha256 = 8;
+  }
+}
+
+// Complete common-credential-root presentation in canonical proof-slot order.
+message ZkCommonCredentialRootPresentation {
+  ZkCommonCredentialRootPersonaMode persona_mode = 1;
+  ZkCredentialHashAlgorithm credential_hash_algorithm = 2;
+  ZkProofSuite proof_suite = 3;
+  ZkSessionBinding session_binding = 4;
+  repeated ZkCommonCredentialRootRawProofPackage proofs = 5;
+}
+
+// Holder-private claim opening retained by the wallet after issuance. These
+// bytes must remain inside an encrypted wallet record and never enter an
+// OpenID4VCI response or OpenID4VP presentation as plaintext.
+message ZkCommonCredentialRootPrivateClaimOpening {
+  bytes claim_name_hash = 1;
+  bytes claim_value = 2;
+  bytes claim_salt = 3;
+  uint32 leaf_index = 4;
+  repeated ZkInputBytes32 siblings = 5;
+}
+
+// Versioned holder-private companion to an issuer-signed credential root.
+// The wallet checks claim_root against the authenticated SSI envelope before
+// storing or using these openings; issuance_binding prevents cross-credential
+// substitution when the record is later decrypted.
+message ZkCommonCredentialRootPreparedClaims {
+  uint32 format_version = 1;
+  bytes claim_root = 2;
+  bytes issuance_binding = 3;
+  repeated ZkCommonCredentialRootPrivateClaimOpening openings = 4;
+  // Must equal the issuer-authenticated credential hash lane on restoration.
+  ZkCredentialHashAlgorithm credential_hash_algorithm = 5;
+}
+
+// Secret derivation inputs for a holder's common-credential-root relationship. This
+// message is allowed only inside the wallet-encrypted credential record.
+message ZkCommonCredentialRootPrivateLineageMaterial {
+  bytes root = 1;
+  string relationship_did = 2;
+  bytes nonce = 3;
+}
+
+// Plaintext serialized only inside a wallet-encrypted credential record.
+// The first payload is the complete OpenID4VCI CredentialEnvelope protobuf;
+// the second is ZkCommonCredentialRootPreparedClaims. Wallet decryption must revalidate
+// the issuer receipt before accepting any private opening from this record.
+message ZkWalletStoredCredential {
+  uint32 format_version = 1;
+  bytes credential_pb = 2;
+  bytes prepared_claims_pb = 3;
+  ZkCommonCredentialRootPrivateLineageMaterial private_lineage = 4;
+}
+
+// One stage proof inside a production bridge proof bundle.
+message ZkClaimProofBundleStageProofPackage {
+  ZkClaimProofBundleKind bundle_kind = 1;
+  ZkClaimProofBundleStage stage = 2;
+  ZkProofPackage proof = 3;
+}
+
+// Stable production proof bundle emitted by iOS, Android/Kotlin, WASM, and
+// service providers.
+message ZkClaimProofBundle {
+  ZkClaimProofBundleKind bundle_kind = 1;
+  // Version of this composition envelope, independent of the circuit revision.
+  uint32 format_version = 2;
+  repeated ZkClaimProofBundleStageProofPackage stages = 3;
+  ZkSessionBinding session_binding = 4;
+  ZkCredentialHashAlgorithm credential_hash_algorithm = 5;
+  ZkProofSuite proof_suite = 6;
+}
+
+// The issuer signature, credential validity interval, and hidden current
+// status index are proven by the common-credential-root issuer-status source circuit.
+// Its raw field stream cannot fit the compact four-stage bundle ABI.
+message ZkCredentialStatusProofPackage {
+  ZkCircuitRef circuit_ref = 1;
+  ZkProofSuite proof_suite = 2;
+  ZkArtifactSetIdentity artifact_set_identity_sha256 = 3;
+  bytes proof = 4;
+  ZkCommonCredentialRootRawPublicInputs public_inputs = 5;
+}
+
+// Complete direct/private request-bound presentation. Both proofs are
+// required: the fifth proof joins the same request-scoped credential binding
+// and issuer key as the four-stage claim bundle.
+message ZkStatusQualifiedClaimProofBundle {
+  ZkClaimProofBundle claim_proof_bundle = 1;
+  ZkCredentialStatusProofPackage issuer_credential_status = 2;
+}
+
+// Expected presentation-session binding.
+message ZkSessionBinding {
+  bytes nonce_hash = 1;
+  bytes audience_hash = 2;
+  bytes transaction_data_hash = 3;
+}
+
+// Proof shape expected from one successful diagnostic stage proving vector.
+// Proof bytes and the artifact-manifest digest are intentionally absent: both
+// are produced only after the manifest hashes this pre-manifest vector set.
+message ZkExpectedStageProofShape {
+  ZkClaimProofBundleKind bundle_kind = 1;
+  ZkClaimProofBundleStage stage = 2;
+  ZkProofMetadata metadata = 3;
+  ZkPublicInputs public_inputs = 4;
+  ZkSessionBinding session_binding = 5;
+}
+
+// Proof shape expected from one successful production bundle proving vector.
+message ZkExpectedClaimProofBundleProofShape {
+  ZkClaimProofBundleKind bundle_kind = 1;
+  ZkCredentialHashAlgorithm credential_hash_algorithm = 2;
+  ZkProofSuite proof_suite = 3;
+  ZkSessionBinding session_binding = 4;
+  repeated ZkExpectedStageProofShape stages = 5;
+}
+
+// One provider-generated serialized witness stack bound to the exact circuit
+// ABI that produced it. Connect handlers and SDK adapters must treat this
+// message as secret and must not log request bodies.
+message ZkWitness {
+  bytes encoded = 1;
+  ZkCircuitRef circuit_ref = 2;
+  ZkWitnessEncoding encoding = 3;
+}
+
+// Complete ordered witness set for the four-stage production proof bundle.
+// Each stack is generated independently because the stage circuits have
+// different ABIs; consumers reject missing, duplicate, reordered, or
+// cross-bundle-kind/hash witnesses.
+message ZkClaimProofBundleWitness {
+  ZkClaimProofBundleKind bundle_kind = 1;
+  ZkCredentialHashAlgorithm credential_hash_algorithm = 2;
+  repeated ZkWitness stage_witnesses = 3;
+}
+
+// Complete ordered native-owned witness-handle set for the four-stage
+// production proof bundle. SDKs use this shape so Swift/Kotlin can request
+// bundle proving without copying secret witness bytes into managed memory.
+message ZkRetainedClaimProofBundleWitness {
+  ZkClaimProofBundleKind bundle_kind = 1;
+  ZkCredentialHashAlgorithm credential_hash_algorithm = 2;
+  repeated ZkStageWitnessHandle stage_witness_handles = 3;
+}
+
+// Canonical production bundle proving operation. The exact circuit family is
+// derived from bundle_kind and credential_hash_algorithm; individual stage references
+// are resolved and validated by the injected provider.
+message ZkClaimProofBundleProveOperation {
+  ZkClaimProofBundleKind bundle_kind = 1;
+  ZkCredentialHashAlgorithm credential_hash_algorithm = 2;
+  ZkSessionBinding session_binding = 3;
+  ZkClaimProofBundleWitness witness_bundle = 4;
+  ZkProofSuite proof_suite = 5;
+}
+
+// Canonical production bundle proving operation for native SDK adapters that
+// already generated stage witnesses through the same provider context.
+message ZkRetainedClaimProofBundleProveOperation {
+  ZkClaimProofBundleKind bundle_kind = 1;
+  ZkCredentialHashAlgorithm credential_hash_algorithm = 2;
+  ZkSessionBinding session_binding = 3;
+  ZkRetainedClaimProofBundleWitness witness_bundle = 4;
+  ZkProofSuite proof_suite = 5;
+}
+
+// Four-stage claim-bundle verification only. This operation does not establish
+// issuer-signed credential validity or current status. The nonzero legacy
+// credential_status_checked_at_unix field is rejected by the codec; callers
+// cannot attest to revocation checks by setting a timestamp.
+message ZkClaimProofBundleVerifyOperation {
+  ZkClaimProofBundle claim_proof_bundle = 1;
+  ZkSessionBinding expected_binding = 2;
+  repeated ZkP256PublicKey trusted_issuers = 3;
+  uint64 verification_time_unix = 4;
+  uint64 credential_status_checked_at_unix = 5;
+  ZkProofSuite expected_proof_suite = 6;
+}
+
+// Neutral P-256 coordinates. Each enclosing field specifies the key role.
+message ZkP256PublicKey {
+  bytes x = 1;
+  bytes y = 2;
+}
+
+// The typed public statement established only after every production stage,
+// issuer trust, claim padding, session binding, and expiry check succeeds.
+// This is four-proof, presentation-bound evidence: it does not establish
+// issuer-signed credential validity or current status. Credential acceptance
+// uses ZkStatusQualifiedClaimStatement.
+message ZkPresentationBoundClaimStatement {
+  ZkP256PublicKey issuer = 1;
+  ZkP256PublicKey persona = 2;
+  bytes claim_name_hash = 3;
+  bytes claim_value = 4;
+  uint32 claim_value_length = 5;
+  uint64 presentation_expiry_unix = 6;
+  bytes session_link_commitment = 7;
+  bytes credential_binding = 8;
+}
+
+// One verifier-owned expected claim in a common-credential-root presentation.
+message ZkCommonCredentialRootClaimExpectation {
+  ZkP256PublicKey issuer = 1;
+  bytes claim_name_hash = 2;
+  bytes claim_value = 3;
+  uint32 claim_value_length = 4;
+}
+
+// Issuer-authenticated meaning of a credential status bit.
+enum ZkIssuerStatusPurpose {
+  ZK_ISSUER_STATUS_PURPOSE_UNSPECIFIED = 0;
+  ZK_ISSUER_STATUS_PURPOSE_REVOCATION = 1;
+  ZK_ISSUER_STATUS_PURPOSE_SUSPENSION = 2;
+}
+
+// One signature-verified, current issuer status list selected by the verifier.
+// The root and metadata must be obtained from trusted SSI status material.
+message ZkCommonCredentialRootIssuerStatusExpectation {
+  bytes root = 1;
+  uint64 length = 2;
+  bytes list_id = 3;
+  bytes url_hash = 4;
+  ZkIssuerStatusPurpose purpose = 5;
+}
+
+// Verifier-owned policy inputs for common-credential-root join validation. These values
+// must come from the active verifier request and authenticated trust policy,
+// never from the holder's presentation body.
+message ZkCommonCredentialRootJoinPolicy {
+  bytes challenge = 1;
+  bytes audience_hash = 2;
+  bytes transaction_data_hash = 3;
+  uint64 request_time_unix = 4;
+  ZkP256PublicKey attestation_signer = 5;
+  bytes assurance_policy_id = 6;
+  bytes status_root = 7;
+  repeated ZkCommonCredentialRootClaimExpectation claims = 8;
+  repeated ZkCommonCredentialRootIssuerStatusExpectation issuer_status = 9;
+  // Verifier-owned time used for current issuer-status validation.
+  uint64 status_validation_time_unix = 10;
+  // Maximum accepted age for holder-produced current-status proof time.
+  uint64 status_validation_max_age_seconds = 11;
+}
+
+// ReallyMe authority publication of the current active root-attestation set.
+// The signature covers SHA-256("RMRSTAT1" || status_root || issued_unix_be64 ||
+// expires_unix_be64 || sequence_be64). Verifiers pin the status-authority key,
+// enforce freshness and monotonic sequence, and then use status_root in their
+// common-credential-root join policy. The holder cannot supply an unauthenticated root.
+message ZkRootStatusSnapshot {
+  uint32 format_version = 1;
+  bytes status_root = 2;
+  uint64 issued_unix = 3;
+  uint64 expires_unix = 4;
+  uint64 sequence = 5;
+  ZkP256PublicKey signer = 6;
+  bytes signature = 7;
+}
+
+// Issued by the private ReallyMe root-assurance authority and stored in the
+// holder's encrypted wallet. The authority signs the versioned RMRA1 digest
+// over root_commitment, assurance_policy_id, times, and epoch. The normal
+// presentation reveals a proof about this attestation, not these bytes.
+message ZkRootAssuranceAttestation {
+  uint32 format_version = 1;
+  bytes root_commitment = 2;
+  bytes assurance_policy_id = 3;
+  uint64 issued_unix = 4;
+  uint64 expires_unix = 5;
+  uint32 epoch = 6;
+  ZkP256PublicKey signer = 7;
+  bytes signature = 8;
+}
+
+// Public, complete active-attestation set for one signed snapshot. IDs are
+// fixed-width 32-byte values in strictly ascending order, packed without a
+// length prefix. The snapshot signature authenticates the canonical Merkle
+// root recomputed from these bytes. Holders derive paths locally, avoiding
+// presentation-time lookups by their private attestation identifier.
+message ZkRootActiveSetPublication {
+  uint32 format_version = 1;
+  bytes sorted_attestation_ids = 2;
+  ZkRootStatusSnapshot snapshot = 3;
+}
+
+// Authority-private, crash-recoverable intent for exactly one status feed.
+// Persist this canonical message before advancing the external sequence anchor.
+// After a crash, the authority reconstructs the exact active root and signing
+// digest from these fields; it must never substitute a fresh inventory or time
+// for an already anchored sequence.
+message ZkRootStatusPublicationIntent {
+  uint32 format_version = 1;
+  bytes sorted_attestation_ids = 2;
+  uint64 issued_unix = 3;
+  uint64 expires_unix = 4;
+  uint64 sequence = 5;
+  bytes feed_id = 6;
+}
+
+// Wallet-private assignment and Merkle path for one configured active-set
+// feed. This material is derived locally from a full publication and stored in
+// encrypted wallet state; it must not appear in verifier-visible claims. The
+// feed_id is deployment-owned routing state, not a circuit public input.
+message ZkRootActiveSetPathAssignment {
+  uint32 format_version = 1;
+  bytes feed_id = 2;
+  bytes active_status_root = 3;
+  uint64 sequence = 4;
+  bytes attestation_id = 5;
+  uint32 status_index = 6;
+  ZkInputCommonCredentialRootStatusPath status_path = 7;
+}
+
+// Canonical common-credential-root verification operation.
+message ZkCommonCredentialRootVerifyOperation {
+  ZkCommonCredentialRootPresentation presentation = 1;
+  ZkCommonCredentialRootJoinPolicy join_policy = 2;
+  ZkProofSuite expected_proof_suite = 3;
+}
+
+// Successful common-credential-root verification after all proofs and joins pass.
+message ZkCommonCredentialRootVerification {
+  ZkCommonCredentialRootPersonaMode persona_mode = 1;
+  uint32 verified_proof_count = 2;
+  ZkProofSuite proof_suite = 3;
+}
+
+message ZkInputBytes32 {
+  bytes value = 1;
+}
+
+message ZkInputBytes16 {
+  bytes value = 1;
+}
+
+message ZkInputBytes64 {
+  bytes value = 1;
+}
+
+message ZkInputP256PublicKey {
+  ZkInputBytes32 x = 1;
+  ZkInputBytes32 y = 2;
+}
+
+message ZkInputSessionContext {
+  ZkInputBytes32 challenge = 1;
+  ZkInputBytes32 audience_hash = 2;
+  uint64 expiry_unix = 3;
+  ZkInputBytes32 session_binding = 4;
+  ZkInputBytes32 transaction_data_hash = 5;
+}
+
+message ZkInputIssuerContext {
+  ZkInputP256PublicKey issuer_public_key = 1;
+  ZkInputBytes32 challenge = 2;
+  ZkInputBytes32 audience_hash = 3;
+  uint64 expiry_unix = 4;
+  ZkInputBytes32 transaction_data_hash = 5;
+}
+
+message ZkInputClaimDisclosure {
+  ZkInputBytes32 credential_binding = 1;
+  uint32 value_length = 2;
+  ZkInputBytes64 value = 3;
+  ZkInputBytes32 claim_name_hash = 4;
+}
+
+message ZkInputMerklePath {
+  uint32 path_length = 1;
+  repeated ZkInputBytes32 siblings = 2;
+}
+
+message ZkInputMerkleClaimProof {
+  ZkInputBytes32 envelope_hash = 1;
+  ZkInputBytes32 merkle_root = 2;
+  ZkInputBytes16 claim_salt = 3;
+  uint32 leaf_index = 4;
+  ZkInputMerklePath path = 5;
+}
+
+message ZkInputEnvelopeSignatureProof {
+  ZkInputBytes32 envelope_hash = 1;
+  ZkInputBytes64 issuer_signature = 2;
+}
+
+message ZkInputCredentialRootProof {
+  ZkInputBytes32 envelope_hash = 1;
+  ZkInputBytes32 merkle_root = 2;
+  ZkInputBytes64 issuer_root_binding_signature = 3;
+}
+
+message ZkInputSubjectSessionAuthorization {
+  ZkInputP256PublicKey subject_public_key = 1;
+  ZkInputBytes64 subject_signature = 2;
+}
+
+message ZkInputPersonaSessionAuthorization {
+  ZkInputP256PublicKey persona_public_key = 1;
+  ZkInputBytes64 persona_signature = 2;
+}
+
+message ZkInputPublicPersonaSessionAuthorization {
+  ZkInputBytes64 persona_fresh_signature = 1;
+}
+
+message ZkInputSubjectClaimLink {
+  ZkInputBytes64 issuer_subject_binding_signature = 1;
+  ZkInputP256PublicKey subject_public_key = 2;
+}
+
+message ZkInputPersonaClaimLink {
+  ZkInputBytes64 issuer_subject_binding_signature = 1;
+  ZkInputP256PublicKey subject_public_key = 2;
+  ZkInputP256PublicKey persona_public_key = 3;
+  ZkInputBytes64 subject_link_signature = 4;
+}
+
+message ZkInputPublicPersonaClaimLink {
+  ZkInputBytes64 issuer_subject_binding_signature = 1;
+  ZkInputP256PublicKey subject_public_key = 2;
+  ZkInputBytes64 subject_link_signature = 3;
+}
+
+message ZkCredentialSubjectClaimSessionInput {
+  ZkInputSessionContext session_context = 1;
+  ZkInputSubjectSessionAuthorization authorization = 2;
+}
+
+message ZkPrivatePersonaSessionInput {
+  ZkInputSessionContext session_context = 1;
+  ZkInputPersonaSessionAuthorization authorization = 2;
+}
+
+message ZkPublicPersonaSessionInput {
+  ZkInputP256PublicKey persona_public_key = 1;
+  ZkInputSessionContext session_context = 2;
+  ZkInputPublicPersonaSessionAuthorization authorization = 3;
+}
+
+message ZkCredentialEnvelopeInput {
+  ZkInputIssuerContext issuer_context = 1;
+  ZkInputBytes32 envelope_binding = 2;
+  ZkInputEnvelopeSignatureProof proof = 3;
+}
+
+message ZkCredentialRootInput {
+  ZkInputIssuerContext issuer_context = 1;
+  ZkInputBytes32 envelope_binding = 2;
+  ZkInputBytes32 credential_binding = 3;
+  ZkInputCredentialRootProof proof = 4;
+}
+
+message ZkCredentialSubjectClaimInput {
+  ZkInputIssuerContext issuer_context = 1;
+  ZkInputBytes32 session_binding = 2;
+  ZkInputClaimDisclosure disclosure = 3;
+  ZkInputMerkleClaimProof proof = 4;
+  ZkInputSubjectClaimLink link = 5;
+}
+
+message ZkPrivatePersonaClaimInput {
+  ZkInputIssuerContext issuer_context = 1;
+  ZkInputBytes32 session_binding = 2;
+  ZkInputClaimDisclosure disclosure = 3;
+  ZkInputMerkleClaimProof proof = 4;
+  ZkInputPersonaClaimLink link = 5;
+}
+
+// The values supplied by the verifier for one presentation. The wallet
+// repeats them in each common-credential-root stage so no proof can be replayed into a
+// different request, transaction, or validity window.
+message ZkInputPresentationContext {
+  ZkInputBytes32 challenge = 1;
+  ZkInputBytes32 audience_hash = 2;
+  ZkInputBytes32 transaction_data_hash = 3;
+  uint64 expiry_unix = 4;
+}
+
+message ZkCommonCredentialRootAttestationInput {
+  ZkInputPresentationContext presentation = 1;
+  ZkInputP256PublicKey reallyme_public_key = 2;
+  ZkInputBytes32 assurance_policy_id = 3;
+  uint64 request_unix = 4;
+  ZkInputBytes32 root_join = 5;
+  ZkInputBytes32 attestation_join = 6;
+  ZkInputBytes32 root = 7;
+  uint64 attestation_issued_unix = 8;
+  uint64 attestation_expires_unix = 9;
+  uint32 attestation_epoch = 10;
+  ZkInputBytes64 attestation_signature = 11;
+  ZkInputBytes32 join_salt = 12;
+}
+
+message ZkInputCommonCredentialRootStatusPath {
+  uint32 path_length = 1;
+  repeated ZkInputBytes32 siblings = 2;
+}
+
+message ZkCommonCredentialRootStatusInput {
+  ZkInputPresentationContext presentation = 1;
+  ZkInputBytes32 active_status_root = 2;
+  ZkInputBytes32 root_join = 3;
+  ZkInputBytes32 attestation_join = 4;
+  ZkInputBytes32 root = 5;
+  ZkInputBytes32 attestation_id = 6;
+  ZkInputBytes32 join_salt = 7;
+  uint32 status_index = 8;
+  ZkInputCommonCredentialRootStatusPath status_path = 9;
+}
+
+// Private status opening for the exact credential named by the signed tuple.
+message ZkCommonCredentialRootIssuerCredentialStatusInput {
+  ZkInputPresentationContext presentation = 1;
+  ZkInputP256PublicKey issuer_public_key = 2;
+  uint64 presentation_expiry = 3;
+  ZkInputBytes32 credential_binding = 4;
+  ZkInputBytes32 status_root = 5;
+  uint64 status_length = 6;
+  ZkInputBytes32 status_list_id = 7;
+  ZkInputBytes32 status_url_hash = 8;
+  ZkIssuerStatusPurpose status_purpose = 9;
+  uint64 verifier_now = 10;
+  ZkInputBytes32 envelope_hash = 11;
+  ZkInputBytes32 claims_root = 12;
+  ZkInputBytes64 issuer_validity_status_signature = 13;
+  uint64 valid_from = 14;
+  uint64 valid_until = 15;
+  uint64 status_index = 16;
+  ZkInputBytes32 status_chunk = 17;
+  uint32 path_length = 18;
+  repeated ZkInputBytes32 path = 19;
+}
+
+message ZkInputCommonCredentialRootLineageSlot {
+  ZkInputP256PublicKey issuer_public_key = 1;
+  uint64 expiry_unix = 2;
+  ZkInputBytes32 credential_binding = 3;
+  ZkInputBytes32 subject_join = 4;
+}
+
+message ZkInputCommonCredentialRootLineageWitness {
+  ZkInputBytes32 envelope_hash = 1;
+  ZkInputBytes32 merkle_root = 2;
+  ZkInputBytes64 issuer_root_binding_signature = 3;
+  ZkInputP256PublicKey subject_public_key = 4;
+  ZkInputBytes32 relationship_did_hash = 5;
+  ZkInputBytes32 relationship_nonce = 6;
+  ZkInputBytes16 claim_salt = 7;
+  uint32 merkle_leaf_index = 8;
+  ZkInputMerklePath merkle_path = 9;
+}
+
+message ZkCommonCredentialRootLineageInput {
+  ZkInputPresentationContext presentation = 1;
+  ZkInputBytes32 root_join = 2;
+  ZkInputCommonCredentialRootLineageSlot slot = 3;
+  ZkInputBytes32 root = 4;
+  ZkInputBytes32 join_salt = 5;
+  ZkInputCommonCredentialRootLineageWitness witness = 6;
+}
+
+message ZkCommonCredentialRootPrivatePersonaClaimInput {
+  ZkInputIssuerContext issuer_context = 1;
+  ZkInputBytes32 session_binding = 2;
+  ZkInputBytes32 subject_join = 3;
+  ZkInputClaimDisclosure disclosure = 4;
+  ZkInputMerkleClaimProof proof = 5;
+  ZkInputPersonaClaimLink link = 6;
+  ZkInputBytes32 join_salt = 7;
+}
+
+message ZkCommonCredentialRootPublicPersonaClaimInput {
+  ZkInputIssuerContext issuer_context = 1;
+  ZkInputP256PublicKey persona_public_key = 2;
+  ZkInputBytes32 session_binding = 3;
+  ZkInputBytes32 subject_join = 4;
+  ZkInputClaimDisclosure disclosure = 5;
+  ZkInputMerkleClaimProof proof = 6;
+  ZkInputPublicPersonaClaimLink link = 7;
+  ZkInputBytes32 join_salt = 8;
+}
+
+// One stage is proved at a time. The provider owns and destroys the private
+// witness before it returns a proof; SDK callers never receive witness bytes.
+message ZkCommonCredentialRootStageProveOperation {
+  ZkCommonCredentialRootPersonaMode persona_mode = 1;
+  ZkCommonCredentialRootProofSlot slot = 2;
+  ZkCircuitRef circuit_ref = 3;
+  ZkProofSuite proof_suite = 4;
+  ZkSessionBinding expected_binding = 5;
+  oneof input {
+    ZkCommonCredentialRootAttestationInput root_attestation = 6;
+    ZkCommonCredentialRootStatusInput root_status = 7;
+    ZkCommonCredentialRootLineageInput lineage = 8;
+    ZkCommonCredentialRootPrivatePersonaClaimInput private_persona_claim = 9;
+    ZkCommonCredentialRootPublicPersonaClaimInput public_persona_claim = 10;
+    ZkPrivatePersonaSessionInput private_persona_session = 11;
+    ZkPublicPersonaSessionInput public_persona_session = 12;
+    ZkCommonCredentialRootIssuerCredentialStatusInput issuer_credential_status = 13;
+  }
+}
+
+// Complete common-credential-root presentation proving request. Each field is named by
+// its canonical proof slot so SDKs cannot smuggle an ordered-but-mislabeled
+// stage list across the FFI boundary. The nested stage operations still carry
+// their exact circuit refs and private typed inputs; decoders must require the
+// parent persona mode, suite, and session binding to match every child stage.
+message ZkCommonCredentialRootPresentationProveOperation {
+  ZkCommonCredentialRootPersonaMode persona_mode = 1;
+  ZkProofSuite proof_suite = 2;
+  ZkSessionBinding expected_binding = 3;
+  ZkCommonCredentialRootStageProveOperation root_attestation = 4;
+  ZkCommonCredentialRootStageProveOperation root_status = 5;
+  ZkCommonCredentialRootStageProveOperation lineage_0 = 6;
+  ZkCommonCredentialRootStageProveOperation lineage_1 = 7;
+  ZkCommonCredentialRootStageProveOperation selected_claim_0 = 8;
+  ZkCommonCredentialRootStageProveOperation selected_claim_1 = 9;
+  ZkCommonCredentialRootStageProveOperation session = 10;
+  ZkCommonCredentialRootStageProveOperation issuer_credential_status_0 = 11;
+  ZkCommonCredentialRootStageProveOperation issuer_credential_status_1 = 12;
+}
+
+message ZkStageWitnessInput {
+  oneof input {
+    ZkCredentialSubjectClaimSessionInput credential_subject_claim_session = 1;
+    ZkPrivatePersonaSessionInput private_persona_session = 2;
+    ZkCredentialEnvelopeInput credential_envelope = 3;
+    ZkCredentialRootInput credential_root = 4;
+    ZkCredentialSubjectClaimInput credential_subject_claim = 5;
+    ZkPrivatePersonaClaimInput private_persona_claim = 6;
+  }
+}
+
+// Explicit stage-level witness operation for native SDK adapters. The input is
+// a generated fixed-schema message rather than Noir JSON so provider adapters
+// can validate lengths and zeroize private material before witness generation.
+message ZkStageWitnessOperation {
+  ZkCircuitRef circuit_ref = 1;
+  ZkProofSuite proof_suite = 2;
+  ZkStageWitnessInput input = 3;
+}
+
+// Opaque native witness owner. The handle is meaningful only to the provider
+// context that returned it and lets Swift/Kotlin prove without receiving raw
+// witness bytes in managed memory.
+message ZkStageWitnessHandle {
+  uint64 native_handle_id = 1;
+  ZkCircuitRef circuit_ref = 2;
+  ZkWitnessEncoding encoding = 3;
+}
+
+// Witness owner and public statement derived from one exact stage input. SDK
+// facades pass the handle to ZkStageProveOperation; diagnostic harnesses may
+// still use ZkWitness directly where the executable boundary explicitly admits
+// secret witness bytes.
+message ZkStageWitness {
+  ZkStageWitnessHandle witness_handle = 1;
+  ZkPublicInputs public_inputs = 2;
+  ZkSessionBinding session_binding = 3;
+}
+
+// Explicitly releases a native-owned witness that will not be consumed by
+// proving. This gives SDK cancellation paths the same audited lifecycle as the
+// prove path, where handles are consumed exactly once.
+message ZkStageWitnessReleaseOperation {
+  ZkStageWitnessHandle witness_handle = 1;
+}
+
+// Confirmation that one native-owned witness handle was released by the
+// provider context that owned it.
+message ZkStageWitnessRelease {
+  ZkCircuitRef circuit_ref = 1;
+}
+
+// Explicit stage-level proving operation for diagnostics and circuit
+// iteration. Production SDK facades expose bundle proving instead.
+message ZkStageProveOperation {
+  ZkCircuitRef circuit_ref = 1;
+  ZkWitness witness = 2;
+  ZkPublicInputs public_inputs = 3;
+  ZkSessionBinding session_binding = 4;
+  ZkProofSuite proof_suite = 5;
+  ZkStageWitnessHandle witness_handle = 6;
+}
+
+// Explicit stage-level verification operation for diagnostics and circuit
+// iteration.
+message ZkStageVerifyOperation {
+  ZkProofPackage proof = 1;
+  ZkSessionBinding expected_binding = 2;
+  ZkProofSuite expected_proof_suite = 3;
+}
+
+// Exact artifact lookup operation. ZkCircuitRef is the only circuit identity;
+// adapters must not accept a parallel string or policy-level identifier.
+message ZkArtifactManifestOperation {
+  ZkCircuitRef circuit_ref = 1;
+  ZkProofSuite proof_suite = 2;
+}
+
+// The single provider operation request shared by native, FFI, JNI, WASM, and
+// Connect adapters. Proving variants contain secret witness bytes and are
+// binary-only at executable boundaries.
+message ZkProviderOperationRequest {
+  oneof operation {
+    ZkClaimProofBundleProveOperation prove_claim_proof_bundle = 1;
+    ZkClaimProofBundleVerifyOperation verify_claim_proof_bundle = 2;
+    ZkStageProveOperation prove_stage = 3;
+    ZkStageVerifyOperation verify_stage = 4;
+    ZkArtifactManifestOperation get_artifact_manifest = 5;
+    ZkStageWitnessOperation witness_stage = 6;
+    ZkStageWitnessReleaseOperation release_stage_witness = 7;
+    ZkRetainedClaimProofBundleProveOperation prove_retained_claim_proof_bundle = 8;
+    ZkCommonCredentialRootVerifyOperation verify_common_credential_root = 9;
+    ZkCommonCredentialRootStageProveOperation prove_common_credential_root_stage = 10;
+    ZkCommonCredentialRootPresentationProveOperation prove_common_credential_root_presentation = 11;
+    ZkPersonaCredentialEvidenceStageVerifyOperation verify_persona_credential_evidence_stage = 12;
+    ZkPersonaCredentialEvidenceStageProveOperation prove_persona_credential_evidence_stage = 13;
+    ZkPersonaCredentialEvidenceCurrentStateProveOperation prove_persona_credential_evidence_current_state = 14;
+    ZkPersonaCredentialEvidencePresentationSigningOperation prepare_persona_credential_evidence_presentation_signing = 15;
+    ZkPersonaCredentialEvidencePresentationAssembleOperation assemble_persona_credential_evidence_presentation = 16;
+    ZkPersonaCredentialEvidenceIssuerEnvelopeProveOperation prove_persona_credential_evidence_issuer_envelope = 17;
+    ZkPersonaCredentialEvidenceClaimRootProveOperation prove_persona_credential_evidence_claim_root = 18;
+    ZkPersonaCredentialEvidenceSignedValidityProveOperation prove_persona_credential_evidence_signed_validity = 19;
+    ZkPersonaCredentialEvidenceSelectedClaimProveOperation prove_persona_credential_evidence_selected_claim = 20;
+    ZkStatusQualifiedClaimProofBundleVerifyOperation verify_status_qualified_claim_proof_bundle = 21;
+  }
+}
+
+// Complete direct or private credential verification: the four claim proofs,
+// the issuer validity and current-status proof, and the verifier's current
+// issuer status list. The verifier application authenticates the status list
+// signature, issuer, freshness, and rollback floor before supplying it here;
+// the provider never accepts a status root from the holder's presentation.
+message ZkStatusQualifiedClaimProofBundleVerifyOperation {
+  ZkStatusQualifiedClaimProofBundle status_qualified_claim_proof_bundle = 1;
+  ZkSessionBinding expected_binding = 2;
+  // Credential issuer for which the verifier authenticated current_issuer_status.
+  // This is the credential issuer key, including when its status signer is delegated.
+  ZkP256PublicKey expected_issuer = 3;
+  repeated ZkP256PublicKey trusted_issuers = 4;
+  uint64 verification_time_unix = 5;
+  ZkProofSuite expected_proof_suite = 6;
+  ZkCommonCredentialRootIssuerStatusExpectation current_issuer_status = 7;
+}
+
+// The typed public statement established only after all five proofs, issuer
+// trust, session binding, presentation expiry, issuer-signed credential
+// validity, and current issuer status succeed.
+message ZkStatusQualifiedClaimStatement {
+  ZkP256PublicKey issuer = 1;
+  ZkP256PublicKey persona = 2;
+  bytes claim_name_hash = 3;
+  bytes claim_value = 4;
+  uint32 claim_value_length = 5;
+  uint64 presentation_expiry_unix = 6;
+  bytes session_link_commitment = 7;
+  bytes credential_binding = 8;
+}
+
+// Successful five-proof verification against the verifier's current issuer
+// status list. It does not consume the session; the verifier must accept the
+// active session exactly once before granting access.
+message ZkStatusQualifiedClaimProofBundleVerification {
+  ZkClaimProofBundleKind bundle_kind = 1;
+  uint32 verified_proof_count = 2;
+  ZkProofSuite proof_suite = 3;
+  ZkStatusQualifiedClaimStatement statement = 4;
+  ZkIssuerStatusPurpose status_purpose = 5;
+}
+
+// Successful four-stage claim verification. Credential acceptance requires the
+// separate issuer-credential-status proof and authenticated current status feed.
+message ZkPresentationBoundClaimBundleVerification {
+  ZkClaimProofBundleKind bundle_kind = 1;
+  uint32 verified_stage_count = 2;
+  ZkProofSuite proof_suite = 3;
+  ZkPresentationBoundClaimStatement statement = 4;
+}
+
+// A successful provider operation has exactly one typed value.
+message ZkProviderOperationResult {
+  oneof result {
+    ZkClaimProofBundle claim_proof_bundle = 1;
+    ZkPresentationBoundClaimBundleVerification claim_proof_bundle_verification = 2;
+    ZkProofPackage stage_proof = 3;
+    ZkVerification stage_verification = 4;
+    ZkArtifactManifest artifact_manifest = 5;
+    ZkStageWitness stage_witness = 6;
+    ZkStageWitnessRelease stage_witness_release = 7;
+    ZkCommonCredentialRootVerification common_credential_root_verification = 8;
+    ZkCommonCredentialRootRawProofPackage common_credential_root_stage_proof = 9;
+    ZkCommonCredentialRootPresentation common_credential_root_presentation = 10;
+    ZkPersonaCredentialEvidenceStageVerification persona_credential_evidence_stage_verification = 11;
+    ZkPersonaCredentialEvidenceStageProof persona_credential_evidence_stage_proof = 12;
+    ZkPersonaCredentialEvidencePresentationSigningChallenge persona_credential_evidence_presentation_signing_challenge = 13;
+    ZkPersonaCredentialEvidencePresentation persona_credential_evidence_presentation = 14;
+    ZkStatusQualifiedClaimProofBundleVerification status_qualified_claim_proof_bundle_verification = 15;
+  }
+}
+
+// The single provider result envelope. Expected failures use only the
+// structured, privacy-safe ZkError contract.
+message ZkProviderOperationResponse {
+  // SHA-256 of the exact canonical ZkProviderOperationRequest bytes. Adapters
+  // MUST compare this value before accepting either success or typed failure.
+  bytes request_sha256 = 1;
+  oneof outcome {
+    ZkProviderOperationResult result = 2;
+    ZkError error = 3;
+  }
+}
+
+// One pre-manifest proving specification. `base_operation` must contain a
+// proving operation and must be valid before the typed mutation is applied.
+// Success expectations describe only deterministic proof metadata and public
+// inputs; concrete randomized proof bytes belong to post-manifest verification
+// vectors pinned by the release index.
+message ZkProvingVector {
+  uint32 vector_number = 1;
+  ZkProvingVectorMutation mutation = 2;
+  ZkProviderOperationRequest base_operation = 3;
+  oneof expected_outcome {
+    ZkExpectedStageProofShape stage_proof = 4;
+    ZkExpectedClaimProofBundleProofShape claim_proof_bundle = 5;
+    ZkError error = 6;
+  }
+}
+
+// Canonical pre-manifest vector set hashed by each artifact manifest. Every
+// vector uses synthetic, non-production witness material. Binary protobuf is
+// the only supported representation because this message transitively owns
+// secret-bearing proving operations.
+message ZkProvingVectorSet {
+  uint32 format_version = 1;
+  ZkClaimProofBundleKind bundle_kind = 2;
+  ZkCredentialHashAlgorithm credential_hash_algorithm = 3;
+  ZkProofSuite proof_suite = 4;
+  repeated ZkProvingVector vectors = 5;
+}
+
+// One sealed artifact manifest admitted to a release. The manifest digest is
+// computed over its canonical binary protobuf bytes. Bundle kind, stage, and exact
+// circuit reference are repeated here only as validated lookup coordinates;
+// release tooling must compare them with the decoded manifest.
+message ZkReleaseArtifactPin {
+  ZkClaimProofBundleKind bundle_kind = 1;
+  ZkClaimProofBundleStage stage = 2;
+  ZkCircuitRef circuit_ref = 3;
+  ZkArtifactManifestDigest artifact_manifest_sha256 = 4;
+}
+
+// One post-manifest verification case. The base operation contains a concrete
+// proof that already retains its sealed artifact-manifest identity and must be
+// valid before the typed mutation is applied. The expected response reuses the
+// canonical provider result/error envelope.
+message ZkVerificationVector {
+  uint32 vector_number = 1;
+  ZkVerificationVectorMutation mutation = 2;
+  ZkProviderOperationRequest base_operation = 3;
+  ZkProviderOperationResponse expected_response = 4;
+}
+
+// Canonical post-manifest verification vectors for one bundle kind and hash lane.
+// The four artifact pins must be complete and ordered by production stage.
+// Proof-bearing verification vectors are binary-only and are never hashed by
+// the stage manifests they reference.
+message ZkVerificationVectorSet {
+  uint32 format_version = 1;
+  ZkClaimProofBundleKind bundle_kind = 2;
+  ZkCredentialHashAlgorithm credential_hash_algorithm = 3;
+  ZkProofSuite proof_suite = 4;
+  repeated ZkReleaseArtifactPin artifact_manifests = 5;
+  repeated ZkVerificationVector vectors = 6;
+}
+
+// Digest and count of one canonical post-manifest verification-vector file.
+// Its bundle-kind/hash coordinates derive the release layout; no caller-controlled
+// filesystem path is part of the protocol contract.
+message ZkReleaseVerificationVectorPin {
+  ZkClaimProofBundleKind bundle_kind = 1;
+  ZkCredentialHashAlgorithm credential_hash_algorithm = 2;
+  ZkProofSuite proof_suite = 3;
+  Digest vector_set_sha256 = 4;
+  uint32 vector_count = 5;
+}
+
+// One exact common-credential-root v1 program admitted by the sealed release index.
+// The source lock and source closure bind the compiled program to the reviewed
+// Noir source; the final identity is the value carried by proof packages.
+message ZkReleaseCommonCredentialRootArtifactPin {
+  ZkCircuitRef circuit_ref = 1;
+  Digest source_lock_sha256 = 2;
+  Digest source_closure_sha256 = 3;
+  Digest bytecode_sha256 = 4;
+  Digest verification_key_sha256 = 5;
+  Digest artifact_identity_sha256 = 6;
+}
+
+// One exact persona-credential-evidence source program admitted by the sealed release
+// index. Claim and current-state proofs carry their own artifact identities.
+message ZkReleasePersonaCredentialEvidenceArtifactPin {
+  ZkCircuitRef circuit_ref = 1;
+  Digest source_lock_sha256 = 2;
+  Digest source_closure_sha256 = 3;
+  Digest bytecode_sha256 = 4;
+  Digest verification_key_sha256 = 5;
+  Digest artifact_identity_sha256 = 6;
+}
+
+// Acyclic root for one production ZK release. Stage manifests bind only
+// pre-manifest proving specifications. This index is created after manifests
+// and proof-bearing verification vectors exist, then binds both by digest.
+// The digest/signature of these canonical index bytes belongs to the package
+// publication layer and is deliberately not embedded as a self-reference.
+message ZkReleaseIndex {
+  uint32 format_version = 1;
+  string release_version = 2;
+  string nargo_version = 3;
+  string barretenberg_version = 4;
+  ZkProofSuite proof_suite = 5;
+  Digest capability_registry_sha256 = 6;
+  repeated ZkReleaseArtifactPin artifact_manifests = 7;
+  repeated ZkReleaseVerificationVectorPin verification_vectors = 8;
+  repeated ZkReleaseCommonCredentialRootArtifactPin common_credential_root_artifacts = 9;
+  repeated ZkReleasePersonaCredentialEvidenceArtifactPin persona_credential_evidence_artifacts = 10;
+}
+
+// Successful verification result.
+message ZkVerification {
+  ZkCircuitId circuit_id = 1;
+  ZkCircuitRef circuit_ref = 2;
+  ZkClaimProofBundleKind bundle_kind = 3;
+  ZkProofSuite proof_suite = 4;
+}

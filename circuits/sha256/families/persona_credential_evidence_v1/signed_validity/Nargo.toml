@@ -1,0 +1,10 @@
+# SPDX-FileCopyrightText: Copyright © 2026 ReallyMe Technologies Limited. All rights reserved
+#
+# SPDX-License-Identifier: MIT OR Apache-2.0
+
+[package]
+name = "credential_persona_credential_evidence_v1_signed_validity_sha256"
+type = "bin"
+version = "0.1.0"
+
+[dependencies]

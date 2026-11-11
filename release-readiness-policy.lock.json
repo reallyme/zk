@@ -1,0 +1,311 @@
+{
+  "schemaVersion": 1,
+  "releaseReadinessVersion": "0.7.0",
+  "hashedFiles": [
+    {
+      "path": "scripts/check_release_readiness.mjs",
+      "role": "consumer release-readiness policy declaration",
+      "sha256": "29d6be7d1bcf3b639dc0f2810a33c6cfba07705942bba00bf600104fbb438ba6"
+    },
+    {
+      "path": "scripts/check-platform-facade-pins.mjs",
+      "role": "platform facade protobuf/runtime pin policy",
+      "sha256": "0254cfa8dcdae6b46eb07def1c66f555a460ab505cfb5b3391613e3637f8d61c"
+    },
+    {
+      "path": "scripts/check-platform-facade-pins.test.mjs",
+      "role": "platform facade protobuf/runtime pin policy tests",
+      "sha256": "a8cefa094e0073325b2f7e94e2ff302ddb64c406a03e48b982bd1908082f5877"
+    },
+    {
+      "path": "scripts/check-release-readiness-policy-lock.mjs",
+      "role": "reviewed policy lock verifier",
+      "sha256": "4265d81d184800b8b4d27beb3adf40654543c339e1b5c20490bac79ad28edf00"
+    },
+    {
+      "path": "scripts/check-release-readiness-policy-lock.test.mjs",
+      "role": "reviewed policy lock verifier tests",
+      "sha256": "06b5dc27e41235e29d16af4159701e16ad938f50831cd2bed7e704fdf160be73"
+    },
+    {
+      "path": "scripts/check_release_readiness.test.mjs",
+      "role": "consumer policy declaration tests",
+      "sha256": "230f0992924d692aaec6feeeed8e835dcac7b89a5d2d3b7844f34efff6435a44"
+    },
+    {
+      "path": "scripts/ci-workflow-policy.test.mjs",
+      "role": "workflow policy tests",
+      "sha256": "34bfe06fc1b60b663f0400b0a8c99dd5a85ec1b16764f3d109a7ccac3aee1681"
+    },
+    {
+      "path": "scripts/build_swift_xcframework.sh",
+      "role": "Swift binary artifact builder",
+      "sha256": "a5fe32fb7661f3fb1cf6aea5c17ba23400779f667f042e3c93fae24790690f0f"
+    },
+    {
+      "path": "scripts/install_apple_barretenberg_static_archives.sh",
+      "role": "Apple Barretenberg static archive installer",
+      "sha256": "7fda8fd0e9446b01695e2cc168102bb90fefba07082cdc2df377a21a6ff00b35"
+    },
+    {
+      "path": "scripts/prepare_swift_binary_manifest.mjs",
+      "role": "Swift binary manifest binder",
+      "sha256": "84a044b007c414df5dfea1def76b3eeddfdbb8ab08cedd9a47a1418dfc21eeb0"
+    },
+    {
+      "path": "scripts/verify_sdk_release_version.mjs",
+      "role": "SDK release version verifier",
+      "sha256": "2c690d2599d8553bf67faeeea0f6ee1136efafd547b6dfe9b73e1d5d958c7e8b"
+    },
+    {
+      "path": "scripts/verify_swift_release_artifact.mjs",
+      "role": "Swift binary artifact verifier",
+      "sha256": "342c0fd3b3e87f21c21341253bfffc47b99552ed5f56c5c7ccec4f1aa3eb31b0"
+    },
+    {
+      "path": "scripts/release-readiness/core.mjs",
+      "role": "vendored fallback release-readiness core",
+      "sha256": "7614b0cbf9e36a4653c2fa9008bee0d1e22542de0e4a08a10e640c836a5c93db"
+    },
+    {
+      "path": "scripts/check-generated-protos.sh",
+      "role": "pinned generator freshness comparison",
+      "sha256": "7e01f968c94afb132e8a9367d1a331734878d70255e2c519441964c984cf803d"
+    },
+    {
+      "path": ".github/workflows/rust-ci.yml",
+      "role": "primary policy and exact-commit CI workflow",
+      "sha256": "b2d121794b82069c29364e02406daad3e210c30ee1ad32058584d8d57627264a"
+    },
+    {
+      "path": ".github/workflows/fuzz.yml",
+      "role": "fuzz policy workflow",
+      "sha256": "d40a4a6cdac07b349b7832032cfee68da9a39d015991afbb783b9f79c5daa156"
+    },
+    {
+      "path": ".github/workflows/sealed-release-attestation-policy.yml",
+      "role": "release policy workflow",
+      "sha256": "0d9660a82f2834bc08e5af159b1d9a84535195a5894330df4c1c03b73cce0df5"
+    },
+    {
+      "path": ".github/workflows/crates-package-preflight.yml",
+      "role": "crates package preflight workflow",
+      "sha256": "a7bad6af7835b047396e7414a990e28e98239b6a174b278920a232cb54a7b608"
+    },
+    {
+      "path": ".github/workflows/protobuf-ci.yml",
+      "role": "generated-freshness workflow",
+      "sha256": "4c6576324835dcd328b5d7f5f662e409b95d21d518b2b0a2aa1b4cf8f952bf36"
+    },
+    {
+      "path": ".github/workflows/swift-package-preflight.yml",
+      "role": "Swift binary package preflight workflow",
+      "sha256": "f874a5686cd6137ec1d06f2c82db51a4d3e9bbdd00deeda1d2797440b4ef3331"
+    },
+    {
+      "path": ".github/workflows/swift-package-release.yml",
+      "role": "Swift binary package release workflow",
+      "sha256": "aec3bc5f9ae0e6e166e5461289a7190f45438b046e0c07876255c45bf3b677ce"
+    },
+    {
+      "path": "scripts/test-modern-soundness-regressions.sh",
+      "role": "pinned Noir and Barretenberg soundness regressions",
+      "sha256": "198b1dced32c56f528179007f9cd84f7373dbac51484d2efcd4863fe79d4628a"
+    },
+    {
+      "path": "scripts/soundness-regression-assertions.sh",
+      "role": "strict prover rejection and independent proof mutation checks",
+      "sha256": "1803fc2232abdfe379b709ab2cc09aa3ced2271db7022941e70b31a9577ab077"
+    },
+    {
+      "path": "scripts/soundness-regression-assertions.test.mjs",
+      "role": "soundness assertion failure-path regression tests",
+      "sha256": "3071fafbd24c787c7827360157b66c416456d25fd228eeec3728381f24905f40"
+    },
+    {
+      "path": "scripts/static-upload-package.mjs",
+      "role": "bounded immutable static release upload staging",
+      "sha256": "6bf3a20274483ca5192433c136cf783c0291ecef744f2ebfdd8ce9d5e81b5103"
+    },
+    {
+      "path": "scripts/static-upload-package.test.mjs",
+      "role": "static release staging positive and rejection coverage",
+      "sha256": "032fb1f2c21fd81c66cfd9d5e8c40854e78d91172342dfc7b6b20df1ee60210d"
+    },
+    {
+      "path": ".gitleaks.toml",
+      "role": "scoped public-value secret scanner policy",
+      "sha256": "74656e6e04ae5c690035d21f87ddd46bc28c0b070d9736c1c4de511d8806343b"
+    },
+    {
+      "path": "scripts/check-gitleaks-policy.mjs",
+      "role": "secret scanner positive detection verification",
+      "sha256": "b2e3d9cc6e71aa7a43353eb347fc5f5bfe9605b4f345832ea2805bb1ea039139"
+    },
+    {
+      "path": "requirements-circuits-ci.txt",
+      "role": "hash-pinned circuit fixture dependency graph",
+      "sha256": "16d61707e62588c2c12fb5935803a9fa271d2efe6a2942e5fd69543688102539"
+    },
+    {
+      "path": "scripts/prepare_android_native_manifest.mjs",
+      "role": "current-source Android CI manifest binder",
+      "sha256": "948446d9b733644d9f841e880a0369959058e82b0eceae0ca19b9b15be2992d1"
+    },
+    {
+      "path": "scripts/prepare_android_native_manifest.test.mjs",
+      "role": "Android source manifest binder tests",
+      "sha256": "825c973b1006713c4589ca642990be5c49cf37b0c04e031ad4027739e07cbc0b"
+    },
+    {
+      "path": "scripts/release-artifact-cache.mjs",
+      "role": "distribution manifest and artifact admission",
+      "sha256": "f81ebccecbec2e5b52c797882c1206367a7658349e7d9d41197f256f8bf93c4a"
+    },
+    {
+      "path": "scripts/release-artifact-cache.test.mjs",
+      "role": "artifact admission and authenticated transport tests",
+      "sha256": "ac8e861059840d63702909ff6a81f616c232496ade31782c4cb65899389bc58e"
+    },
+    {
+      "path": "scripts/check-platform-ffi-symbols.sh",
+      "role": "native ABI visibility admission",
+      "sha256": "d7bcd60651b382a90d5b49acc258bf1612d256c5b8794357ac2ce5388154d617"
+    },
+    {
+      "path": "scripts/check-platform-ffi-symbols.test.mjs",
+      "role": "native ABI tool discovery and visibility tests",
+      "sha256": "1ee1f30ac5e6eae71f7973ef799e66c05f1d7da363988e56cfc9b9cbf8504469"
+    },
+    {
+      "path": "scripts/r2-artifact-source.mjs",
+      "role": "bounded read-only R2 artifact transport",
+      "sha256": "70ad795677ebcae68faf76b9515272326aa530d8d7bccc771ad9f3bd54f464a0"
+    },
+    {
+      "path": "scripts/r2-artifact-source.test.mjs",
+      "role": "R2 signing isolation and failure-path tests",
+      "sha256": "f929f34e02178b91cf2752452beacf9b0aa2c3008bd82790f5cb5b8390748bf4"
+    },
+    {
+      "path": "scripts/ci-change-scope.mjs",
+      "role": "changed-source lane selection and fail-closed aggregation",
+      "sha256": "9d77948a5a5283dbb4674fea02062b85f56887ed8b9d33dca9dd98f90cfbfa63"
+    },
+    {
+      "path": "scripts/ci-change-scope.test.mjs",
+      "role": "source scope and skipped-lane regression tests",
+      "sha256": "1fd8a02578b2e72c0ae651d44cc433592752d4c9bc14f99efbd33b2836f0b647"
+    },
+    {
+      "path": "scripts/select-ci-scope.mjs",
+      "role": "bounded Git diff adapter",
+      "sha256": "a57496d65c5e003e6213602de167c2783920b688c997cd55a0d5a9e15e23ca59"
+    },
+    {
+      "path": "scripts/require-ci-results.mjs",
+      "role": "required-job result admission",
+      "sha256": "5713fa106bf357cda0de0da5c132707cbaa25b5c4fb124d1bee2ebe1db7cf2fe"
+    },
+    {
+      "path": "scripts/check-platform-policy-delegation.mjs",
+      "role": "platform source policy delegation checker",
+      "sha256": "696d48716e407af12637be44fd6400c54816e5e11201a65262cd112c6523e646"
+    },
+    {
+      "path": "scripts/check-platform-policy-delegation.test.mjs",
+      "role": "conditional platform delegation tests",
+      "sha256": "6b88a364811ebb7bc0886b54178efaf52d331492c135742155cbf58d9540440c"
+    },
+    {
+      "path": "scripts/verify_required_ci.mjs",
+      "role": "exact-commit release qualification admission",
+      "sha256": "8d8a953b32ffe1f6d60fcbd64f48171d3ed85272d123791fe732d32d1ad0ae4c"
+    },
+    {
+      "path": "scripts/verify_required_ci.test.mjs",
+      "role": "release qualification and zero-wait evidence tests",
+      "sha256": "9637cd4558846d98f6ba487d75d2d81a9e078be01163fe7a58710092e1340643"
+    },
+    {
+      "path": "scripts/test-modern-production-circuits.sh",
+      "role": "single-pass CI and repeated promotion proving",
+      "sha256": "57b5588399c049d55183326ef69c7531d9437e77d5a7d16a4699f794f6cc2ea2"
+    },
+    {
+      "path": "scripts/build_android_barretenberg_static_archive.sh",
+      "role": "pinned Android upstream builder and cache admission",
+      "sha256": "8f96e2f7e753546c33c5c78921c83f8d878ccff5f76df1420baecf15c55ed605"
+    },
+    {
+      "path": "scripts/android-upstream-cache.test.mjs",
+      "role": "Android cache tampering and compiler-free admission tests",
+      "sha256": "2ef49a7156dc53a81d3b3734e19c18e79e7ccd31a6fa22ee8e7ab2d47631a7c5"
+    }
+  ],
+  "requiredFragments": [
+    {
+      "path": "scripts/check_release_readiness.mjs",
+      "contains": [
+        "RELEASE_READINESS_CORE_URL",
+        "assertReallyMeReleasePackagePolicy",
+        "version: \"0.7.0\"",
+        "scripts/check-release-readiness-policy-lock.mjs",
+        "scripts/check-platform-facade-pins.mjs",
+        "scripts/check-platform-facade-pins.test.mjs"
+      ]
+    },
+    {
+      "path": "scripts/check-platform-facade-pins.mjs",
+      "contains": [
+        "SWIFT_RUNTIME_OLDER_THAN_GENERATOR",
+        "JAVALITE_RUNTIME_OLDER_THAN_GENERATED",
+        "KOTLIN_LITE_RUNTIME_OLDER_THAN_GENERATED",
+        "KOTLIN_SUBPROJECT_VERSION_PIN_"
+      ]
+    },
+    {
+      "path": ".github/workflows/rust-ci.yml",
+      "contains": [
+        "node scripts/check-release-readiness-policy-lock.mjs",
+        "repository: reallyme/release-readiness",
+        "ref: 18a6d91d99837e80f92e41fe04effb0b043d754e",
+        "node .release-readiness/scripts/run-consumer-check.mjs --policy-only",
+        "node scripts/select-ci-scope.mjs",
+        "node scripts/require-ci-results.mjs",
+        "RUNS: ${{ github.event_name == 'workflow_dispatch' && '3' || '1' }}"
+      ]
+    },
+    {
+      "path": ".github/workflows/sealed-release-attestation-policy.yml",
+      "contains": [
+        "release-readiness-policy.lock.json",
+        "scripts/check-release-readiness-policy-lock.mjs",
+        "--package=https://codeload.github.com/reallyme/release-readiness/tar.gz/18a6d91d99837e80f92e41fe04effb0b043d754e",
+        "-- reallyme-release-readiness --policy-only"
+      ]
+    },
+    {
+      "path": ".github/workflows/crates-package-preflight.yml",
+      "contains": [
+        "repository: reallyme/release-readiness",
+        "ref: 18a6d91d99837e80f92e41fe04effb0b043d754e",
+        "node .release-readiness/scripts/run-consumer-check.mjs --policy-only"
+      ]
+    },
+    {
+      "path": ".github/workflows/protobuf-ci.yml",
+      "contains": [
+        "scripts/check-generated-protos.sh",
+        "scripts/check-proto-breaking.sh"
+      ]
+    },
+    {
+      "path": "scripts/check-generated-protos.sh",
+      "contains": [
+        "scripts/generate-zk-platform-protos.sh",
+        "diff -r -q"
+      ]
+    }
+  ]
+}

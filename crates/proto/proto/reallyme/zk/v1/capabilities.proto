@@ -1,0 +1,63 @@
+// SPDX-FileCopyrightText: Copyright © 2026 ReallyMe Technologies Limited. All rights reserved
+//
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
+syntax = "proto3";
+
+package reallyme.zk.v1;
+
+// Whether a selected claim value is hidden or disclosed; predicates are separate.
+enum ZkDisclosureMode {
+  ZK_DISCLOSURE_MODE_UNSPECIFIED = 0;
+  ZK_DISCLOSURE_MODE_HIDDEN = 1;
+  ZK_DISCLOSURE_MODE_REVEAL = 2;
+}
+
+// Predicate vocabulary is independent of disclosure. A declared enum value
+// does not imply circuit support; only predicate_types advertises support.
+enum ZkPredicateType {
+  ZK_PREDICATE_TYPE_UNSPECIFIED = 0;
+  ZK_PREDICATE_TYPE_GREATER_THAN_OR_EQUAL = 1;
+  ZK_PREDICATE_TYPE_LESS_THAN_OR_EQUAL = 2;
+  ZK_PREDICATE_TYPE_RANGE = 3;
+}
+
+// Semantic guarantees asserted by a circuit revision.
+enum ZkSemanticGuarantee {
+  ZK_SEMANTIC_GUARANTEE_UNSPECIFIED = 0;
+  ZK_SEMANTIC_GUARANTEE_SESSION_BOUND = 1;
+  ZK_SEMANTIC_GUARANTEE_AUDIENCE_BOUND = 2;
+  ZK_SEMANTIC_GUARANTEE_TRANSACTION_DATA_BOUND = 3;
+  ZK_SEMANTIC_GUARANTEE_CREDENTIAL_AUTHENTICITY = 4;
+  ZK_SEMANTIC_GUARANTEE_CLAIM_INTEGRITY = 5;
+  ZK_SEMANTIC_GUARANTEE_PRIVATE_PERSONA_BINDING = 6;
+  ZK_SEMANTIC_GUARANTEE_LINKABLE_PERSONA_BINDING = 7;
+}
+
+// Whether a circuit proves binding to the credential subject.
+enum ZkSubjectBinding {
+  ZK_SUBJECT_BINDING_UNSPECIFIED = 0;
+  ZK_SUBJECT_BINDING_REQUIRED = 1;
+  ZK_SUBJECT_BINDING_FORBIDDEN = 2;
+  ZK_SUBJECT_BINDING_OPTIONAL = 3;
+}
+
+// Whether a circuit proves binding to a wallet/persona key.
+enum ZkPersonaBinding {
+  ZK_PERSONA_BINDING_UNSPECIFIED = 0;
+  ZK_PERSONA_BINDING_REQUIRED = 1;
+  ZK_PERSONA_BINDING_FORBIDDEN = 2;
+  ZK_PERSONA_BINDING_OPTIONAL = 3;
+}
+
+// Registry capabilities for a circuit version.
+message ZkCircuitCapabilities {
+  ZkSubjectBinding subject_binding = 1;
+  ZkPersonaBinding persona_binding = 2;
+  // Capability metadata, not permission: observers may correlate presentations.
+  bool may_be_correlated = 3;
+  repeated ZkDisclosureMode disclosure_modes = 4;
+  repeated ZkSemanticGuarantee semantic_guarantees = 5;
+  // Empty for every current circuit. Disclosure alone advertises no predicate.
+  repeated ZkPredicateType predicate_types = 6;
+}

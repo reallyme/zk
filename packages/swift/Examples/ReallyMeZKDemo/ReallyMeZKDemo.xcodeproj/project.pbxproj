@@ -1,0 +1,656 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		84FEE0072F7400000099E3F7 /* zk_demo in Resources */ = {isa = PBXBuildFile; fileRef = 84FEE0062F7400000099E3F7 /* zk_demo */; };
+		84FEE00D2F7400000099E3F7 /* ReallyMeZKDemoBundle in Frameworks */ = {isa = PBXBuildFile; productRef = 84FEE00E2F7400000099E3F7 /* ReallyMeZKDemoBundle */; };
+		84FEE00F2F7400000099E3F7 /* ReallyMeZKDemoBundle in Frameworks */ = {isa = PBXBuildFile; productRef = 84FEE00E2F7400000099E3F7 /* ReallyMeZKDemoBundle */; };
+		84FEE0102F7400000099E3F7 /* ReallyMeZKDemoBundle in Embed Frameworks */ = {isa = PBXBuildFile; productRef = 84FEE00E2F7400000099E3F7 /* ReallyMeZKDemoBundle */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		84FDE3FD2D08F5000099E3F7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 84FDE3E22D08F4FF0099E3F7 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 84FDE3E92D08F4FF0099E3F7;
+			remoteInfo = ReallyMeZKDemo;
+		};
+		84FDE4072D08F5000099E3F7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 84FDE3E22D08F4FF0099E3F7 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 84FDE3E92D08F4FF0099E3F7;
+			remoteInfo = ReallyMeZKDemo;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		846E7C162F4E71FB00BCCB33 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				84FEE0102F7400000099E3F7 /* ReallyMeZKDemoBundle in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		84FDE3EA2D08F4FF0099E3F7 /* ReallyMeZKDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ReallyMeZKDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		84FDE3FC2D08F5000099E3F7 /* ReallyMeZKDemoTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ReallyMeZKDemoTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		84FDE4062D08F5000099E3F7 /* ReallyMeZKDemoUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ReallyMeZKDemoUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		84FEE0042F7400000099E3F7 /* ReallyMeZKPlatformFFI.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = ReallyMeZKPlatformFFI.xcframework; path = "../../../../release-artifacts/modern-v1-bb-6.0.0/apple-platform-ffi/ReallyMeZKPlatformFFI.xcframework"; sourceTree = SOURCE_ROOT; };
+		84FEE0062F7400000099E3F7 /* zk_demo */ = {isa = PBXFileReference; lastKnownFileType = folder; name = zk_demo; path = "../../../../release-artifacts/modern-v1-bb-6.0.0/ios-demo-resources/zk_demo"; sourceTree = SOURCE_ROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		84FDE5082D108D470099E3F7 /* Exceptions for "ReallyMeZKDemo" folder in "ReallyMeZKDemo" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+				Resources/zk_demo,
+			);
+			target = 84FDE3E92D08F4FF0099E3F7 /* ReallyMeZKDemo */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		84FDE3EC2D08F4FF0099E3F7 /* ReallyMeZKDemo */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				84FDE5082D108D470099E3F7 /* Exceptions for "ReallyMeZKDemo" folder in "ReallyMeZKDemo" target */,
+			);
+			path = ReallyMeZKDemo;
+			sourceTree = "<group>";
+		};
+		84FDE3FF2D08F5000099E3F7 /* ReallyMeZKDemoTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = ReallyMeZKDemoTests;
+			sourceTree = "<group>";
+		};
+		84FDE4092D08F5000099E3F7 /* ReallyMeZKDemoUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = ReallyMeZKDemoUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		84FDE3E72D08F4FF0099E3F7 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				84FEE00D2F7400000099E3F7 /* ReallyMeZKDemoBundle in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		84FDE3F92D08F5000099E3F7 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				84FEE00F2F7400000099E3F7 /* ReallyMeZKDemoBundle in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		84FDE4032D08F5000099E3F7 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		84FDE3E12D08F4FF0099E3F7 = {
+			isa = PBXGroup;
+			children = (
+				84FDE3EC2D08F4FF0099E3F7 /* ReallyMeZKDemo */,
+				84FDE3FF2D08F5000099E3F7 /* ReallyMeZKDemoTests */,
+				84FDE4092D08F5000099E3F7 /* ReallyMeZKDemoUITests */,
+				84FEE0042F7400000099E3F7 /* ReallyMeZKPlatformFFI.xcframework */,
+				84FEE0062F7400000099E3F7 /* zk_demo */,
+				84FDE3EB2D08F4FF0099E3F7 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		84FDE3EB2D08F4FF0099E3F7 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				84FDE3EA2D08F4FF0099E3F7 /* ReallyMeZKDemo.app */,
+				84FDE3FC2D08F5000099E3F7 /* ReallyMeZKDemoTests.xctest */,
+				84FDE4062D08F5000099E3F7 /* ReallyMeZKDemoUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		84FDE3E92D08F4FF0099E3F7 /* ReallyMeZKDemo */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 84FDE4102D08F5000099E3F7 /* Build configuration list for PBXNativeTarget "ReallyMeZKDemo" */;
+			buildPhases = (
+				84FDE3E62D08F4FF0099E3F7 /* Sources */,
+				84FDE3E72D08F4FF0099E3F7 /* Frameworks */,
+				84FDE3E82D08F4FF0099E3F7 /* Resources */,
+				846E7C162F4E71FB00BCCB33 /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				84FDE3EC2D08F4FF0099E3F7 /* ReallyMeZKDemo */,
+			);
+			name = ReallyMeZKDemo;
+			packageProductDependencies = (
+				84FEE00E2F7400000099E3F7 /* ReallyMeZKDemoBundle */,
+			);
+			productName = ReallyMeZKDemo;
+			productReference = 84FDE3EA2D08F4FF0099E3F7 /* ReallyMeZKDemo.app */;
+			productType = "com.apple.product-type.application";
+		};
+		84FDE3FB2D08F5000099E3F7 /* ReallyMeZKDemoTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 84FDE4132D08F5000099E3F7 /* Build configuration list for PBXNativeTarget "ReallyMeZKDemoTests" */;
+			buildPhases = (
+				84FDE3F82D08F5000099E3F7 /* Sources */,
+				84FDE3F92D08F5000099E3F7 /* Frameworks */,
+				84FDE3FA2D08F5000099E3F7 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				84FDE3FE2D08F5000099E3F7 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				84FDE3FF2D08F5000099E3F7 /* ReallyMeZKDemoTests */,
+			);
+			name = ReallyMeZKDemoTests;
+			packageProductDependencies = (
+				84FEE00E2F7400000099E3F7 /* ReallyMeZKDemoBundle */,
+			);
+			productName = ReallyMeZKDemoTests;
+			productReference = 84FDE3FC2D08F5000099E3F7 /* ReallyMeZKDemoTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		84FDE4052D08F5000099E3F7 /* ReallyMeZKDemoUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 84FDE4162D08F5000099E3F7 /* Build configuration list for PBXNativeTarget "ReallyMeZKDemoUITests" */;
+			buildPhases = (
+				84FDE4022D08F5000099E3F7 /* Sources */,
+				84FDE4032D08F5000099E3F7 /* Frameworks */,
+				84FDE4042D08F5000099E3F7 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				84FDE4082D08F5000099E3F7 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				84FDE4092D08F5000099E3F7 /* ReallyMeZKDemoUITests */,
+			);
+			name = ReallyMeZKDemoUITests;
+			packageProductDependencies = (
+			);
+			productName = ReallyMeZKDemoUITests;
+			productReference = 84FDE4062D08F5000099E3F7 /* ReallyMeZKDemoUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		84FDE3E22D08F4FF0099E3F7 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1610;
+				LastUpgradeCheck = 2700;
+				TargetAttributes = {
+					84FDE3E92D08F4FF0099E3F7 = {
+						CreatedOnToolsVersion = 16.1;
+					};
+					84FDE3FB2D08F5000099E3F7 = {
+						CreatedOnToolsVersion = 16.1;
+						TestTargetID = 84FDE3E92D08F4FF0099E3F7;
+					};
+					84FDE4052D08F5000099E3F7 = {
+						CreatedOnToolsVersion = 16.1;
+						TestTargetID = 84FDE3E92D08F4FF0099E3F7;
+					};
+				};
+			};
+			buildConfigurationList = 84FDE3E52D08F4FF0099E3F7 /* Build configuration list for PBXProject "ReallyMeZKDemo" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 84FDE3E12D08F4FF0099E3F7;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				84FEE0052F7400000099E3F7 /* XCLocalSwiftPackageReference "../../../.." */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 84FDE3EB2D08F4FF0099E3F7 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				84FDE3E92D08F4FF0099E3F7 /* ReallyMeZKDemo */,
+				84FDE3FB2D08F5000099E3F7 /* ReallyMeZKDemoTests */,
+				84FDE4052D08F5000099E3F7 /* ReallyMeZKDemoUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		84FDE3E82D08F4FF0099E3F7 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				84FEE0072F7400000099E3F7 /* zk_demo in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		84FDE3FA2D08F5000099E3F7 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		84FDE4042D08F5000099E3F7 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		84FDE3E62D08F4FF0099E3F7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		84FDE3F82D08F5000099E3F7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		84FDE4022D08F5000099E3F7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		84FDE3FE2D08F5000099E3F7 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 84FDE3E92D08F4FF0099E3F7 /* ReallyMeZKDemo */;
+			targetProxy = 84FDE3FD2D08F5000099E3F7 /* PBXContainerItemProxy */;
+		};
+		84FDE4082D08F5000099E3F7 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 84FDE3E92D08F4FF0099E3F7 /* ReallyMeZKDemo */;
+			targetProxy = 84FDE4072D08F5000099E3F7 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		84FDE40E2D08F5000099E3F7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = x86_64;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "This app requires camera access to scan MRZ data.";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "2024 by ReallyMe Technologies Limited";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		84FDE40F2D08F5000099E3F7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = x86_64;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "This app requires camera access to scan MRZ data.";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "2024 by ReallyMe Technologies Limited";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		84FDE4112D08F5000099E3F7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ReallyMeZKDemo/Info.plist;
+				INFOPLIST_KEY_NFCReaderUsageDescription = "This app uses NFC to read data from passports, ID cards, and other secure documents.";
+				INFOPLIST_KEY_NSCameraUsageDescription = "This app requires camera access to scan MRZ data.";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "2024 by ReallyMe Technologies Limited";
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-lc++",
+					"-lz",
+					"-Wl,-unexported_symbol,_bbapi",
+					"-Wl,-unexported_symbol,_bbmalloc",
+					"-Wl,-unexported_symbol,_bbfree",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = me.really.zk.demo;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		84FDE4122D08F5000099E3F7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ReallyMeZKDemo/Info.plist;
+				INFOPLIST_KEY_NFCReaderUsageDescription = "This app uses NFC to read data from passports, ID cards, and other secure documents.";
+				INFOPLIST_KEY_NSCameraUsageDescription = "This app requires camera access to scan MRZ data.";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "2024 by ReallyMe Technologies Limited";
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-lc++",
+					"-lz",
+					"-Wl,-unexported_symbol,_bbapi",
+					"-Wl,-unexported_symbol,_bbmalloc",
+					"-Wl,-unexported_symbol,_bbfree",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = me.really.zk.demo;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		84FDE4142D08F5000099E3F7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = me.really.zk.demoTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ReallyMeZKDemo.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/ReallyMeZKDemo";
+			};
+			name = Debug;
+		};
+		84FDE4152D08F5000099E3F7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = me.really.zk.demoTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ReallyMeZKDemo.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/ReallyMeZKDemo";
+			};
+			name = Release;
+		};
+		84FDE4172D08F5000099E3F7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = me.really.zk.demoUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = ReallyMeZKDemo;
+			};
+			name = Debug;
+		};
+		84FDE4182D08F5000099E3F7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = me.really.zk.demoUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = ReallyMeZKDemo;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		84FDE3E52D08F4FF0099E3F7 /* Build configuration list for PBXProject "ReallyMeZKDemo" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				84FDE40E2D08F5000099E3F7 /* Debug */,
+				84FDE40F2D08F5000099E3F7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		84FDE4102D08F5000099E3F7 /* Build configuration list for PBXNativeTarget "ReallyMeZKDemo" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				84FDE4112D08F5000099E3F7 /* Debug */,
+				84FDE4122D08F5000099E3F7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		84FDE4132D08F5000099E3F7 /* Build configuration list for PBXNativeTarget "ReallyMeZKDemoTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				84FDE4142D08F5000099E3F7 /* Debug */,
+				84FDE4152D08F5000099E3F7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		84FDE4162D08F5000099E3F7 /* Build configuration list for PBXNativeTarget "ReallyMeZKDemoUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				84FDE4172D08F5000099E3F7 /* Debug */,
+				84FDE4182D08F5000099E3F7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		84FEE0052F7400000099E3F7 /* XCLocalSwiftPackageReference "../../../.." */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../../../..;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		84FEE00E2F7400000099E3F7 /* ReallyMeZKDemoBundle */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 84FEE0052F7400000099E3F7 /* XCLocalSwiftPackageReference "../../../.." */;
+			productName = ReallyMeZKDemoBundle;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 84FDE3E22D08F4FF0099E3F7 /* Project object */;
+}

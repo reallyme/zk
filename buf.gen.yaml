@@ -1,0 +1,27 @@
+# SPDX-FileCopyrightText: Copyright © 2026 ReallyMe Technologies Limited. All rights reserved
+#
+# SPDX-License-Identifier: MIT OR Apache-2.0
+
+version: v2
+clean: true
+plugins:
+  - local: protoc-gen-buffa
+    out: crates/proto/src/generated/buffa
+    strategy: all
+    opt: [views=true, json=true]
+  - local: protoc-gen-buffa-packaging
+    out: crates/proto/src/generated/buffa
+    strategy: all
+  - remote: buf.build/apple/swift:v1.39.0
+    out: packages/swift/Sources/Generated/ReallyMeZkProtoGenerated
+    opt:
+      - Visibility=Public
+      - FileNaming=PathToUnderscores
+  - remote: buf.build/protocolbuffers/java:v35.1
+    out: gen/java/zk
+    opt:
+      - lite
+  - remote: buf.build/protocolbuffers/kotlin:v35.1
+    out: gen/kotlin/zk
+    opt:
+      - lite

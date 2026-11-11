@@ -1,0 +1,68 @@
+# SPDX-FileCopyrightText: Copyright © 2026 ReallyMe Technologies Limited. All rights reserved
+#
+# SPDX-License-Identifier: MIT OR Apache-2.0
+
+[graph]
+targets = [
+    "x86_64-unknown-linux-gnu",
+    "aarch64-unknown-linux-gnu",
+    "wasm32-unknown-unknown",
+    "aarch64-apple-ios",
+    "aarch64-linux-android",
+]
+all-features = true
+no-default-features = false
+
+[output]
+feature-depth = 1
+
+[advisories]
+ignore = []
+yanked = "deny"
+
+[licenses]
+confidence-threshold = 0.93
+allow = [
+    "Apache-2.0",
+    "BSD-3-Clause",
+    "MIT",
+    "NCSA",
+    "Unicode-3.0",
+    "Zlib",
+]
+exceptions = []
+
+[licenses.private]
+ignore = true
+registries = []
+
+[bans]
+multiple-versions = "deny"
+wildcards = "deny"
+highlight = "all"
+workspace-default-features = "allow"
+external-default-features = "allow"
+deny = []
+# These exact exceptions cover only duplicate versions in the committed fuzz
+# graph. Production-only compiler dependencies are reviewed in the root policy.
+skip = [
+    { name = "base64", version = "=0.22.1" },
+    { name = "crypto-common", version = "=0.1.7" },
+    { name = "digest", version = "=0.10.7" },
+    { name = "getrandom", version = "=0.2.17" },
+    { name = "hashbrown", version = "=0.15.5" },
+    { name = "rand_core", version = "=0.6.4" },
+    { name = "syn", version = "=3.0.10" },
+]
+skip-tree = []
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]
+allow-git = []
+
+[sources.allow-org]
+github = []
+gitlab = []
+bitbucket = []

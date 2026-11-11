@@ -1,0 +1,376 @@
+{
+  "abi_version": 1,
+  "error_types": {
+    "11237793718593688902": {
+      "error_kind": "string",
+      "string": "credential inactive"
+    },
+    "12030568887398788535": {
+      "error_kind": "string",
+      "string": "unused status path entry"
+    },
+    "12586772248037545758": {
+      "error_kind": "string",
+      "string": "empty status list"
+    },
+    "12654599843986237238": {
+      "error_kind": "string",
+      "string": "noncanonical status path length"
+    },
+    "13449272851463246336": {
+      "error_kind": "string",
+      "string": "invalid credential interval"
+    },
+    "13884211347143521174": {
+      "error_kind": "string",
+      "string": "issuer validity or status signature invalid"
+    },
+    "14486391642420115797": {
+      "error_kind": "string",
+      "string": "Field failed to decompose into specified 3 limbs"
+    },
+    "14990209321349310352": {
+      "error_kind": "string",
+      "string": "attempt to add with overflow"
+    },
+    "16843928159449900876": {
+      "error_kind": "string",
+      "string": "empty token nonce"
+    },
+    "16867938931504519215": {
+      "error_kind": "string",
+      "string": "invalid status purpose"
+    },
+    "17215908410201856774": {
+      "error_kind": "string",
+      "string": "prepared before credential validity"
+    },
+    "17260419276252615619": {
+      "error_kind": "string",
+      "string": "prepared after credential validity"
+    },
+    "361444214588792908": {
+      "error_kind": "string",
+      "string": "attempt to multiply with overflow"
+    },
+    "4236046965106301375": {
+      "error_kind": "string",
+      "string": "status list too large"
+    },
+    "4956898014500841329": {
+      "error_kind": "string",
+      "string": "credential binding mismatch"
+    },
+    "5246397748741640555": {
+      "error_kind": "string",
+      "string": "issuer status root mismatch"
+    },
+    "5421095327929394772": {
+      "error_kind": "string",
+      "string": "attempt to bit-shift with overflow"
+    },
+    "5998962898627848809": {
+      "error_kind": "string",
+      "string": "empty holder key"
+    },
+    "6879555566783056692": {
+      "error_kind": "string",
+      "string": "invalid prepared interval"
+    },
+    "783827026176869946": {
+      "error_kind": "string",
+      "string": "unused status index bit"
+    },
+    "8497702622121780052": {
+      "error_kind": "string",
+      "string": "status tree too deep"
+    },
+    "9572405725281442998": {
+      "error_kind": "string",
+      "string": "status index out of range"
+    }
+  },
+  "parameters": [
+    {
+      "name": "slot",
+      "type": {
+        "fields": [
+          {
+            "name": "issuer_x",
+            "type": {
+              "kind": "array",
+              "length": 32,
+              "type": {
+                "kind": "integer",
+                "sign": "unsigned",
+                "width": 8
+              }
+            }
+          },
+          {
+            "name": "issuer_y",
+            "type": {
+              "kind": "array",
+              "length": 32,
+              "type": {
+                "kind": "integer",
+                "sign": "unsigned",
+                "width": 8
+              }
+            }
+          },
+          {
+            "name": "holder_x",
+            "type": {
+              "kind": "array",
+              "length": 32,
+              "type": {
+                "kind": "integer",
+                "sign": "unsigned",
+                "width": 8
+              }
+            }
+          },
+          {
+            "name": "holder_y",
+            "type": {
+              "kind": "array",
+              "length": 32,
+              "type": {
+                "kind": "integer",
+                "sign": "unsigned",
+                "width": 8
+              }
+            }
+          },
+          {
+            "name": "token_nonce",
+            "type": {
+              "kind": "array",
+              "length": 32,
+              "type": {
+                "kind": "integer",
+                "sign": "unsigned",
+                "width": 8
+              }
+            }
+          },
+          {
+            "name": "prepared_from",
+            "type": {
+              "kind": "integer",
+              "sign": "unsigned",
+              "width": 64
+            }
+          },
+          {
+            "name": "prepared_until",
+            "type": {
+              "kind": "integer",
+              "sign": "unsigned",
+              "width": 64
+            }
+          },
+          {
+            "name": "credential_binding",
+            "type": {
+              "kind": "array",
+              "length": 32,
+              "type": {
+                "kind": "integer",
+                "sign": "unsigned",
+                "width": 8
+              }
+            }
+          },
+          {
+            "name": "status_root",
+            "type": {
+              "kind": "array",
+              "length": 32,
+              "type": {
+                "kind": "integer",
+                "sign": "unsigned",
+                "width": 8
+              }
+            }
+          },
+          {
+            "name": "status_length",
+            "type": {
+              "kind": "integer",
+              "sign": "unsigned",
+              "width": 64
+            }
+          },
+          {
+            "name": "status_list_id",
+            "type": {
+              "kind": "array",
+              "length": 32,
+              "type": {
+                "kind": "integer",
+                "sign": "unsigned",
+                "width": 8
+              }
+            }
+          },
+          {
+            "name": "status_url_hash",
+            "type": {
+              "kind": "array",
+              "length": 32,
+              "type": {
+                "kind": "integer",
+                "sign": "unsigned",
+                "width": 8
+              }
+            }
+          },
+          {
+            "name": "status_purpose",
+            "type": {
+              "kind": "integer",
+              "sign": "unsigned",
+              "width": 8
+            }
+          }
+        ],
+        "kind": "struct",
+        "path": "PublicPreparedCurrentState"
+      },
+      "visibility": "public"
+    },
+    {
+      "name": "witness",
+      "type": {
+        "fields": [
+          {
+            "name": "envelope_hash",
+            "type": {
+              "kind": "array",
+              "length": 32,
+              "type": {
+                "kind": "integer",
+                "sign": "unsigned",
+                "width": 8
+              }
+            }
+          },
+          {
+            "name": "claims_root",
+            "type": {
+              "kind": "array",
+              "length": 32,
+              "type": {
+                "kind": "integer",
+                "sign": "unsigned",
+                "width": 8
+              }
+            }
+          },
+          {
+            "name": "subject_x",
+            "type": {
+              "kind": "array",
+              "length": 32,
+              "type": {
+                "kind": "integer",
+                "sign": "unsigned",
+                "width": 8
+              }
+            }
+          },
+          {
+            "name": "subject_y",
+            "type": {
+              "kind": "array",
+              "length": 32,
+              "type": {
+                "kind": "integer",
+                "sign": "unsigned",
+                "width": 8
+              }
+            }
+          },
+          {
+            "name": "issuer_validity_status_signature",
+            "type": {
+              "kind": "array",
+              "length": 64,
+              "type": {
+                "kind": "integer",
+                "sign": "unsigned",
+                "width": 8
+              }
+            }
+          },
+          {
+            "name": "valid_from",
+            "type": {
+              "kind": "integer",
+              "sign": "unsigned",
+              "width": 64
+            }
+          },
+          {
+            "name": "valid_until",
+            "type": {
+              "kind": "integer",
+              "sign": "unsigned",
+              "width": 64
+            }
+          },
+          {
+            "name": "status_index",
+            "type": {
+              "kind": "integer",
+              "sign": "unsigned",
+              "width": 64
+            }
+          },
+          {
+            "name": "status_chunk",
+            "type": {
+              "kind": "array",
+              "length": 32,
+              "type": {
+                "kind": "integer",
+                "sign": "unsigned",
+                "width": 8
+              }
+            }
+          },
+          {
+            "name": "path_len",
+            "type": {
+              "kind": "integer",
+              "sign": "unsigned",
+              "width": 32
+            }
+          },
+          {
+            "name": "path",
+            "type": {
+              "kind": "array",
+              "length": 12,
+              "type": {
+                "kind": "array",
+                "length": 32,
+                "type": {
+                  "kind": "integer",
+                  "sign": "unsigned",
+                  "width": 8
+                }
+              }
+            }
+          }
+        ],
+        "kind": "struct",
+        "path": "PrivatePreparedCurrentState"
+      },
+      "visibility": "private"
+    }
+  ],
+  "return_type": null
+}

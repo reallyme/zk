@@ -1,0 +1,98 @@
+# SPDX-FileCopyrightText: Copyright © 2026 ReallyMe Technologies Limited. All rights reserved
+# SPDX-License-Identifier: MIT OR Apache-2.0
+
+schema: reallyme.identity.conformance_evidence_map.v1
+repository: reallyme/zk
+# Circuit and backend tests require requirement-specific review before a row can
+# be promoted; no broad test-suite claim is treated as implementation evidence.
+requirements:
+  command:identity.zero_knowledge.create_predicate_proof:
+    accepted_requirement_sha256: 797b605a0e202044021a20b9392fe805715ff5623f32445c1567d5dd6a02939a
+    status: not_applicable
+    reason_code: unsupported_profile
+    evidence: []
+  command:identity.zero_knowledge.create_proof:
+    accepted_requirement_sha256: 7c6c34d14493ebed613f38c99cb9423443c184e5aff715277fbd3d3adaec0c9b
+    status: implemented
+    reason_code:
+    evidence:
+      - artifact_id:
+        class: code_symbol
+        path: crates/api/src/traits.rs
+        source_sha256: 81262aff97e2318d07ec36625c842399c4a7379bb22c5fe2089e0236052f373f
+        symbol: "fn prove(&self, request: ZkProveRequest<'_>)"
+      - artifact_id:
+        class: behavior_test
+        path: crates/backend-bb/tests/openid4vp_stage_provider_tests.rs
+        source_sha256: edc8aa67add2b46bfa6b717fe481f9e43d6eaa6a4c30f65f6a5bf0f26ca2aaf2
+        symbol: diagnostic_stage_proving_uses_backend_bb_artifact_provider
+      - artifact_id:
+        class: invalid_input_test
+        path: crates/backend-bb/tests/openid4vp_stage_provider_tests.rs
+        source_sha256: edc8aa67add2b46bfa6b717fe481f9e43d6eaa6a4c30f65f6a5bf0f26ca2aaf2
+        symbol: openid4vp_rejects_cross_circuit_witness_before_backend_use
+      - artifact_id:
+        class: round_trip_test
+        path: crates/backend-bb/tests/native_linked_all30_prove_verify.rs
+        source_sha256: 640cabc3dbbd76566526e144585839ee97e56b7bf4baca86703d9ee262d1daf7
+        symbol: native_backend_proves_and_verifies_retained_request_bound_circuits
+  command:identity.zero_knowledge.derive_proof:
+    accepted_requirement_sha256: 998884bde1422d388ce95288c73b04db941ace5a802f4d95053f270ceaf27b3b
+    status: not_applicable
+    reason_code: unsupported_profile
+    evidence: []
+  command:identity.zero_knowledge.get_supported_suites:
+    accepted_requirement_sha256: affae6a25150d6064b0b8d626afb0a295ded84409371273cc135838f3d905868
+    status: not_applicable
+    reason_code: capability_not_selected
+    evidence: []
+  command:identity.zero_knowledge.get_verification_parameters:
+    accepted_requirement_sha256: 6db2b1ad9cd8ae77b0e29f3b34cc747b9feba62ad3e6a50abe6136b8273e5e77
+    status: not_applicable
+    reason_code: capability_not_selected
+    evidence: []
+  command:identity.zero_knowledge.register_suite:
+    accepted_requirement_sha256: 13df7077752e190229275a1e2af88586e54215c435b49f60a03e5053f6097ad5
+    status: not_applicable
+    reason_code: capability_not_selected
+    evidence: []
+  command:identity.zero_knowledge.rotate_verification_parameters:
+    accepted_requirement_sha256: 344a95527784b68ae1139ecf14f5ed3ead3a63fa1f7b838cb41881afea642c75
+    status: not_applicable
+    reason_code: capability_not_selected
+    evidence: []
+  command:identity.zero_knowledge.validate_circuit:
+    accepted_requirement_sha256: 94c420a4fa8fe9de71d62db679d74cfc99eda423e1d4ae48727ced5594cad9b5
+    status: not_applicable
+    reason_code: capability_not_selected
+    evidence: []
+  command:identity.zero_knowledge.verify_predicate_proof:
+    accepted_requirement_sha256: 9036d4571001c05a3907091e6ba0a6f8bb2ba50501ffd65af5f887f88325fca7
+    status: not_applicable
+    reason_code: unsupported_profile
+    evidence: []
+  command:identity.zero_knowledge.verify_proof:
+    accepted_requirement_sha256: 261e1f5a28f96a456b7ac10d4cc6457f3b16f2f4ff6bff64e2eed90aba4db491
+    status: implemented
+    reason_code:
+    evidence:
+      - artifact_id:
+        class: code_symbol
+        path: crates/api/src/traits.rs
+        source_sha256: 81262aff97e2318d07ec36625c842399c4a7379bb22c5fe2089e0236052f373f
+        symbol: verify_presentation_bound_claim_bundle_with
+      - artifact_id:
+        class: behavior_test
+        path: crates/backend-bb/tests/native_linked_private_persona_composition.rs
+        source_sha256: bd1f6d3637dbdc8ed0632198717634ed828e00fdb65b77d83eaddaf3467696ab
+        symbol: linked_private_persona_distinct_hidden_subject_credentials_share_session_link
+      - artifact_id:
+        class: invalid_input_test
+        path: crates/backend-bb/tests/native_linked_private_persona_composition.rs
+        source_sha256: bd1f6d3637dbdc8ed0632198717634ed828e00fdb65b77d83eaddaf3467696ab
+        symbol: require_same_session_link(wrong_persona.statement())
+      - artifact_id:
+        class: round_trip_test
+        path: crates/backend-bb/tests/native_linked_all30_prove_verify.rs
+        source_sha256: 640cabc3dbbd76566526e144585839ee97e56b7bf4baca86703d9ee262d1daf7
+        symbol: native_backend_proves_and_verifies_retained_request_bound_circuits

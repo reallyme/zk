@@ -1,0 +1,207 @@
+# SPDX-FileCopyrightText: Copyright © 2026 ReallyMe Technologies Limited. All rights reserved
+#
+# SPDX-License-Identifier: MIT OR Apache-2.0
+
+name: Sealed Release Package Attestation
+
+run-name: Sealed release package attestation ${{ inputs.version }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_sha:
+        description: Optional exact main commit SHA to certify. Leave blank to use current origin/main.
+        required: false
+        type: string
+        default: ""
+      version:
+        description: Canonical release version without leading v
+        required: true
+        type: string
+        default: 0.3.0
+      candidate_archive_sha256:
+        description: Reviewed lowercase SHA-256 of the draft release candidate tar
+        required: true
+        type: string
+      expected_index_sha256:
+        description: Reviewed lowercase SHA-256 of canonical index.pb
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sealed-release-package-attestation-${{ inputs.version }}
+  cancel-in-progress: false
+
+jobs:
+  admit-candidate:
+    name: admit exact sealed release candidate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    outputs:
+      artifact_name: ${{ steps.release-identity.outputs.artifact_name }}
+      release_sha: ${{ steps.release-identity.outputs.release_sha }}
+    steps:
+      - name: Checkout current main
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          fetch-depth: 0
+          path: zk
+          persist-credentials: false
+
+      - name: Resolve exact current-main release identity
+        id: release-identity
+        working-directory: zk
+        env:
+          ARCHIVE_SHA256: ${{ inputs.candidate_archive_sha256 }}
+          EXPECTED_INDEX_SHA256: ${{ inputs.expected_index_sha256 }}
+          RELEASE_SHA_INPUT: ${{ inputs.release_sha }}
+          RELEASE_VERSION: ${{ inputs.version }}
+        run: |
+          if [[ ! "${RELEASE_VERSION}" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]; then
+            echo "::error::version must be canonical semver"
+            exit 1
+          fi
+          if [[ ! "${ARCHIVE_SHA256}" =~ ^[0-9a-f]{64}$ ]]; then
+            echo "::error::candidate_archive_sha256 must be lowercase SHA-256"
+            exit 1
+          fi
+          if [[ ! "${EXPECTED_INDEX_SHA256}" =~ ^[0-9a-f]{64}$ ]]; then
+            echo "::error::expected_index_sha256 must be lowercase SHA-256"
+            exit 1
+          fi
+          git fetch --no-tags origin main
+          if [ -n "${RELEASE_SHA_INPUT}" ]; then
+            if [[ ! "${RELEASE_SHA_INPUT}" =~ ^[0-9a-f]{40}$ ]]; then
+              echo "::error::release_sha must be blank or a lowercase 40-character commit SHA"
+              exit 1
+            fi
+            release_sha="${RELEASE_SHA_INPUT}"
+          else
+            release_sha="$(git rev-parse origin/main)"
+          fi
+          if [ "$(git rev-parse origin/main)" != "${release_sha}" ]; then
+            echo "::error::release SHA is not the current origin/main tip"
+            exit 1
+          fi
+          if [ "${GITHUB_SHA}" != "${release_sha}" ]; then
+            echo "::error::release SHA does not match the workflow run head SHA"
+            exit 1
+          fi
+          git checkout --detach "${release_sha}"
+          echo "release_sha=${release_sha}" >> "${GITHUB_OUTPUT}"
+          echo "artifact_name=reallyme-zk-sealed-release-${RELEASE_VERSION}-${release_sha}" >> "${GITHUB_OUTPUT}"
+
+      - name: Install Node.js for bounded candidate admission
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "26"
+
+      - name: Test candidate admission policy
+        working-directory: zk
+        run: node --test scripts/verify_sealed_release_candidate.test.mjs
+
+      - name: Download candidate release metadata
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_VERSION: ${{ inputs.version }}
+        run: >-
+          gh api
+          "repos/${GITHUB_REPOSITORY}/releases/tags/zk-candidate-v${RELEASE_VERSION}"
+          > "${RUNNER_TEMP}/candidate-release.json"
+
+      - name: Admit draft release identity and exact asset
+        id: candidate
+        env:
+          ARCHIVE_SHA256: ${{ inputs.candidate_archive_sha256 }}
+          RELEASE_SHA: ${{ steps.release-identity.outputs.release_sha }}
+          RELEASE_VERSION: ${{ inputs.version }}
+        run: >-
+          node zk/scripts/verify_sealed_release_candidate.mjs metadata
+          "${RUNNER_TEMP}/candidate-release.json" "${RELEASE_SHA}"
+          "${RELEASE_VERSION}" "${ARCHIVE_SHA256}" "${GITHUB_OUTPUT}"
+
+      - name: Download exact candidate asset
+        env:
+          ASSET_ID: ${{ steps.candidate.outputs.asset_id }}
+          ASSET_NAME: ${{ steps.candidate.outputs.asset_name }}
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          gh api -H "Accept: application/octet-stream"
+          "repos/${GITHUB_REPOSITORY}/releases/assets/${ASSET_ID}"
+          > "${RUNNER_TEMP}/${ASSET_NAME}"
+
+      - name: Verify and safely extract candidate archive
+        env:
+          ARCHIVE_SHA256: ${{ inputs.candidate_archive_sha256 }}
+          ASSET_NAME: ${{ steps.candidate.outputs.asset_name }}
+          RELEASE_VERSION: ${{ inputs.version }}
+        run: >-
+          node zk/scripts/verify_sealed_release_candidate.mjs extract
+          "${RUNNER_TEMP}/${ASSET_NAME}" "${ARCHIVE_SHA256}"
+          "${RELEASE_VERSION}" "${RUNNER_TEMP}/admitted-sealed-release"
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@2c7215f132e9ebf062739d9130488b56d53c060c # master
+        with:
+          toolchain: 1.99.0
+
+      - name: Re-admit complete release and reviewed index
+        env:
+          EXPECTED_INDEX_SHA256: ${{ inputs.expected_index_sha256 }}
+          RELEASE_VERSION: ${{ inputs.version }}
+        run: >-
+          cargo run --locked -p reallyme-zk-artifact-package
+          --bin check-release-index-attestation --
+          "${RUNNER_TEMP}/admitted-sealed-release"
+          "${RELEASE_VERSION}" "${EXPECTED_INDEX_SHA256}"
+        working-directory: zk
+
+      - name: Recompute manifest source-tree identities
+        env:
+          RELEASE_VERSION: ${{ inputs.version }}
+        run: >-
+          cargo run --locked -p reallyme-zk-release-assembly
+          --bin check-release-source-attestation --
+          "${GITHUB_WORKSPACE}/zk"
+          "${RUNNER_TEMP}/admitted-sealed-release"
+          "${RELEASE_VERSION}"
+        working-directory: zk
+
+      - name: Upload same-run admitted sealed release
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ${{ steps.release-identity.outputs.artifact_name }}
+          path: ${{ runner.temp }}/admitted-sealed-release
+          if-no-files-found: error
+          retention-days: 7
+
+  attest:
+    name: canonical index and Sigstore attestation
+    needs: admit-candidate
+    permissions:
+      actions: read
+      attestations: write
+      contents: read
+      id-token: write
+    uses: ./.github/workflows/sealed-release-attestation.yml
+    with:
+      artifact_name: ${{ needs.admit-candidate.outputs.artifact_name }}
+      expected_index_sha256: ${{ inputs.expected_index_sha256 }}
+      release_sha: ${{ needs.admit-candidate.outputs.release_sha }}
+      release_version: ${{ inputs.version }}
+
+  require-attestation:
+    name: require successful canonical index attestation
+    needs: attest
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Reject skipped or failed reusable attestation
+        env:
+          ATTESTATION_RESULT: ${{ needs.attest.result }}
+        run: test "${ATTESTATION_RESULT}" = "success"

@@ -1,0 +1,41 @@
+# SPDX-FileCopyrightText: Copyright © 2026 ReallyMe Technologies Limited. All rights reserved
+#
+# SPDX-License-Identifier: MIT OR Apache-2.0
+
+[package]
+name = "reallyme-zk-platform-ffi"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+description = "Typed platform ABI adapter for ReallyMe ZK providers."
+
+[lib]
+crate-type = ["rlib", "staticlib"]
+
+[features]
+default = []
+native = ["reallyme-zk-backend-bb/native"]
+diagnostic-exact-source = ["native"]
+
+[dependencies]
+buffa = { workspace = true }
+crypto-sha2-256 = { workspace = true }
+libc = { workspace = true }
+reallyme-zk-api = { path = "../api", version = "0.3.0", default-features = false }
+reallyme-zk-artifacts = { path = "../artifacts", version = "0.3.0", default-features = false }
+reallyme-zk-backend-bb = { path = "../backend-bb", version = "0.1.0", default-features = false }
+reallyme-zk-noir-witness-core = { path = "../noir-witness-core", version = "0.1.0", default-features = false }
+reallyme-zk-proto = { path = "../proto", version = "0.3.0", default-features = false, features = ["generated"] }
+reallyme-zk-proto-codec = { path = "../proto-codec", version = "0.1.0", default-features = false, features = ["native"] }
+zeroize = { workspace = true }
+
+[dev-dependencies]
+crypto-p256 = { workspace = true, features = ["native"] }
+reallyme-zk-release-process = { path = "../release-process", version = "0.1.0", default-features = false }
+toml = { workspace = true }
+
+[lints]
+workspace = true

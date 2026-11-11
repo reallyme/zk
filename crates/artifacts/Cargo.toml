@@ -1,0 +1,28 @@
+# SPDX-FileCopyrightText: Copyright © 2026 ReallyMe Technologies Limited. All rights reserved
+#
+# SPDX-License-Identifier: MIT OR Apache-2.0
+
+[package]
+name = "reallyme-zk-artifacts"
+version = "0.3.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+documentation = "https://docs.rs/reallyme-zk-artifacts"
+keywords = ["zero-knowledge", "artifacts", "identity", "cryptography"]
+categories = ["cryptography", "authentication"]
+publish = true
+description = "ReallyMe ZK artifact manifest validation and hash-pinned artifact metadata."
+include = ["/src/**/*.rs", "/Cargo.toml", "/README.md", "/LICENSE-MIT", "/LICENSE-APACHE"]
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[dependencies]
+reallyme-zk-api = { path = "../api", version = "0.3.0", default-features = false }
+sha2 = { workspace = true }
+
+[lints]
+workspace = true

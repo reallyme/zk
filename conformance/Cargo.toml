@@ -1,0 +1,25 @@
+# SPDX-FileCopyrightText: Copyright © 2026 ReallyMe Technologies Limited. All rights reserved
+#
+# SPDX-License-Identifier: MIT OR Apache-2.0
+
+[package]
+name = "reallyme-zk-conformance"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+description = "Typed cross-provider conformance harness for ReallyMe ZK vectors."
+
+[dependencies]
+reallyme-zk-api = { path = "../crates/api", version = "0.3.0", default-features = false }
+reallyme-zk-proto-codec = { path = "../crates/proto-codec", version = "0.1.0", default-features = false }
+thiserror = { workspace = true }
+
+[dev-dependencies]
+buffa = { workspace = true }
+reallyme-zk-proto = { path = "../crates/proto", version = "0.3.0", default-features = false, features = ["generated"] }
+
+[lints]
+workspace = true

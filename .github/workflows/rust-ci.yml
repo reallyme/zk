@@ -1,0 +1,1232 @@
+# SPDX-FileCopyrightText: Copyright © 2026 ReallyMe Technologies Limited. All rights reserved
+#
+# SPDX-License-Identifier: MIT OR Apache-2.0
+
+name: Rust CI
+
+on:
+  # Manual runs qualify the exact commit for release: every lane and three proof passes.
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rust-ci-${{ github.event_name }}-${{ github.event_name == 'workflow_dispatch' && github.run_id || github.ref }}
+  cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' }}
+
+env:
+  CARGO_AUDIT_VERSION: 0.22.2
+  CARGO_DENY_VERSION: 0.20.2
+  CARGO_NEXTEST_VERSION: 0.9.146
+  CARGO_SEMVER_CHECKS_VERSION: 0.50.0
+  CARGO_MUTANTS_VERSION: 27.1.0
+
+jobs:
+  changes:
+    name: Select required validation lanes
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      source: ${{ steps.scope.outputs.source }}
+      swift: ${{ steps.scope.outputs.swift }}
+      android: ${{ steps.scope.outputs.android }}
+      ios: ${{ steps.scope.outputs.ios }}
+      circuits: ${{ steps.scope.outputs.circuits }}
+    steps:
+      - name: Checkout tested source and comparison history
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Install Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "26"
+      - name: Select lanes from the complete Git diff
+        id: scope
+        env:
+          CI_EVENT_NAME: ${{ github.event_name }}
+          CI_BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          CI_HEAD_SHA: ${{ github.sha }}
+        run: node scripts/select-ci-scope.mjs
+
+  public-artifacts:
+    name: Admit pinned circuit and CRS inputs
+    needs: changes
+    if: needs.changes.outputs.android == 'true' || needs.changes.outputs.circuits == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: zk
+          persist-credentials: false
+      - name: Install Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "26"
+      # Admission includes unpacking, so malformed packs fail before any native
+      # compilation or proving. Consumers use these same bytes without another fetch.
+      # Main seeds this cache through R2. Pull requests can reuse the public,
+      # digest-pinned inputs without receiving any origin credentials.
+      - name: Cache pinned circuit and CRS downloads
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: |
+            zk/release-artifacts/modern-v1-bb-6.0.0/mobile-circuit-artifacts-persona-credential-evidence-v1.tar
+            zk/release-artifacts/modern-v1-bb-6.0.0/cdn/crs/bn254_g1.prover
+            zk/release-artifacts/modern-v1-bb-6.0.0/cdn/crs/bn254_g2.dat
+          key: mobile-inputs-${{ hashFiles('zk/scripts/release-artifact-cache.mjs') }}
+      - name: Download and admit pinned mobile artifacts
+        working-directory: zk
+        env:
+          REALLYME_ZK_ARTIFACT_TRANSPORT: ${{ github.event_name == 'pull_request' && 'cdn' || 'r2' }}
+          R2_ENDPOINT: ${{ github.event_name != 'pull_request' && secrets.R2_ENDPOINT || '' }}
+          R2_ACCESS_KEY_ID: ${{ github.event_name != 'pull_request' && secrets.R2_ACCESS_KEY_ID || '' }}
+          R2_SECRET_ACCESS_KEY: ${{ github.event_name != 'pull_request' && secrets.R2_SECRET_ACCESS_KEY || '' }}
+        run: node scripts/release-artifact-cache.mjs --hydrate --mobile-only --unpack-mobile-public-artifacts
+      - name: Share admitted immutable inputs within this run
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: public-ci-artifacts-${{ github.sha }}
+          path: |
+            zk/release-artifacts/modern-v1-bb-6.0.0/mobile-circuit-artifacts-persona-credential-evidence-v1.tar
+            zk/release-artifacts/modern-v1-bb-6.0.0/cdn/crs/bn254_g1.prover
+            zk/release-artifacts/modern-v1-bb-6.0.0/cdn/crs/bn254_g2.dat
+          if-no-files-found: error
+          retention-days: 1
+
+  rust-checks:
+    needs: changes
+    if: needs.changes.outputs.source == 'true'
+    name: Rust source, lint, and boundary policy
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    env:
+      CXX: clang++-20
+      REALLYME_ZK_REQUIRED_OPEN_STACK_CHECKOUTS: ssi,openid4vci,openid4vp
+    steps:
+      - name: Checkout zk
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: zk
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Checkout pinned SSI boundary source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: reallyme/ssi
+          ref: 77f5c5874403599e64c1bc79fe40ed54cfcf2e77
+          path: ssi
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Checkout pinned OpenID4VCI boundary source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: reallyme/openid4vci
+          ref: 9ba35e61057dbbe1c56515c400636721469ba4b7
+          path: openid4vci
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Checkout pinned OpenID4VP boundary source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: reallyme/openid4vp
+          ref: 90d5a5a7349268aed2d2945b1f9f96b7fe9bd8db
+          path: openid4vp
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Install LLVM 20 C++ runtime for Barretenberg
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes clang-20 libc++-20-dev libc++abi-20-dev
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@2c7215f132e9ebf062739d9130488b56d53c060c # master
+        with:
+          toolchain: 1.99.0
+          components: rustfmt, clippy
+          targets: wasm32-unknown-unknown
+
+      - name: Cache Cargo
+        uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
+        with:
+          workspaces: zk
+
+      - name: Install Rust CI tools
+        uses: taiki-e/install-action@41049aa56687c35e0afa74eed4f09cec4f9afabf # v2.85.2
+        with:
+          tool: cargo-nextest@${{ env.CARGO_NEXTEST_VERSION }},cargo-deny@${{ env.CARGO_DENY_VERSION }},cargo-audit@${{ env.CARGO_AUDIT_VERSION }},ripgrep@15.2.0
+
+      - name: Install Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "26"
+
+      - name: Install pinned Barretenberg 6.0.0 static library for native checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          bb_dir="${RUNNER_TEMP}/bb-v6.0.0-static"
+          archive="${RUNNER_TEMP}/barretenberg-static-amd64-linux.tar.gz"
+          install -d -m 0755 "${bb_dir}"
+          curl --proto '=https' --tlsv1.2 --fail --silent --show-error --location \
+            --output "${archive}" \
+            https://github.com/AztecProtocol/aztec-packages/releases/download/v6.0.0/barretenberg-static-amd64-linux.tar.gz
+          printf '%s  %s\n' \
+            '4040c25d374f20d0641824642db328abaf3847959e503a835060fb03a5a95d9f' \
+            "${archive}" | shasum -a 256 --check --strict
+          tar -xzf "${archive}" -C "${bb_dir}"
+          test -f "${bb_dir}/libbb-external.a"
+          echo "REALLYME_BARRETENBERG_LIB_DIR=${bb_dir}" >>"${GITHUB_ENV}"
+
+      - name: Format
+        working-directory: zk
+        run: cargo fmt --all --check
+
+      - name: Check all features with warnings denied
+        working-directory: zk
+        env:
+          RUSTFLAGS: -Dwarnings
+        run: cargo check --locked --workspace --all-features
+
+      - name: Clippy
+        working-directory: zk
+        run: cargo clippy --locked --workspace --all-targets --all-features -- -D warnings
+
+      - name: Test public ZK API without runtime features
+        working-directory: zk
+        run: cargo test --locked -p reallyme-zk-api --no-default-features
+
+      - name: Test CLI without a native backend
+        working-directory: zk
+        run: cargo nextest run --locked -p reallyme-zk-cli --no-default-features
+
+      - name: Test Rust documentation contracts
+        working-directory: zk
+        env:
+          RUSTDOCFLAGS: -Dwarnings
+        run: cargo test --locked --workspace --all-features --doc
+
+      - name: Check fuzz target contracts
+        working-directory: zk
+        run: cargo check --locked --manifest-path fuzz/Cargo.toml --bins
+
+      - name: Doc build
+        working-directory: zk
+        run: cargo doc --locked --workspace --no-deps --all-features
+        env:
+          RUSTDOCFLAGS: -D warnings
+
+      - name: Check native and Wasm feature lanes
+        working-directory: zk
+        run: |
+          cargo check --locked --workspace --no-default-features --features native
+          cargo check --locked --workspace \
+            --exclude reallyme-zk-noir-witness-core \
+            --exclude reallyme-zk-cli \
+            --exclude reallyme-zk-platform-ffi \
+            --exclude reallyme-zk-root-status-authority \
+            --no-default-features --features wasm --target wasm32-unknown-unknown
+
+      - name: ZK boundary policy
+        working-directory: zk
+        run: scripts/check-open-stack-boundaries.sh
+
+      - name: Test repository policy scripts
+        working-directory: zk
+        run: node --test scripts/*.test.mjs
+
+      - name: Release readiness policy lock
+        working-directory: zk
+        run: node scripts/check-release-readiness-policy-lock.mjs
+
+      - name: Checkout release-readiness runner
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: reallyme/release-readiness
+          ref: 18a6d91d99837e80f92e41fe04effb0b043d754e
+          path: zk/.release-readiness
+          persist-credentials: false
+
+      - name: Release readiness
+        working-directory: zk
+        run: node .release-readiness/scripts/run-consumer-check.mjs --policy-only
+
+      - name: Dependency policy
+        working-directory: zk
+        run: |
+          cargo metadata --locked --all-features --format-version 1 \
+            | jq -e '.packages | any(.name == "reallyme-ssi-proto")'
+          cargo deny --locked check
+          cargo deny --locked --manifest-path fuzz/Cargo.toml --config fuzz/deny.toml check
+
+      - name: Security advisory audit
+        working-directory: zk
+        run: scripts/audit_committed_lockfiles.sh
+
+  workspace-tests:
+    needs: changes
+    if: needs.changes.outputs.source == 'true'
+    name: Workspace tests (${{ matrix.lane }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        lane: [native, all-features, default]
+    env:
+      CXX: clang++-20
+      # Large Noir test binaries exhaust hosted disks with full debug symbols.
+      # Keep the same test code and assertions while bounding build storage.
+      CARGO_PROFILE_DEV_DEBUG: "0"
+      CARGO_PROFILE_TEST_DEBUG: "0"
+      CARGO_INCREMENTAL: "0"
+    steps:
+      - name: Checkout ZK
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: zk
+          persist-credentials: false
+
+      - name: Install LLVM 20 C++ runtime for Barretenberg
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes clang-20 libc++-20-dev libc++abi-20-dev
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@2c7215f132e9ebf062739d9130488b56d53c060c # master
+        with:
+          toolchain: 1.99.0
+
+      - name: Install Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "26"
+
+      - name: Cache Cargo
+        uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
+        with:
+          workspaces: zk
+          cache-bin: false
+
+      - name: Install nextest
+        uses: taiki-e/install-action@41049aa56687c35e0afa74eed4f09cec4f9afabf # v2.85.2
+        with:
+          tool: cargo-nextest@${{ env.CARGO_NEXTEST_VERSION }}
+
+      - name: Install pinned Barretenberg 6.0.0 static library for native checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          bb_dir="${RUNNER_TEMP}/bb-v6.0.0-static"
+          archive="${RUNNER_TEMP}/barretenberg-static-amd64-linux.tar.gz"
+          install -d -m 0755 "${bb_dir}"
+          curl --proto '=https' --tlsv1.2 --fail --silent --show-error --location \
+            --output "${archive}" \
+            https://github.com/AztecProtocol/aztec-packages/releases/download/v6.0.0/barretenberg-static-amd64-linux.tar.gz
+          printf '%s  %s\n' \
+            '4040c25d374f20d0641824642db328abaf3847959e503a835060fb03a5a95d9f' \
+            "${archive}" | shasum -a 256 --check --strict
+          tar -xzf "${archive}" -C "${bb_dir}"
+          test -f "${bb_dir}/libbb-external.a"
+          echo "REALLYME_BARRETENBERG_LIB_DIR=${bb_dir}" >>"${GITHUB_ENV}"
+
+      - name: Test workspace feature lane
+        working-directory: zk
+        env:
+          TEST_LANE: ${{ matrix.lane }}
+        run: node scripts/run_bounded_nextest.mjs "$TEST_LANE"
+
+  package-archives:
+    needs: changes
+    if: needs.changes.outputs.source == 'true'
+    name: Inspect and test normalized crate archives
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - name: Checkout ZK
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: zk
+          persist-credentials: false
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@2c7215f132e9ebf062739d9130488b56d53c060c # master
+        with:
+          toolchain: 1.99.0
+
+      - name: Install Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "26"
+
+      - name: Cache Cargo
+        uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
+        with:
+          workspaces: zk
+          cache-bin: false
+
+      - name: Inspect publishable Rust package sources
+        working-directory: zk
+        run: node scripts/publish-crates-in-order.mjs inspect
+
+  semver:
+    needs: changes
+    if: needs.changes.outputs.source == 'true'
+    name: Public API semver
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - name: Checkout ZK
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: zk
+          persist-credentials: false
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@2c7215f132e9ebf062739d9130488b56d53c060c # master
+        with:
+          toolchain: 1.99.0
+
+      - name: Install Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "26"
+
+      - name: Cache Cargo
+        uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
+        with:
+          workspaces: zk
+          cache-bin: false
+
+      - name: Install cargo-semver-checks
+        uses: taiki-e/install-action@41049aa56687c35e0afa74eed4f09cec4f9afabf # v2.85.2
+        with:
+          tool: cargo-semver-checks@${{ env.CARGO_SEMVER_CHECKS_VERSION }}
+
+      - name: Check planned public crate versions against crates.io
+        working-directory: zk
+        run: node scripts/check-public-crate-baselines.mjs
+
+  security-mutations:
+    needs: changes
+    if: needs.changes.outputs.source == 'true'
+    name: Security mutation gate (${{ matrix.name }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: claim-bindings-and-expiry
+            package: reallyme-zk-api
+            file: crates/api/src/claim_proof_bundle_verification.rs
+            examine: 'validate_presentation_expiry|require_same_session_link|require_same_credential_binding'
+          - name: persona-validity-window
+            package: reallyme-zk-api
+            file: crates/api/src/persona_credential_evidence.rs
+            examine: 'ZkPersonaCredentialEvidenceValidityWindow::(?:try_new|validate_at|validate_issuer_bounds)'
+          - name: artifact-integrity
+            package: reallyme-zk-artifacts
+            file: crates/artifacts/src/identity.rs
+            examine: 'Digest32::(?:matches_sha256|is_zero)'
+    steps:
+      - name: Checkout ZK
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: zk
+          persist-credentials: false
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@2c7215f132e9ebf062739d9130488b56d53c060c # master
+        with:
+          toolchain: 1.99.0
+
+      - name: Install Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "26"
+
+      - name: Cache Cargo
+        uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
+        with:
+          workspaces: zk
+          cache-bin: false
+
+      - name: Install cargo-mutants
+        uses: taiki-e/install-action@41049aa56687c35e0afa74eed4f09cec4f9afabf # v2.85.2
+        with:
+          tool: cargo-mutants@${{ env.CARGO_MUTANTS_VERSION }}
+
+      - name: Require security tests to kill mutations
+        working-directory: zk
+        env:
+          MUTATION_PACKAGE: ${{ matrix.package }}
+          MUTATION_FILE: ${{ matrix.file }}
+          MUTATION_EXAMINE: ${{ matrix.examine }}
+        run: |
+          mutation_list="$(cargo mutants --list --package "$MUTATION_PACKAGE" \
+            --file "$MUTATION_FILE" --examine-re "$MUTATION_EXAMINE")"
+          test -n "$mutation_list"
+          env -u CARGO_TARGET_DIR cargo mutants --gitignore true --package "$MUTATION_PACKAGE" \
+            --file "$MUTATION_FILE" --examine-re "$MUTATION_EXAMINE" \
+            --timeout 300 --jobs 2
+
+  audit:
+    name: fmt, lint, test, and boundary policy
+    if: ${{ always() }}
+    needs: [changes, public-artifacts, rust-checks, workspace-tests, package-archives, semver, security-mutations, public-crate-msrv, swift-package, kotlin-package, android-target, ios-target, production-circuits]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Checkout aggregate policy
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "26"
+      - name: Require every selected validation gate
+        env:
+          RESULT_CHANGES: ${{ needs.changes.result }}
+          SCOPE_SOURCE: ${{ needs.changes.outputs.source }}
+          SCOPE_SWIFT: ${{ needs.changes.outputs.swift }}
+          SCOPE_ANDROID: ${{ needs.changes.outputs.android }}
+          SCOPE_IOS: ${{ needs.changes.outputs.ios }}
+          SCOPE_CIRCUITS: ${{ needs.changes.outputs.circuits }}
+          RESULT_RUST_CHECKS: ${{ needs.rust-checks.result }}
+          RESULT_WORKSPACE_TESTS: ${{ needs.workspace-tests.result }}
+          RESULT_PACKAGE_ARCHIVES: ${{ needs.package-archives.result }}
+          RESULT_SEMVER: ${{ needs.semver.result }}
+          RESULT_SECURITY_MUTATIONS: ${{ needs.security-mutations.result }}
+          RESULT_PUBLIC_CRATE_MSRV: ${{ needs.public-crate-msrv.result }}
+          RESULT_SWIFT_PACKAGE: ${{ needs.swift-package.result }}
+          RESULT_KOTLIN_PACKAGE: ${{ needs.kotlin-package.result }}
+          RESULT_ANDROID_TARGET: ${{ needs.android-target.result }}
+          RESULT_IOS_TARGET: ${{ needs.ios-target.result }}
+          RESULT_PRODUCTION_CIRCUITS: ${{ needs.production-circuits.result }}
+          RESULT_PUBLIC_ARTIFACTS: ${{ needs.public-artifacts.result }}
+        run: node scripts/require-ci-results.mjs
+
+  swift-package:
+    needs: changes
+    if: needs.changes.outputs.swift == 'true'
+    name: Swift package build and tests
+    runs-on: xcode-27
+    timeout-minutes: 90
+    steps:
+      - name: Checkout ZK
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: zk
+          persist-credentials: false
+
+      - name: Install Node.js for artifact admission
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "26"
+
+      - name: Install Rust for the current Swift provider
+        uses: dtolnay/rust-toolchain@2c7215f132e9ebf062739d9130488b56d53c060c # master
+        with:
+          toolchain: 1.99.0
+          components: llvm-tools-preview
+          targets: aarch64-apple-darwin,aarch64-apple-ios,aarch64-apple-ios-sim
+
+      - name: Cache Swift provider Rust dependencies
+        uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
+        with:
+          workspaces: zk
+          cache-bin: false
+      - name: Cache Swift package dependencies
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: zk/.build
+          key: swift-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('zk/Package.swift', 'zk/Package.resolved', 'zk/circuits/toolchain-lock.json') }}-${{ github.sha }}
+          restore-keys: |
+            swift-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('zk/Package.swift', 'zk/Package.resolved', 'zk/circuits/toolchain-lock.json') }}-
+
+      - name: Build and bind the Swift provider from this commit
+        working-directory: zk
+        run: |
+          scripts/build_swift_xcframework.sh
+          version="$(node --input-type=module -e 'import { plannedPublicReleaseVersion } from "./scripts/check-public-crate-baselines.mjs"; console.log(plannedPublicReleaseVersion())')"
+          node scripts/prepare_swift_binary_manifest.mjs "$version" \
+            "$(cat build/swift/ReallyMeZKPlatformFFI.xcframework.checksum)" \
+            --local-artifact-path build/swift/ReallyMeZKPlatformFFI.xcframework
+          scripts/check-apple-platform-ffi-freshness.sh
+
+      - name: Check Swift source format
+        working-directory: zk
+        run: packages/swift/scripts/check-format.sh
+
+      - name: Check Swift source lint
+        working-directory: zk
+        run: packages/swift/scripts/check-lint.sh
+
+      - name: Build Swift package with warnings denied
+        working-directory: zk
+        run: swift build -Xswiftc -warnings-as-errors
+
+      - name: Test Swift package with warnings denied
+        working-directory: zk
+        run: swift test -Xswiftc -warnings-as-errors
+
+      - name: Retain the tested current-source Swift provider
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: swift-provider-source-${{ github.sha }}
+          path: |
+            zk/build/swift/ReallyMeZKPlatformFFI.xcframework.zip
+            zk/build/swift/ReallyMeZKPlatformFFI.xcframework.checksum
+            zk/build/swift/ReallyMeZKPlatformFFI.xcframework.build.tsv
+          if-no-files-found: error
+          retention-days: 7
+
+  kotlin-package:
+    name: Kotlin package build and tests
+    needs: [changes, public-artifacts, android-target]
+    if: needs.changes.outputs.android == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - name: Checkout ZK
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: zk
+          persist-credentials: false
+
+      - name: Install pinned Java toolchains
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: |
+            17
+            21
+          cache: gradle
+          cache-dependency-path: |
+            zk/packages/kotlin/**/*.gradle.kts
+            zk/packages/kotlin/gradle/wrapper/gradle-wrapper.properties
+
+      - name: Install Node.js for circuit artifact admission
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "26"
+
+      - name: Install Rust for offline mobile artifact validation
+        uses: dtolnay/rust-toolchain@2c7215f132e9ebf062739d9130488b56d53c060c # master
+        with:
+          toolchain: 1.99.0
+
+      - name: Cache mobile artifact checker dependencies
+        uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
+        with:
+          workspaces: zk
+          shared-key: mobile-artifact-checker
+          cache-bin: false
+
+      # Gradle stages demo assets through the Rust integrity checker in offline
+      # mode. Prepare that checker before starting the platform build so a
+      # fresh runner never depends on an incidental Cargo cache.
+      - name: Prepare offline mobile artifact checker
+        working-directory: zk
+        run: |
+          cargo fetch --locked --target x86_64-unknown-linux-gnu
+          cargo build --locked --offline -p reallyme-zk-artifact-package --bin check-mobile-runtime
+
+      - name: Download current-commit Android native package
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: android-native-source-${{ github.sha }}
+          path: zk/release-artifacts/modern-v1-bb-6.0.0
+
+      - name: Download admitted public circuit inputs
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: public-ci-artifacts-${{ github.sha }}
+          path: zk/release-artifacts/modern-v1-bb-6.0.0
+      - name: Admit only pinned mobile circuit fixtures and CRS
+        working-directory: zk
+        env:
+          REALLYME_ZK_RELEASE_ARTIFACT_BASE_URL: https://static.reallyme.net/zk
+        run: |
+          node scripts/release-artifact-cache.mjs --check --mobile-only --unpack-mobile-public-artifacts
+          crs_dir="${RUNNER_TEMP}/zk-demo-crs"
+          mkdir -p "$crs_dir"
+          cp release-artifacts/modern-v1-bb-6.0.0/cdn/crs/bn254_g1.prover "$crs_dir/bn254_g1.dat"
+          cp release-artifacts/modern-v1-bb-6.0.0/cdn/crs/bn254_g2.dat "$crs_dir/bn254_g2.dat"
+          echo "REALLYME_ZK_DEMO_CRS_DIR=$crs_dir" >> "$GITHUB_ENV"
+          scripts/check-android-platform-jni-freshness.sh
+
+      - name: Bind Kotlin checks to the admitted current-commit provider
+        working-directory: zk
+        run: node scripts/prepare_android_native_manifest.mjs
+
+      - name: Install pinned Android packaging NDK
+        env:
+          ANDROID_PACKAGING_NDK_VERSION: 30.0.16248370
+        run: |
+          set -euo pipefail
+          "${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager" --install "ndk;${ANDROID_PACKAGING_NDK_VERSION}"
+          test -x "${ANDROID_HOME}/ndk/${ANDROID_PACKAGING_NDK_VERSION}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip"
+
+      - name: Lint, build, and test Kotlin packages
+        working-directory: zk
+        run: >-
+          ./packages/kotlin/gradlew --project-dir packages/kotlin --no-daemon
+          ktlintCheck detekt compileKotlin :proto-generated:compileKotlin
+          :proto-codec:compileKotlin :demo-shared:compileKotlin
+          :demo-android:compileDebugKotlin test :proto-codec:test
+          :demo-shared:test :demo-android:testDebugUnitTest
+          :android-native:check
+
+  public-crate-msrv:
+    needs: changes
+    if: needs.changes.outputs.source == 'true'
+    name: public crate MSRV (Rust 1.99)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - name: Checkout ZK
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: zk
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Install public crate MSRV toolchain
+        uses: dtolnay/rust-toolchain@2c7215f132e9ebf062739d9130488b56d53c060c # master
+        with:
+          toolchain: 1.99.0
+
+      - name: Assert MSRV toolchain
+        run: >-
+          test "$(rustc +1.99.0 --version --verbose | sed -n 's/^release: //p')" = "1.99.0"
+
+      - name: Cache public crate MSRV build
+        uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
+        with:
+          workspaces: zk
+          shared-key: public-crate-msrv-1.99
+
+      - name: Check exact crates.io publish set on MSRV
+        working-directory: zk
+        run: >-
+          cargo +1.99.0 check --locked --all-features
+          --package reallyme-zk-api
+          --package reallyme-zk-artifacts
+          --package reallyme-zk-proto
+
+  ios-target:
+    name: warning-denied iOS arm64 target
+    needs: [changes]
+    if: needs.changes.outputs.ios == 'true'
+    runs-on: macos-15
+    timeout-minutes: 45
+    steps:
+      - name: Checkout ZK
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: zk
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Install exact mobile Rust target
+        uses: dtolnay/rust-toolchain@2c7215f132e9ebf062739d9130488b56d53c060c # master
+        with:
+          toolchain: 1.99.0
+          targets: aarch64-apple-ios
+
+      - name: Cache iOS Rust dependencies
+        uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
+        with:
+          workspaces: zk
+          cache-bin: false
+
+      - name: Install pinned Barretenberg 6.0.0 static library for iOS
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive_name="barretenberg-static-arm64-ios.tar.gz"
+          archive_sha256="c7350fb21963da64d59d1b94835dfcdf71a78ea05752ed56af7004e5fa7f671d"
+          bb_dir="${RUNNER_TEMP}/bb-v6.0.0-static"
+          archive="${RUNNER_TEMP}/${archive_name}"
+          install -d -m 0755 "${bb_dir}"
+          curl --proto '=https' --tlsv1.2 --fail --silent --show-error --location \
+            --output "${archive}" \
+            "https://github.com/AztecProtocol/aztec-packages/releases/download/v6.0.0/${archive_name}"
+          printf '%s  %s\n' "${archive_sha256}" "${archive}" | shasum -a 256 --check --strict
+          tar -xzf "${archive}" -C "${bb_dir}"
+          test -f "${bb_dir}/libbb-external.a"
+          echo "REALLYME_BARRETENBERG_LIB_DIR=${bb_dir}" >>"${GITHUB_ENV}"
+      - name: Check iOS native workspace with warnings denied
+        working-directory: zk
+        env:
+          RUSTFLAGS: -Dwarnings
+          TARGET: aarch64-apple-ios
+        run: cargo check --locked --workspace --all-features --target "${TARGET}"
+
+  android-target:
+    name: warning-denied Android arm64 native target
+    needs: [changes, public-artifacts]
+    if: needs.changes.outputs.android == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Checkout ZK
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: zk
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Install exact mobile Rust target
+        uses: dtolnay/rust-toolchain@2c7215f132e9ebf062739d9130488b56d53c060c # master
+        with:
+          toolchain: 1.99.0
+          targets: aarch64-linux-android
+
+      - name: Install Node.js for Android native lock parsing
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "26"
+
+      - name: Download admitted public inputs
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: public-ci-artifacts-${{ github.sha }}
+          path: zk/release-artifacts/modern-v1-bb-6.0.0
+      - name: Cache Android Rust dependencies
+        uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
+        with:
+          workspaces: zk
+          cache-bin: false
+
+      # Upstream archives depend on their reviewed source/build inputs, not this
+      # repository's commit. Never restore a partial or differently pinned pair.
+      - name: Restore pinned Android upstream libraries
+        id: android-libraries
+        uses: actions/cache/restore@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: zk/release-artifacts/modern-v1-bb-6.0.0/android-barretenberg-static/arm64-v8a
+          key: android-bb-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('zk/circuits/toolchain-lock.json', 'zk/scripts/build_android_barretenberg_static_archive.sh', 'zk/scripts/install-android-native-ci-toolchain.sh') }}
+
+      - name: Install pinned Android native build tools
+        if: steps.android-libraries.outputs.cache-hit != 'true'
+        working-directory: zk
+        shell: bash
+        run: |
+          set -euo pipefail
+          tools="${RUNNER_TEMP}/android-native-tools"
+          scripts/install-android-native-ci-toolchain.sh "${tools}"
+          {
+            echo "ANDROID_NDK_ROOT=${ANDROID_HOME}/ndk/28.2.13676358"
+            echo "ANDROID_NDK_HOME=${ANDROID_HOME}/ndk/28.2.13676358"
+            echo "CMAKE_BIN=${tools}/cmake/bin/cmake"
+            echo "NINJA_BIN=${tools}/ninja/ninja"
+          } >>"${GITHUB_ENV}"
+
+      - name: Build pinned Android Barretenberg static archive
+        if: steps.android-libraries.outputs.cache-hit != 'true'
+        working-directory: zk
+        env:
+          REALLYME_ZK_ANDROID_REPRO_DIAGNOSTICS_DIR: ${{ runner.temp }}/android-native-reproduction
+        shell: bash
+        run: |
+          set -euo pipefail
+          scripts/build_android_barretenberg_static_archive.sh
+
+      - name: Verify pinned Android upstream library bytes
+        working-directory: zk
+        run: |
+          set -euo pipefail
+          scripts/build_android_barretenberg_static_archive.sh --verify-only
+          echo "ANDROID_ARM64_BB_LIB_DIR=${PWD}/release-artifacts/modern-v1-bb-6.0.0/android-barretenberg-static/arm64-v8a" >>"${GITHUB_ENV}"
+
+      - name: Cache verified Android upstream libraries
+        if: steps.android-libraries.outputs.cache-hit != 'true' && github.event_name != 'pull_request'
+        uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: zk/release-artifacts/modern-v1-bb-6.0.0/android-barretenberg-static/arm64-v8a
+          key: ${{ steps.android-libraries.outputs.cache-primary-key }}
+
+      - name: Install pinned Android provider NDK
+        env:
+          ANDROID_PROVIDER_NDK_VERSION: 30.0.16248370
+        run: |
+          set -euo pipefail
+          "${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager" --install "ndk;${ANDROID_PROVIDER_NDK_VERSION}"
+          ndk_bin="${ANDROID_HOME}/ndk/${ANDROID_PROVIDER_NDK_VERSION}/toolchains/llvm/prebuilt/linux-x86_64/bin"
+          test -x "${ndk_bin}/aarch64-linux-android26-clang"
+          test -x "${ndk_bin}/aarch64-linux-android26-clang++"
+          test -x "${ndk_bin}/llvm-readelf"
+          {
+            echo "ANDROID_NDK_ROOT=${ANDROID_HOME}/ndk/${ANDROID_PROVIDER_NDK_VERSION}"
+            echo "ANDROID_NDK_HOME=${ANDROID_HOME}/ndk/${ANDROID_PROVIDER_NDK_VERSION}"
+            echo "CC_aarch64_linux_android=${ndk_bin}/aarch64-linux-android26-clang"
+            echo "CXX_aarch64_linux_android=${ndk_bin}/aarch64-linux-android26-clang++"
+            echo "AR_aarch64_linux_android=${ndk_bin}/llvm-ar"
+            echo "CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER=${ndk_bin}/aarch64-linux-android26-clang"
+            echo "LLVM_READELF=${ndk_bin}/llvm-readelf"
+          } >>"${GITHUB_ENV}"
+
+      - name: Check Android native platform FFI with pinned archive
+        working-directory: zk
+        env:
+          RUSTFLAGS: -Dwarnings
+          TARGET: aarch64-linux-android
+        run: >-
+          REALLYME_BARRETENBERG_LIB_DIR="${ANDROID_ARM64_BB_LIB_DIR}"
+          cargo check --locked -p reallyme-zk-platform-ffi --features native --target "${TARGET}"
+
+      - name: Build Android platform FFI static package with pinned archive
+        working-directory: zk
+        run: scripts/build_android_platform_ffi_static.sh
+
+      - name: Build and verify current-commit Android JNI package
+        working-directory: zk
+        run: |
+          scripts/build_android_platform_jni.sh
+          scripts/check-android-platform-jni-freshness.sh
+
+      - name: Upload current-commit Android native package
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: android-native-source-${{ github.sha }}
+          path: |
+            zk/release-artifacts/modern-v1-bb-6.0.0/android-platform-ffi
+            zk/release-artifacts/modern-v1-bb-6.0.0/android-platform-jni
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Check Android source workspace with warnings denied
+        working-directory: zk
+        env:
+          RUSTFLAGS: -Dwarnings
+          TARGET: aarch64-linux-android
+        run: cargo check --locked --workspace --no-default-features --target "${TARGET}"
+
+  production-circuits:
+    needs: [changes, public-artifacts]
+    if: needs.changes.outputs.circuits == 'true'
+    name: pinned production circuits and soundness
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    env:
+      CXX: clang++-20
+      RUSTFLAGS: -Dwarnings
+      CARGO_PROFILE_DEV_DEBUG: "0"
+      CARGO_PROFILE_TEST_DEBUG: "0"
+      CARGO_INCREMENTAL: "0"
+    steps:
+      - name: Checkout zk
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: zk
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Install Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "26"
+
+      - name: Download admitted public mobile artifacts before proving
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: public-ci-artifacts-${{ github.sha }}
+          path: zk/release-artifacts/modern-v1-bb-6.0.0
+      - name: Recheck and unpack the admitted circuit pack
+        working-directory: zk
+        run: node scripts/release-artifact-cache.mjs --check --mobile-only --unpack-mobile-public-artifacts
+
+      - name: Checkout the pinned Noir source for advisory ancestry
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: noir-lang/noir
+          ref: 275d3ab1a5c916c6ea73e8d6b943f685f574500c
+          path: noir
+          fetch-depth: 0
+          # Advisory checks need the complete commit graph, not historical blobs.
+          filter: blob:none
+          persist-credentials: false
+
+      - name: Install LLVM 20 C++ runtime for Barretenberg
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes clang-20 libc++-20-dev libc++abi-20-dev
+
+      - name: Install Rust for the canonical circuit registry
+        uses: dtolnay/rust-toolchain@2c7215f132e9ebf062739d9130488b56d53c060c # master
+        with:
+          toolchain: 1.99.0
+
+      - name: Cache circuit Rust dependencies
+        uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
+        with:
+          workspaces: zk
+          cache-bin: false
+
+      # Later witness/parity tests intentionally forbid network access. A
+      # fresh runner must hydrate their complete locked host dependency graph.
+      - name: Fetch locked dependencies for offline circuit tests
+        working-directory: zk
+        run: cargo fetch --locked --target x86_64-unknown-linux-gnu
+
+      - name: Install Python for deterministic circuit fixtures
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: zk/requirements-circuits-ci.txt
+
+      - name: Install hash-pinned fixture dependencies
+        working-directory: zk
+        run: >-
+          python -m pip install --require-hashes --only-binary=:all: -r requirements-circuits-ci.txt
+
+      - name: Install hash-pinned Protobuf compiler for stage vectors
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive="${RUNNER_TEMP}/protoc-35.1-linux-x86_64.zip"
+          destination="${RUNNER_TEMP}/protoc-35.1"
+          curl --proto '=https' --proto-redir '=https' --tlsv1.2 \
+            --fail --silent --show-error --location --retry 3 \
+            --output "${archive}" \
+            https://github.com/protocolbuffers/protobuf/releases/download/v35.1/protoc-35.1-linux-x86_64.zip
+          printf '%s  %s\n' \
+            6930ebf62bd4ea607b98fff052596c6ee564b9835b4ce172c75a3f53ae9d91b7 \
+            "${archive}" | sha256sum --check --strict
+          unzip -q "${archive}" -d "${destination}"
+          test "$("${destination}/bin/protoc" --version)" = 'libprotoc 35.1'
+          echo "${destination}/bin" >>"${GITHUB_PATH}"
+
+      - name: Install hash-pinned release binaries and full-prover CRS
+        shell: bash
+        working-directory: zk
+        run: |
+          set -euo pipefail
+          test "$(git -C ../noir rev-parse HEAD)" = '275d3ab1a5c916c6ea73e8d6b943f685f574500c'
+          bash scripts/install-modern-ci-toolchain.sh "${RUNNER_TEMP}/modern-zk-tools"
+          {
+            echo "NARGO=${RUNNER_TEMP}/modern-zk-tools/bin/nargo"
+            echo "BB=${RUNNER_TEMP}/modern-zk-tools/bin/bb"
+            echo "BB_CRS_DIR=${RUNNER_TEMP}/modern-zk-tools/crs"
+            echo "REALLYME_BARRETENBERG_LIB_DIR=${RUNNER_TEMP}/modern-zk-tools/lib/linuxX86_64"
+          } >>"${GITHUB_ENV}"
+
+      - name: Retain verified CRS download receipt
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: modern-crs-download-receipt-${{ github.sha }}
+          path: ${{ runner.temp }}/modern-zk-tools/crs/download-receipt.tsv
+          if-no-files-found: error
+          retention-days: 90
+
+      - name: Check pinned Noir security-advisory ancestry
+        working-directory: zk
+        env:
+          NOIR_CHECKOUT: ${{ github.workspace }}/noir
+        run: scripts/check-noir-advisory-ancestry.sh
+
+      - name: Build offline witness test harness before proving
+        working-directory: zk
+        run: cargo test --locked --offline --no-run -p reallyme-zk-noir-witness-core
+
+      - name: Check frozen mobile demo inputs against circuit fixtures
+        working-directory: zk
+        run: >-
+          cargo run --locked --offline -p reallyme-zk-demo-fixture-generator
+          --bin generate-demo-flow-inputs -- check "${PWD}"
+
+      - name: Prove and verify all 20 request-bound circuits and negative bindings
+        working-directory: zk
+        env:
+          RUNS: ${{ github.event_name == 'workflow_dispatch' && '3' || '1' }}
+          ISOLATED_HOME: ${{ runner.temp }}/modern-zk-home
+          ISOLATED_CACHE: ${{ runner.temp }}/modern-zk-cache
+        run: scripts/test-modern-production-circuits.sh
+
+      # Joined presentations execute alternate inputs through the shared
+      # private-session program and overwrite its Nargo witness filename.
+      # Compare the canonical Prover.toml witness before those gates run.
+      - name: Compare ACVM witness stacks with the pinned Nargo fixtures
+        working-directory: zk
+        env:
+          REALLYME_ZK_ALL_CIRCUITS_V1_ROOT: ${{ github.workspace }}/zk/circuits
+          RUSTFLAGS: -Dwarnings
+        run: >-
+          cargo test --locked -p reallyme-zk-noir-witness-core
+          execution::tests::opt_in_all_circuits_v1_fixture_witness_parity
+          -- --ignored --exact --nocapture
+
+      - name: Prove and verify common-credential-root exact circuits and generated vectors
+        working-directory: zk
+        env:
+          ISOLATED_CACHE: ${{ runner.temp }}/common-credential-root-zk-cache
+        run: scripts/test-common-credential-root-production-circuits.sh
+
+      - name: Admit and stage sealed prepared mobile circuit pack
+        working-directory: zk
+        env:
+          REALLYME_ZK_DEMO_CRS_DIR: ${{ runner.temp }}/modern-zk-tools/crs
+          REALLYME_ZK_RELEASE_ARTIFACT_BASE_URL: https://static.reallyme.net/zk
+        run: |
+          set -euo pipefail
+          local_artifact_root="${PWD}/release-artifacts/modern-v1-bb-6.0.0"
+          persona_credential_evidence_artifacts="${local_artifact_root}/mobile-demo-artifacts-persona-credential-evidence-v1-candidate"
+          demo_fixture="${local_artifact_root}/ios-demo-resources/zk_demo"
+          rm -rf "${persona_credential_evidence_artifacts}" "${demo_fixture}"
+          node scripts/release-artifact-cache.mjs --check --mobile-only --unpack-mobile-public-artifacts
+          node --test scripts/release-artifact-cache.test.mjs
+          cargo run --locked -p reallyme-zk-artifact-package --bin check-mobile-runtime -- \
+            "${persona_credential_evidence_artifacts}" v1
+          node scripts/stage-demo-mobile-assets.mjs "${demo_fixture}"
+
+      - name: Prove and verify persona credential evidence claim and status circuits
+        working-directory: zk
+        env:
+          REALLYME_VERIFY_PERSONA_CREDENTIAL_EVIDENCE_NATIVE: '1'
+        run: python3 scripts/test-persona-credential-evidence-linked-proofs.py
+
+      - name: Reject mismatched persona credential evidence witnesses
+        working-directory: zk
+        run: python3 scripts/test-persona-credential-evidence-joined-circuits.py
+
+      - name: Reject invalid prepared status witnesses
+        working-directory: zk
+        run: python3 scripts/test-persona-credential-evidence-current-state-circuits.py
+
+      - name: Reject empty required status fields in both hash lanes
+        working-directory: zk
+        run: python3 scripts/test-required-status-field-circuits.py
+
+      - name: Check pinned Poseidon2 crypto contract vectors
+        working-directory: zk
+        run: scripts/check-poseidon2-crypto-contract.sh
+
+      - name: Exercise pinned Noir soundness regressions
+        working-directory: zk
+        env:
+          ISOLATED_HOME: ${{ runner.temp }}/modern-soundness-home
+          ISOLATED_CACHE: ${{ runner.temp }}/modern-soundness-cache
+        run: scripts/test-modern-soundness-regressions.sh
+
+      - name: Install pinned linked Barretenberg library
+        shell: bash
+        run: |
+          set -euo pipefail
+          bb_dir="${RUNNER_TEMP}/bb-v6.0.0-static"
+          archive="${RUNNER_TEMP}/barretenberg-static-amd64-linux.tar.gz"
+          install -d -m 0755 "${bb_dir}"
+          curl --proto '=https' --tlsv1.2 --fail --silent --show-error --location \
+            --output "${archive}" \
+            https://github.com/AztecProtocol/aztec-packages/releases/download/v6.0.0/barretenberg-static-amd64-linux.tar.gz
+          printf '%s  %s\n' \
+            '4040c25d374f20d0641824642db328abaf3847959e503a835060fb03a5a95d9f' \
+            "${archive}" | sha256sum --check --strict
+          tar -xzf "${archive}" -C "${bb_dir}"
+          test -f "${bb_dir}/libbb-external.a"
+          echo "REALLYME_BARRETENBERG_LIB_DIR=${bb_dir}" >>"${GITHUB_ENV}"
+
+      - name: Prove and verify all 20 request-bound circuits through the linked library
+        working-directory: zk
+        env:
+          REALLYME_ZK_ALL_CIRCUITS_V1_ROOT: ${{ github.workspace }}/zk/circuits
+          REALLYME_BN254_G1_PATH: ${{ runner.temp }}/modern-zk-tools/crs/bn254_g1.dat
+          REALLYME_BN254_G2_PATH: ${{ runner.temp }}/modern-zk-tools/crs/bn254_g2.dat
+          RUSTFLAGS: -Dwarnings
+        run: scripts/test-modern-linked-all30-matrix.sh
+
+      - name: Verify linked-generated proof bytes with official BB CLI
+        working-directory: zk
+        env:
+          REALLYME_ZK_ALL_CIRCUITS_V1_ROOT: ${{ github.workspace }}/zk/circuits
+          REALLYME_BN254_G1_PATH: ${{ runner.temp }}/modern-zk-tools/crs/bn254_g1.dat
+          REALLYME_BN254_G2_PATH: ${{ runner.temp }}/modern-zk-tools/crs/bn254_g2.dat
+          OUTPUT_PARENT: ${{ runner.temp }}
+          RUSTFLAGS: -Dwarnings
+        run: scripts/test-modern-linked-cli-cross-verify.sh
+
+      - name: Admit sealed mobile circuit pack and require platform fixtures
+        working-directory: zk
+        env:
+          REALLYME_ZK_DEMO_CRS_DIR: ${{ runner.temp }}/modern-zk-tools/crs
+          REALLYME_ZK_PLATFORM_DEMO_FIXTURES_REQUIRED: "1"
+          REALLYME_ZK_RELEASE_ARTIFACT_BASE_URL: https://static.reallyme.net/zk
+          RUSTFLAGS: -Dwarnings
+        run: |
+          set -euo pipefail
+          local_artifact_root="${PWD}/release-artifacts/modern-v1-bb-6.0.0"
+          persona_credential_evidence_artifacts="${local_artifact_root}/mobile-demo-artifacts-persona-credential-evidence-v1-candidate"
+          cargo run --locked -p reallyme-zk-artifact-package --bin check-mobile-runtime -- \
+            "${persona_credential_evidence_artifacts}" v1
+          # Verify the frozen demo proofs as shipped. Fresh proofs use random
+          # masking and are exercised by the separate native proving tests.
+          node scripts/check-common-credential-root-ci-artifacts.mjs mobile-fixtures
+          fixture_test_output="${RUNNER_TEMP}/platform-demo-fixture-test.log"
+          cargo test --locked -p reallyme-zk-platform-ffi --features native \
+            --test demo_fixture_witness_tests \
+            demo_stage_fixtures_dispatch_witness_release_prove_and_verify_through_platform_provider \
+            -- --exact --nocapture | tee "${fixture_test_output}"
+          if grep -Fq "running 0 tests" "${fixture_test_output}"; then
+            echo "::error::platform demo fixture integration test matched zero tests"
+            exit 1
+          fi
+          grep -Fq \
+            "test demo_stage_fixtures_dispatch_witness_release_prove_and_verify_through_platform_provider ... ok" \
+            "${fixture_test_output}"
+          common_credential_root_verify_output="${RUNNER_TEMP}/platform-common-credential-root-verify-test.log"
+          cargo test --locked -p reallyme-zk-platform-ffi --features native \
+            --test demo_fixture_witness_tests \
+            mobile_package_verifies_both_hashes_and_persona_modes \
+            -- --ignored --exact --nocapture | tee "${common_credential_root_verify_output}"
+          if grep -Fq "running 0 tests" "${common_credential_root_verify_output}"; then
+            echo "::error::platform common-credential-root verify test matched zero tests"
+            exit 1
+          fi
+          grep -Fq \
+            "test mobile_package_verifies_both_hashes_and_persona_modes ... ok" \
+            "${common_credential_root_verify_output}"
+          common_credential_root_prove_output="${RUNNER_TEMP}/platform-common-credential-root-prove-test.log"
+          cargo test --locked -p reallyme-zk-platform-ffi --features native \
+            --test demo_fixture_witness_tests \
+            mobile_package_proves_every_common_credential_root_stage \
+            -- --ignored --exact --nocapture | tee "${common_credential_root_prove_output}"
+          if grep -Fq "running 0 tests" "${common_credential_root_prove_output}"; then
+            echo "::error::platform common-credential-root prove test matched zero tests"
+            exit 1
+          fi
+          grep -Fq \
+            "test mobile_package_proves_every_common_credential_root_stage ... ok" \
+            "${common_credential_root_prove_output}"
+
+      - name: Verify five-proof issuer status isolation through native dispatch
+        working-directory: zk
+        env:
+          REALLYME_ZK_STATUS_QUALIFIED_FIXTURE_ROOT: ${{ runner.temp }}/status-qualified-issuer-fixtures
+          RUSTFLAGS: -Dwarnings
+        run: |
+          set -euo pipefail
+          cargo run --locked -p reallyme-zk-demo-fixture-generator \
+            --bin generate-private-persona-distinct-fixtures -- generate \
+            "${REALLYME_ZK_STATUS_QUALIFIED_FIXTURE_ROOT}"
+          test_name="dispatch::tests::status_qualified_native::five_real_proofs_cross_status_qualified_dispatch_with_issuer_isolation"
+          output="${RUNNER_TEMP}/platform-status-qualified-issuer-isolation.log"
+          cargo test --locked -p reallyme-zk-platform-ffi --features native --lib \
+            "${test_name}" -- --ignored --exact --nocapture | tee "${output}"
+          grep -Eq 'test result: ok\. 1 passed; 0 failed' "${output}"
+          grep -Fq "test ${test_name} ... ok" "${output}"

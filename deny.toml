@@ -1,0 +1,89 @@
+# SPDX-FileCopyrightText: Copyright © 2026 ReallyMe Technologies Limited. All rights reserved
+#
+# SPDX-License-Identifier: MIT OR Apache-2.0
+
+[graph]
+targets = [
+    "x86_64-unknown-linux-gnu",
+    "aarch64-unknown-linux-gnu",
+    "wasm32-unknown-unknown",
+    "aarch64-apple-ios",
+    "aarch64-linux-android",
+]
+all-features = true
+no-default-features = false
+
+[output]
+feature-depth = 1
+
+[advisories]
+ignore = []
+yanked = "deny"
+
+[licenses]
+confidence-threshold = 0.93
+allow = [
+    "Apache-2.0",
+    "BSD-3-Clause",
+    "MIT",
+    "Unicode-3.0",
+    "Zlib",
+]
+exceptions = []
+
+[licenses.private]
+ignore = true
+registries = []
+
+[bans]
+multiple-versions = "deny"
+wildcards = "deny"
+highlight = "all"
+workspace-default-features = "allow"
+external-default-features = "allow"
+deny = []
+# These exact duplicate-version exceptions are tied to the reviewed dependency
+# graph for Buffa 0.9.2 and Noir 1.0.0. They are intentionally not
+# wildcard skips: remove each one as soon as the pinned upstream that introduces
+# it moves onto the workspace-major line.
+skip = [
+    # Buffa 0.9.2 still requires base64 0.22.1. ZK itself and ReallyMe Codec
+    # use base64 0.23.1.
+    { name = "base64", version = "=0.22.1" },
+    # Noir 1.0.0's Arkworks 0.6 graph still uses digest 0.10 /
+    # crypto-common 0.1 alongside the modern RustCrypto 0.11 / 0.2 graph.
+    { name = "crypto-common", version = "=0.1.7" },
+    { name = "digest", version = "=0.10.7" },
+    # The pinned Arkworks graph used by ReallyMe Poseidon2 still uses rand 0.8
+    # and getrandom 0.2; the rest of this workspace has moved to getrandom 0.4.
+    { name = "getrandom", version = "=0.2.17" },
+    # Buffa 0.9.2 uses hashbrown 0.15 while Noir 1.0.0's execution graph
+    # uses hashbrown 0.17 through indexmap and Arkworks.
+    { name = "hashbrown", version = "=0.15.5" },
+    # Arkworks 0.6 and Noir 1.0.0 currently straddle these collection and
+    # bigint helper versions.
+    { name = "itertools", version = "=0.14.0" },
+    { name = "num-bigint", version = "=0.4.8" },
+    { name = "rand_core", version = "=0.6.4" },
+    # Proc-macro dependencies in the pinned graph currently span syn 2 and 3.
+    { name = "syn", version = "=3.0.10" },
+    # noirc_abi still uses toml 0.8/toml_edit 0.22, while workspace tooling
+    # that parses release/source metadata uses the current spec-1.2 toml line.
+    { name = "serde_spanned", version = "=1.1.3" },
+    { name = "toml", version = "=1.2.1+spec-1.1.0" },
+    { name = "toml_datetime", version = "=1.1.3+spec-1.1.0" },
+    { name = "toml_edit", version = "=0.25.19+spec-1.1.0" },
+    { name = "winnow", version = "=1.0.5" },
+]
+skip-tree = []
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]
+allow-git = ["https://github.com/noir-lang/noir"]
+
+[sources.allow-org]
+github = []
+gitlab = []
+bitbucket = []

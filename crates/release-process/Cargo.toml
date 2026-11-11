@@ -1,0 +1,27 @@
+# SPDX-FileCopyrightText: Copyright © 2026 ReallyMe Technologies Limited. All rights reserved
+#
+# SPDX-License-Identifier: MIT OR Apache-2.0
+
+[package]
+name = "reallyme-zk-release-process"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+description = "Pinned external-tool adapter for ReallyMe ZK release generation."
+
+[dependencies]
+libc = { workspace = true }
+reallyme-zk-api = { path = "../api", version = "0.3.0", default-features = false }
+reallyme-zk-artifacts = { path = "../artifacts", version = "0.3.0", default-features = false }
+reallyme-zk-backend-bb = { path = "../backend-bb", version = "0.1.0", default-features = false }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+sha2 = { workspace = true }
+thiserror = { workspace = true }
+zeroize = { workspace = true }
+
+[lints]
+workspace = true

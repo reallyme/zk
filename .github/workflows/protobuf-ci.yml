@@ -1,0 +1,91 @@
+# SPDX-FileCopyrightText: Copyright © 2026 ReallyMe Technologies Limited. All rights reserved
+#
+# SPDX-License-Identifier: MIT OR Apache-2.0
+
+name: Protobuf Checks
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/protobuf-ci.yml"
+      - "buf.yaml"
+      - "buf.gen.yaml"
+      - "crates/proto/**"
+      - "scripts/check-generated-protos.sh"
+      - "scripts/check-proto-breaking.sh"
+      - "scripts/check_release_readiness.mjs"
+      - "scripts/harden-zk-generated.mjs"
+      - "scripts/proto-hardening/**"
+      - "!**/*.md"
+  push:
+    branches:
+      - main
+      - trunk
+    # A release preflight requires exact-commit evidence. Manually dispatch
+    # this workflow when a Markdown-only HEAD is the intended release commit.
+    paths-ignore:
+      - "**/*.md"
+
+permissions:
+  contents: read
+
+env:
+  BUFFA_VERSION: 0.9.2
+  BUF_VERSION: 1.75.0
+
+jobs:
+  protobuf:
+    name: lint and generated freshness
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - name: Checkout ZK
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: zk
+          persist-credentials: false
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@2c7215f132e9ebf062739d9130488b56d53c060c # master
+        with:
+          toolchain: 1.99.0
+          components: rustfmt
+
+      - name: Install Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "26"
+
+      - name: Cache Cargo
+        uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
+        with:
+          workspaces: zk
+          cache-bin: false
+
+      - name: Install Buf
+        uses: bufbuild/buf-setup-action@a47c93e0b1648d5651a065437926377d060baa99 # v1.50.0
+        with:
+          version: ${{ env.BUF_VERSION }}
+          github_token: ${{ github.token }}
+
+      - name: Install pinned Buffa generators
+        run: |
+          cargo install protoc-gen-buffa --version "$BUFFA_VERSION" --locked
+          cargo install protoc-gen-buffa-packaging --version "$BUFFA_VERSION" --locked
+
+      - name: Check canonical protobuf formatting
+        working-directory: zk
+        run: buf format --diff --exit-code crates/proto/proto
+
+      - name: Check pinned public protobuf baseline
+        working-directory: zk
+        run: |
+          buf breaking --against crates/proto/baselines/reallyme-zk-v1.binpb
+          scripts/check-proto-breaking.sh
+
+      - name: Check generated protobuf freshness
+        working-directory: zk
+        run: |
+          buf lint
+          scripts/check-generated-protos.sh

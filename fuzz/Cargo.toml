@@ -1,0 +1,81 @@
+# SPDX-FileCopyrightText: Copyright © 2026 ReallyMe Technologies Limited. All rights reserved
+#
+# SPDX-License-Identifier: MIT OR Apache-2.0
+
+# This crate is intentionally outside the audited production workspace because
+# libFuzzer requires a no-main target and an unsafe runtime. Only public strict
+# admission functions from production crates are called by these harnesses.
+
+[package]
+name = "reallyme-zk-fuzz"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "=0.4.13"
+reallyme-zk-api = { version = "0.3.0", path = "../crates/api", default-features = false }
+reallyme-zk-backend-bb = { version = "0.1.0", path = "../crates/backend-bb", default-features = false }
+reallyme-zk-proto = { version = "0.3.0", path = "../crates/proto", default-features = false, features = ["generated"] }
+reallyme-zk-proto-codec = { version = "0.1.0", path = "../crates/proto-codec", default-features = false }
+
+[[bin]]
+name = "provider_operation"
+path = "fuzz_targets/provider_operation.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "artifact_contracts"
+path = "fuzz_targets/artifact_contracts.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "proof_contracts"
+path = "fuzz_targets/proof_contracts.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "protojson_contracts"
+path = "fuzz_targets/protojson_contracts.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "public_input_abi"
+path = "fuzz_targets/public_input_abi.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "claim_proof_contracts"
+path = "fuzz_targets/claim_proof_contracts.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "persona_evidence_contracts"
+path = "fuzz_targets/persona_evidence_contracts.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "root_status_contracts"
+path = "fuzz_targets/root_status_contracts.rs"
+test = false
+doc = false
+bench = false
+
+[workspace]

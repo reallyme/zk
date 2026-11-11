@@ -1,0 +1,11 @@
+# SPDX-FileCopyrightText: Copyright © 2026 ReallyMe Technologies Limited. All rights reserved
+#
+# SPDX-License-Identifier: MIT OR Apache-2.0
+
+disallowed-methods = [
+    { path = "std::process::Command::new", reason = "external command execution is restricted to the audited release-process runner" },
+]
+
+disallowed-types = [
+    { path = "std::process::Command", reason = "external command execution is restricted to the audited release-process runner" },
+]

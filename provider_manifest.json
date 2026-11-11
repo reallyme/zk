@@ -1,0 +1,87 @@
+{
+  "spdxFileCopyrightText": "Copyright © 2026 ReallyMe Technologies Limited. All rights reserved",
+  "spdxLicenseIdentifier": "MIT OR Apache-2.0",
+  "schemaVersion": 1,
+  "productionProofSuite": "barretenberg_ultra_honk_keccak_zk_no_ipa",
+  "fallbackBehaviors": [
+    "explicit_provider_required",
+    "typed_unsupported_provider"
+  ],
+  "lanes": {
+    "rust_native": {
+      "status": "first_party_candidate_gate_pending",
+      "provider": "linked Barretenberg backend implemented here and injected at application boundary",
+      "fallback": "explicit_provider_required"
+    },
+    "swift": {
+      "status": "first_party_package_in_progress",
+      "provider": "packages/swift modern linked provider pending full gate",
+      "fallback": "typed_unsupported_provider"
+    },
+    "kotlin_jvm": {
+      "status": "contract_only",
+      "provider": "none",
+      "fallback": "explicit_provider_required"
+    },
+    "kotlin_android": {
+      "status": "first_party_package_in_progress",
+      "provider": "packages/kotlin modern linked provider pending full gate",
+      "fallback": "explicit_provider_required"
+    },
+    "typescript_wasm": {
+      "status": "blocked_modern_provider_migration",
+      "provider": "reallyme/identity modern Barretenberg provider required",
+      "fallback": "typed_unsupported_provider"
+    }
+  },
+  "mobileDependencies": {
+    "appleProofBackend": {
+      "repository": "packages/swift",
+      "status": "in_progress",
+      "requiredContract": [
+        "official_matched_noir_barretenberg_pair_pending_gate",
+        "ultra_honk",
+        "keccak_transcript",
+        "zero_knowledge_enabled",
+        "ipa_accumulation_disabled",
+        "separate_public_inputs",
+        "narrow_typed_native_abi",
+        "bounded_owned_buffers",
+        "crs_hash_pinning",
+        "zeroized_witness_copies",
+        "ios_27_minimum",
+        "retained_proof_verification",
+        "self_verified_generated_proofs"
+      ]
+    },
+    "cryptoUtilities": {
+      "repository": "reallyme/crypto",
+      "status": "compatible",
+      "contract": "platform utilities only; not circuit Poseidon2 or the proof backend"
+    },
+    "witnessGeneration": {
+      "repository": "reallyme/zk",
+      "revision": "pending-modern-toolchain-gate",
+      "status": "in_progress",
+      "contract": "repository-owned typed inputs and NoirWitnessStackV1 output only"
+    },
+    "androidProofBackend": {
+      "repository": "packages/kotlin",
+      "status": "in_progress",
+      "requiredContract": [
+        "official_matched_noir_barretenberg_pair_pending_gate",
+        "ultra_honk",
+        "keccak_transcript",
+        "zero_knowledge_enabled",
+        "ipa_accumulation_disabled",
+        "separate_public_inputs",
+        "narrow_typed_jni_abi",
+        "typed_status_codes",
+        "bounded_owned_buffers",
+        "zeroized_witness_copies",
+        "deterministic_aars",
+        "retained_proof_verification"
+      ]
+    }
+  }
+}
