@@ -18,7 +18,8 @@ crate-type = ["rlib", "staticlib"]
 [features]
 default = []
 native = ["reallyme-zk-backend-bb/native"]
-diagnostic-exact-source = ["native"]
+diagnostic-stage-verification = ["native"]
+diagnostic-exact-source = ["diagnostic-stage-verification"]
 
 [dependencies]
 buffa = { workspace = true }

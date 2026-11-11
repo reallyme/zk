@@ -34,8 +34,8 @@ const defaultArtifactBaseUrl = "https://static.reallyme.net/zk";
 const artifacts = [
   {
     path: "swiftpm/ReallyMeZKPlatformFFI.xcframework.zip",
-    remotePath: "swift/da09e0d12c29c9173867374a74af93edf7ce1c16037e34ca6efd43aa9a42471b/ReallyMeZKPlatformFFI.xcframework.zip",
-    sha256: "da09e0d12c29c9173867374a74af93edf7ce1c16037e34ca6efd43aa9a42471b",
+    remotePath: "swift/60505f149fcf345a3c6132478aeed05dbc8ee8a7b245d96a7fedeeee4d27d341/ReallyMeZKPlatformFFI.xcframework.zip",
+    sha256: "60505f149fcf345a3c6132478aeed05dbc8ee8a7b245d96a7fedeeee4d27d341",
     distribution: true,
     label: "SwiftPM binary target XCFramework",
   },
@@ -76,7 +76,7 @@ const artifacts = [
   },
   {
     path: "android-platform-jni/arm64-v8a/libreallyme_zk_platform_jni.so",
-    sha256: "c22a8c3569c501c6729e4e244474ee4ccf6320cc5e31c6408c2fc36237f9c423",
+    sha256: "b7f7069cf1a859c5cb9ff27b29bb5dc5b5d04164fc00e8dcbf9dbf255f1c716b",
     distribution: false,
     label: "Android JNI library before AAR packaging",
   },

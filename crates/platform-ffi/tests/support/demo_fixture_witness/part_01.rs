@@ -54,17 +54,25 @@ pub(crate) fn run_demo_stage_fixtures_dispatch_witness_release_prove_and_verify_
             stage_proofs.push(stage_result.stage_proof);
         }
         let session_binding = session_binding.ok_or(TestError::UnexpectedResponse)?;
-        let diagnostic_bundle = ZkClaimProofBundle::try_from_stage_proofs(
+        let joined_bundle = ZkClaimProofBundle::try_from_stage_proofs(
             profile.domain_profile(),
             session_binding,
             stage_proofs,
         )
         .map_err(|error| TestError::Domain(error.reason()))?;
+        exercise_forged_envelope(&context, &paths, profile, &joined_bundle).map_err(|cause| {
+            TestError::Fixture {
+                bundle_kind: profile.fixture_name,
+                stage: "credential_envelope",
+                operation: "verify_forged_envelope",
+                cause: Box::new(cause),
+            }
+        })?;
         exercise_claim_proof_bundle_verify_path(
             &context,
             profile,
             session_binding,
-            diagnostic_bundle,
+            joined_bundle,
         )
         .map_err(|cause| TestError::Fixture {
             bundle_kind: profile.fixture_name,
@@ -255,25 +263,20 @@ fn exercise_prove_and_verify_path(
         _ => return Err(TestError::UnexpectedResponse),
     };
 
-    let result = dispatch_success(context, verify_request(&proof, witness.session_binding)?)?;
-    match result {
-        ZkProviderOperationResult::StageVerification(report) => {
-            if report.circuit_ref == Some(witness.witness_handle.circuit_ref) {
-                Ok(StageProofOutcome {
-                    stage_proof: ZkClaimProofBundleStageProof::try_from_parts(
-                        profile.domain_profile(),
-                        stage.production_stage,
-                        proof,
-                    )
-                    .map_err(|error| TestError::Domain(error.reason()))?,
-                    session_binding: witness.session_binding,
-                })
-            } else {
-                Err(TestError::UnexpectedResponse)
-            }
-        }
-        _ => Err(TestError::UnexpectedResponse),
-    }
+    assert_stage_verification_policy(
+        context,
+        verify_request(&proof, witness.session_binding)?,
+        proof.circuit_ref(),
+    )?;
+    Ok(StageProofOutcome {
+        stage_proof: ZkClaimProofBundleStageProof::try_from_parts(
+            profile.domain_profile(),
+            stage.production_stage,
+            proof,
+        )
+        .map_err(|error| TestError::Domain(error.reason()))?,
+        session_binding: witness.session_binding,
+    })
 }
 
 struct BundleProofOutcome {

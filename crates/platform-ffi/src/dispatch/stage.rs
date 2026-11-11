@@ -8,15 +8,18 @@ use reallyme_zk_api::{
     errors::{ZkError, ZkErrorReason},
     proofs::{ZkProof, ZkProofSuite},
 };
+#[cfg(feature = "diagnostic-stage-verification")]
+use reallyme_zk_backend_bb::BbStageVerifyRequest;
 use reallyme_zk_backend_bb::{
-    BarretenbergArtifactResolver, BbStageProveRequest, BbStageVerifyRequest,
-    LinkedBarretenbergBackend,
+    BarretenbergArtifactResolver, BbStageProveRequest, LinkedBarretenbergBackend,
 };
+#[cfg(feature = "diagnostic-stage-verification")]
+use reallyme_zk_proto_codec::result::encode_stage_verification_response;
 use reallyme_zk_proto_codec::{
     operation::{ZkNativeStageWitnessHandle, ZkStageWitnessInputOwner, ZkStageWitnessSource},
     result::{
-        encode_stage_proof_response, encode_stage_verification_response,
-        encode_stage_witness_release_response, encode_stage_witness_response,
+        encode_stage_proof_response, encode_stage_witness_release_response,
+        encode_stage_witness_response,
     },
 };
 use zeroize::Zeroizing;
@@ -137,6 +140,23 @@ pub(super) fn release_stage_witness(
     encode_stage_witness_release_response(request_bytes, handle.circuit_ref)
 }
 
+/// Rejects standalone stage verification in production FFI builds.
+///
+/// A valid stage proof can establish a circuit relation without authenticating
+/// a credential, so only diagnostic builds expose this operation.
+#[cfg(not(feature = "diagnostic-stage-verification"))]
+pub(super) fn verify_stage(
+    _context: &PlatformContext,
+    _request_bytes: &[u8],
+    _proof: &ZkProof,
+    _expected_proof_suite: ZkProofSuite,
+    _expected_binding: reallyme_zk_api::proofs::ZkSessionBinding,
+) -> Result<Zeroizing<Vec<u8>>, ZkError> {
+    Err(ZkError::new(ZkErrorReason::UnsupportedTransport))
+}
+
+/// Verifies one standalone stage proof for circuit diagnostics.
+#[cfg(feature = "diagnostic-stage-verification")]
 pub(super) fn verify_stage(
     context: &PlatformContext,
     request_bytes: &[u8],

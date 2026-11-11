@@ -114,8 +114,8 @@ hierarchy and never overwrite released bytes.
 ### Maven Central
 
 Add `mavenCentral()` to your Gradle dependency repositories. Declare
-`implementation("me.really:zk:0.3.0")` for Kotlin/JVM or
-`implementation("me.really:zk-android:0.3.0")` for Android. The Android
+`implementation("me.really:zk:0.3.1")` for Kotlin/JVM or
+`implementation("me.really:zk-android:0.3.1")` for Android. The Android
 artifact includes the Kotlin API as a dependency. The JVM and Android
 publications resolve their protobuf modules from Maven Central at the same
 version.
@@ -132,7 +132,7 @@ GPG signing key and sign the prepared files:
 ```
 
 The signing step verifies the prepared files and writes
-`build/maven-central-upload/out/reallyme-maven-central-0.3.0.zip` for manual
+`build/maven-central-upload/out/reallyme-maven-central-0.3.1.zip` for manual
 upload in the Central Portal.
 
 ### Static artifact upload

@@ -6,8 +6,8 @@
 import Foundation
 import PackageDescription
 
-let ffiArtifactChecksum = "da09e0d12c29c9173867374a74af93edf7ce1c16037e34ca6efd43aa9a42471b"
-let ffiArtifactVersion = "0.3.0"
+let ffiArtifactChecksum = "60505f149fcf345a3c6132478aeed05dbc8ee8a7b245d96a7fedeeee4d27d341"
+let ffiArtifactVersion = "0.3.1"
 let ffiArtifactLocalPathOverride = ""
 
 let packageRoot = URL(fileURLWithPath: #filePath).deletingLastPathComponent().path

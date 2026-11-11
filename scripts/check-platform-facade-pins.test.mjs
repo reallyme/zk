@@ -17,6 +17,44 @@ test("accepts current platform facade pins", () => {
   assert.doesNotThrow(() => validatePlatformFacadePins(sources));
 });
 
+test("allows matching SDK patch versions independently of the Rust release", () => {
+  const changed = {
+    ...sources,
+    packageSwift: sources.packageSwift.replace(/^let ffiArtifactVersion = "[^"]+"$/mu,
+      'let ffiArtifactVersion = "0.3.2"'),
+    kotlinRootBuild: sources.kotlinRootBuild.replace(/^version = "[^"]+"$/mu,
+      'version = "0.3.2"'),
+  };
+  assert.doesNotThrow(() => validatePlatformFacadePins(changed));
+});
+
+test("rejects differing Swift and Kotlin SDK versions", () => {
+  const changed = {
+    ...sources,
+    kotlinRootBuild: sources.kotlinRootBuild.replace(/^version = "[^"]+"$/mu,
+      'version = "0.3.2"'),
+  };
+  assert.throws(
+    () => validatePlatformFacadePins(changed),
+    (error) =>
+      error instanceof PlatformFacadePinPolicyError &&
+      error.code === "SDK_FACADE_VERSIONS_DIVERGE",
+  );
+});
+
+test("rejects a missing Swift SDK version pin", () => {
+  const changed = {
+    ...sources,
+    packageSwift: sources.packageSwift.replace(/^let ffiArtifactVersion = "[^"]+"$/mu, ""),
+  };
+  assert.throws(
+    () => validatePlatformFacadePins(changed),
+    (error) =>
+      error instanceof PlatformFacadePinPolicyError &&
+      error.code === "SWIFT_FACADE_VERSION_MISSING",
+  );
+});
+
 test("rejects Swift runtime older than generated facade", () => {
   const changed = {
     ...sources,

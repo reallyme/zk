@@ -296,7 +296,7 @@ impl Drop for PlatformContextGuard {
     }
 }
 
-fn hex_to_digest(value: &str) -> Result<[u8; 32], TestError> {
+pub(super) fn hex_to_digest(value: &str) -> Result<[u8; 32], TestError> {
     if value.len() != 64 {
         return Err(TestError::Hex);
     }

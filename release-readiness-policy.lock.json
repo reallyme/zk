@@ -10,12 +10,12 @@
     {
       "path": "scripts/check-platform-facade-pins.mjs",
       "role": "platform facade protobuf/runtime pin policy",
-      "sha256": "0254cfa8dcdae6b46eb07def1c66f555a460ab505cfb5b3391613e3637f8d61c"
+      "sha256": "5bd8f412629b94987a881d56079679ff5df526f032f4b50094d87d752d22f6db"
     },
     {
       "path": "scripts/check-platform-facade-pins.test.mjs",
       "role": "platform facade protobuf/runtime pin policy tests",
-      "sha256": "a8cefa094e0073325b2f7e94e2ff302ddb64c406a03e48b982bd1908082f5877"
+      "sha256": "a0672e7ff89c2dfd26f9cb86e5ac7b3962a0b78f903a7d492b84230335139b26"
     },
     {
       "path": "scripts/check-release-readiness-policy-lock.mjs",
@@ -55,7 +55,7 @@
     {
       "path": "scripts/verify_sdk_release_version.mjs",
       "role": "SDK release version verifier",
-      "sha256": "2c690d2599d8553bf67faeeea0f6ee1136efafd547b6dfe9b73e1d5d958c7e8b"
+      "sha256": "6f7b720f8c378ea1fac199e32431464692d45a541b6aba721b7653a55de127f1"
     },
     {
       "path": "scripts/verify_swift_release_artifact.mjs",
@@ -85,7 +85,7 @@
     {
       "path": ".github/workflows/rust-ci.yml",
       "role": "primary policy and exact-commit CI workflow",
-      "sha256": "293da5c9fe68fb6c682548a255cb0a6ace02aa99a424568c658b918c27de4d33"
+      "sha256": "10e4e02039179d71911e863b8e6eb2495b9d3104835b2b5e4deedfc0585447e5"
     },
     {
       "path": ".github/workflows/fuzz.yml",
@@ -110,12 +110,12 @@
     {
       "path": ".github/workflows/swift-package-preflight.yml",
       "role": "Swift binary package preflight workflow",
-      "sha256": "219b0cbfaa465255a46c02d4ea1683a69e681ad29275908910139b42b7e56688"
+      "sha256": "6fb7d4fc0431f10b4e23b3da88504e0338903b127bc2368d4ea49e76a2cda3ac"
     },
     {
       "path": ".github/workflows/swift-package-release.yml",
       "role": "Swift binary package release workflow",
-      "sha256": "6d747b590bb82828976dbe36b4ce80ed37dbce8f2e4bd85db9cf926b80604a0c"
+      "sha256": "9705a5f1136ed414b3a81ec84ac120e64fabd2c8be44cafb0b2f7c0fb9e44033"
     },
     {
       "path": "scripts/test-modern-soundness-regressions.sh",
@@ -170,7 +170,7 @@
     {
       "path": "scripts/release-artifact-cache.mjs",
       "role": "distribution manifest and artifact admission",
-      "sha256": "f81ebccecbec2e5b52c797882c1206367a7658349e7d9d41197f256f8bf93c4a"
+      "sha256": "dab9fa37ae62d31dade61326343a3d3b7d53ad996fac200cd6e23ab31eaf4eb3"
     },
     {
       "path": "scripts/release-artifact-cache.test.mjs",

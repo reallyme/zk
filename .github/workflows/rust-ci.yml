@@ -1178,6 +1178,14 @@ jobs:
           grep -Fq \
             "test demo_stage_fixtures_dispatch_witness_release_prove_and_verify_through_platform_provider ... ok" \
             "${fixture_test_output}"
+          diagnostic_test_output="${RUNNER_TEMP}/platform-diagnostic-stage-fixture-test.log"
+          cargo test --locked -p reallyme-zk-platform-ffi \
+            --features native,diagnostic-stage-verification --test demo_fixture_witness_tests \
+            demo_stage_fixtures_dispatch_witness_release_prove_and_verify_through_platform_provider \
+            -- --exact --nocapture | tee "${diagnostic_test_output}"
+          grep -Fq \
+            "test demo_stage_fixtures_dispatch_witness_release_prove_and_verify_through_platform_provider ... ok" \
+            "${diagnostic_test_output}"
           common_credential_root_verify_output="${RUNNER_TEMP}/platform-common-credential-root-verify-test.log"
           cargo test --locked -p reallyme-zk-platform-ffi --features native \
             --test demo_fixture_witness_tests \

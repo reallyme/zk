@@ -54,6 +54,20 @@ struct ReallyMeZKStageVerificationReportTests {
     #expect(verified == false)
   }
 
+  @Test
+  func productionTransportRefusalSurfacesTypedError() async throws {
+    await #expect(throws: ReallyMeZKError.providerRejected(.unsupportedTransport)) {
+      _ = try await verifyDiagnosticStage(report: .unsupportedTransport)
+    }
+  }
+
+  @Test
+  func malformedProofPreservesBooleanRejection() async throws {
+    let verified = try await verifyDiagnosticStage(report: .malformedProof)
+
+    #expect(verified == false)
+  }
+
   private func verifyDiagnosticStage(
     report: RecordingStageVerificationReport,
     expectedSessionBinding: Reallyme_Zk_V1_ZkSessionBinding = expectedSessionBinding()

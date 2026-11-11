@@ -22,7 +22,7 @@ plugins {
 }
 
 group = "me.really"
-version = "0.3.0"
+version = "0.3.1"
 
 if (providers.gradleProperty("reallymeZkCentralStaging").isPresent) {
     apply(from = "gradle/central-publication.gradle.kts")

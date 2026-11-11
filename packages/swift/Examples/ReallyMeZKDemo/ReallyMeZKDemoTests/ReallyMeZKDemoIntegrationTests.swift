@@ -243,7 +243,7 @@ final class ReallyMeZKDemoIntegrationTests: XCTestCase {
     }
   }
 
-  func testNativeProviderRejectsAlteredSessionBinding() async throws {
+  func testProductionNativeProviderRejectsStandaloneStageVerification() async throws {
     for credentialHashAlgorithm in ZKCredentialHashAlgorithm.allCases {
       let context = try DemoNativeContext(bundle: .main)
       do {
@@ -271,27 +271,15 @@ final class ReallyMeZKDemoIntegrationTests: XCTestCase {
         let expectedBinding = try ReallyMeZKDemoFixtureWitnessInputs.sessionBinding(
           input: request.witnessInput
         )
-        try await assertRejectedBinding(
-          request: request,
-          proof: proof.handle,
-          provider: provider,
-          binding: alteredNonce(expectedBinding),
-          message: "\(credentialHashAlgorithm.rawValue) altered nonce must not verify"
-        )
-        try await assertRejectedBinding(
-          request: request,
-          proof: proof.handle,
-          provider: provider,
-          binding: alteredAudience(expectedBinding),
-          message: "\(credentialHashAlgorithm.rawValue) altered audience must not verify"
-        )
-        try await assertRejectedBinding(
-          request: request,
-          proof: proof.handle,
-          provider: provider,
-          binding: alteredTransactionData(expectedBinding),
-          message: "\(credentialHashAlgorithm.rawValue) altered transaction data must not verify"
-        )
+        do {
+          _ = try await provider.verifyDiagnosticStage(
+            request: request.providerVerifyRequest(expectedSessionBinding: expectedBinding),
+            proof: proof.handle
+          )
+          XCTFail("production FFI accepted standalone stage verification")
+        } catch {
+          XCTAssertEqual(error, .providerRejected(.unsupportedTransport))
+        }
         try await context.close()
       } catch {
         try? await context.close()
@@ -435,55 +423,6 @@ private func stageRequest(
     stage: stage,
     witnessInput: input
   )
-}
-
-private func assertRejectedBinding<Transport: ReallyMeZKNativeTransport>(
-  request: ZKStageRequest,
-  proof: ReallyMeZKNativeProofHandle,
-  provider: ReallyMeZKNativeProvider<Transport>,
-  binding: Reallyme_Zk_V1_ZkSessionBinding,
-  message: String,
-  file: StaticString = #filePath,
-  line: UInt = #line
-) async throws {
-  let verified = try await provider.verifyDiagnosticStage(
-    request: request.providerVerifyRequest(expectedSessionBinding: binding),
-    proof: proof
-  )
-  XCTAssertFalse(verified, message, file: file, line: line)
-}
-
-private func alteredNonce(
-  _ binding: Reallyme_Zk_V1_ZkSessionBinding
-) -> Reallyme_Zk_V1_ZkSessionBinding {
-  var altered = binding
-  altered.nonceHash = alteredDigest(binding.nonceHash)
-  return altered
-}
-
-private func alteredAudience(
-  _ binding: Reallyme_Zk_V1_ZkSessionBinding
-) -> Reallyme_Zk_V1_ZkSessionBinding {
-  var altered = binding
-  altered.audienceHash = alteredDigest(binding.audienceHash)
-  return altered
-}
-
-private func alteredTransactionData(
-  _ binding: Reallyme_Zk_V1_ZkSessionBinding
-) -> Reallyme_Zk_V1_ZkSessionBinding {
-  var altered = binding
-  altered.transactionDataHash = alteredDigest(binding.transactionDataHash)
-  return altered
-}
-
-private func alteredDigest(_ digest: Data) -> Data {
-  var altered = digest
-  if altered.isEmpty {
-    return Data(repeating: 1, count: 32)
-  }
-  altered[altered.startIndex] ^= 0x01
-  return altered
 }
 
 private func fixtureResourceNames(extension resourceExtension: String) -> Set<String> {

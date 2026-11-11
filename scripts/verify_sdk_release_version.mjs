@@ -28,18 +28,16 @@ const readRegular = (path) => {
   return readFileSync(path, "utf8");
 };
 
+// Native SDK releases can ship FFI fixes independently of the public Rust
+// crates and sealed circuit packages, whose release workflows validate them.
 const assignments = [
-  ["crates/api/Cargo.toml", /^version = "([^"]+)"$/gmu],
-  ["crates/artifacts/Cargo.toml", /^version = "([^"]+)"$/gmu],
-  ["crates/proto/Cargo.toml", /^version = "([^"]+)"$/gmu],
   ["packages/kotlin/build.gradle.kts", /^version = "([^"]+)"$/gmu],
   ["packages/kotlin/demo-android/build.gradle.kts", /^\s+versionName = "([^"]+)"$/gmu],
   ["Package.swift", /^let ffiArtifactVersion = "([^"]+)"$/gmu],
 ];
 const workflowVersionPattern = /^      version:\n(?: {8}[^\n]*\n)*? {8}default: ([0-9]+\.[0-9]+\.[0-9]+)$/gmu;
 for (const workflow of [
-  "crates-package-preflight", "swift-package-preflight",
-  "swift-package-release", "sealed-release-package-attestation",
+  "swift-package-preflight", "swift-package-release",
 ]) {
   assignments.push([`.github/workflows/${workflow}.yml`, workflowVersionPattern]);
 }
@@ -49,4 +47,4 @@ for (const [path, pattern] of assignments) {
     fail(`${path} is not bound to ${expectedVersion}`);
   }
 }
-console.log(`Rust, Swift, and Kotlin ZK package versions are bound to ${expectedVersion}`);
+console.log(`Swift and Kotlin ZK package versions are bound to ${expectedVersion}`);

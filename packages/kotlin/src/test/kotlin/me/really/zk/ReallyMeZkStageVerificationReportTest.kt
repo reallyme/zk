@@ -54,6 +54,20 @@ class ReallyMeZkStageVerificationReportTest {
         assertFalse(verifyDiagnosticStage(StageVerificationReportBridge(StageVerificationReport.PROOF_REJECTED)))
     }
 
+    @Test
+    fun productionTransportRefusalSurfacesTypedError() {
+        val error =
+            assertFailsWith<ReallyMeZkProviderException> {
+                verifyDiagnosticStage(StageVerificationReportBridge(StageVerificationReport.UNSUPPORTED_TRANSPORT))
+            }
+        assertEquals(ZkProviderFailureReason.UNSUPPORTED_TRANSPORT, error.reason)
+    }
+
+    @Test
+    fun malformedProofPreservesBooleanRejection() {
+        assertFalse(verifyDiagnosticStage(StageVerificationReportBridge(StageVerificationReport.MALFORMED_PROOF)))
+    }
+
     private fun assertMalformedProof(report: StageVerificationReport) {
         val bridge = StageVerificationReportBridge(report)
         val error =
@@ -106,6 +120,8 @@ class ReallyMeZkStageVerificationReportTest {
         UNSPECIFIED_PROOF_SUITE,
         WRONG_RESULT_CASE,
         PROOF_REJECTED,
+        UNSUPPORTED_TRANSPORT,
+        MALFORMED_PROOF,
     }
 
     private class StageVerificationReportBridge(
@@ -135,6 +151,18 @@ class ReallyMeZkStageVerificationReportTest {
                         Manifest.ZkError
                             .newBuilder()
                             .setReason(Manifest.ZkErrorReason.ZK_ERROR_REASON_INVALID_PROOF),
+                    )
+                StageVerificationReport.UNSUPPORTED_TRANSPORT ->
+                    response.setError(
+                        Manifest.ZkError
+                            .newBuilder()
+                            .setReason(Manifest.ZkErrorReason.ZK_ERROR_REASON_UNSUPPORTED_TRANSPORT),
+                    )
+                StageVerificationReport.MALFORMED_PROOF ->
+                    response.setError(
+                        Manifest.ZkError
+                            .newBuilder()
+                            .setReason(Manifest.ZkErrorReason.ZK_ERROR_REASON_INVALID_PROOF_ENCODING),
                     )
                 StageVerificationReport.WRONG_RESULT_CASE ->
                     response.setResult(

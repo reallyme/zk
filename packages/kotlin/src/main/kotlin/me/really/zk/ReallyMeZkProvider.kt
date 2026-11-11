@@ -166,6 +166,8 @@ public interface ReallyMeZkProvider<WitnessHandle : Any, ProofHandle : Any> {
 
     /**
      * Verifies one diagnostic stage proof against its typed public binding.
+     * Production native builds reject this operation with
+     * [ZkProviderFailureReason.UNSUPPORTED_TRANSPORT].
      *
      * This is intentionally stage-scoped. A successful return is useful for
      * SDK demos, fixture validation, and backend diagnostics, but it is not a

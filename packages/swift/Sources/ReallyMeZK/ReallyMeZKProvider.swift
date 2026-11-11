@@ -20,6 +20,7 @@ public protocol ReallyMeZKProvider: Sendable {
   ) async throws(ReallyMeZKError) -> ZKProviderProofResult<ProofHandle>
 
   /// Verifies one diagnostic stage proof against its typed public binding.
+  /// Production native builds reject this operation with `.unsupportedTransport`.
   ///
   /// A successful return is stage-scoped. SDK demos, fixture validation, and
   /// backend diagnostics use this path for immediate feedback; production

@@ -98,3 +98,17 @@ of private inputs beyond ReallyMe-owned zeroizing buffers. The
 and the application controls for on-device proving. CRS files are pinned by
 SHA-256; see [Aztec Ignition provenance](provenance/toolchain-artifact-provenance.md#common-reference-string).
 Mobile resource tests use the exact release package.
+
+## Standalone stage diagnostics
+
+Production native FFI rejects the `VerifyStage` operation with
+`UNSUPPORTED_TRANSPORT`. Local diagnostic builds can enable the
+`reallyme-zk-platform-ffi` Cargo feature `diagnostic-stage-verification`.
+The `diagnostic-exact-source` feature also enables it.
+
+Swift and Kotlin retain the Boolean `verifyDiagnosticStage` API for source
+compatibility. Production native builds return a typed unsupported-transport
+error. In diagnostic builds, a successful result establishes that the standalone
+circuit relation held for the expected public binding. Credential acceptance for
+the staged claim format requires status-qualified bundle verification and atomic
+consumption of the active session.

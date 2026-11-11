@@ -18,6 +18,8 @@ enum RecordingStageVerificationReport: Sendable {
   case wrongBundleKind
   case wrongProofSuite
   case unspecifiedProofSuite
+  case unsupportedTransport
+  case malformedProof
 }
 
 /// Shape of the status-qualified verification report the recording transport returns.
@@ -116,9 +118,16 @@ actor RecordingNativeTransport: ReallyMeZKNativeTransport {
       result.stageProof = proof
     case .verifyStage(let verifyOperation):
       verifyExpectedBindings.append(verifyOperation.expectedBinding)
-      if verifyOperation.expectedBinding.transactionDataHash.isEmpty == false {
+      let failure: Reallyme_Zk_V1_ZkErrorReason? =
+        switch stageVerificationReport {
+        case .unsupportedTransport: .unsupportedTransport
+        case .malformedProof: .invalidProofEncoding
+        default:
+          verifyOperation.expectedBinding.transactionDataHash.isEmpty ? nil : .bindingMismatch
+        }
+      if let failure {
         var error = Reallyme_Zk_V1_ZkError()
-        error.reason = .bindingMismatch
+        error.reason = failure
         var response = Reallyme_Zk_V1_ZkProviderOperationResponse()
         response.requestSha256 = Data(SHA256.hash(data: request))
         response.error = error
@@ -391,7 +400,7 @@ private func recordingStageVerification(
   verification.bundleKind = recordingBundleKind(for: proof.circuitRef.family)
   verification.proofSuite = proof.proofSuite
   switch report {
-  case .matching, .empty:
+  case .matching, .empty, .unsupportedTransport, .malformedProof:
     break
   case .wrongCircuitRef:
     verification.circuitRef.stage = .credentialEnvelope

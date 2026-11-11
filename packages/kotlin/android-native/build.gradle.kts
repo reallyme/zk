@@ -66,9 +66,9 @@ val publishedAndroidReleaseAar =
     }
 val symbolCheckScript = rootProject.layout.projectDirectory.file("../../scripts/check-platform-ffi-symbols.sh")
 val freshnessCheckScript = rootProject.layout.projectDirectory.file("../../scripts/check-android-platform-jni-freshness.sh")
-val expectedAndroidJniSha256 = "c22a8c3569c501c6729e4e244474ee4ccf6320cc5e31c6408c2fc36237f9c423"
+val expectedAndroidJniSha256 = "b7f7069cf1a859c5cb9ff27b29bb5dc5b5d04164fc00e8dcbf9dbf255f1c716b"
 val expectedAndroidCppSha256 = "7466ed097631a564ed6bff0b47768caa76bf03270d2047b5a65c03f497b824df"
-val expectedAndroidAarJniSha256 = "c22a8c3569c501c6729e4e244474ee4ccf6320cc5e31c6408c2fc36237f9c423"
+val expectedAndroidAarJniSha256 = "b7f7069cf1a859c5cb9ff27b29bb5dc5b5d04164fc00e8dcbf9dbf255f1c716b"
 val expectedAndroidAarCppSha256 = "b5d97c38a728afe28d341cda3369f512d35eaf9c680c1b0563cd6a63e395230f"
 val androidJniAarEntryPath = "jni/arm64-v8a/libreallyme_zk_platform_jni.so"
 val androidCppAarEntryPath = "jni/arm64-v8a/libc++_shared.so"

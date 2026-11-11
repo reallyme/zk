@@ -96,8 +96,13 @@ export function validatePlatformFacadePins(sources) {
   if (!sources.kotlinAndroidNativeBuild.includes(`zk-android-\${rootProject.version}.aar`)) {
     throw new PlatformFacadePinPolicyError("ANDROID_NATIVE_AAR_PATH_VERSION_INHERITANCE_MISSING");
   }
-  if (kotlinFacadeVersion !== "0.3.0") {
-    throw new PlatformFacadePinPolicyError("KOTLIN_FACADE_VERSION_CHANGED");
+  const swiftFacadeVersion = requireRegex(
+    sources.packageSwift,
+    /^let ffiArtifactVersion = "([0-9]+[.][0-9]+[.][0-9]+)"$/mu,
+    "SWIFT_FACADE_VERSION_MISSING",
+  );
+  if (kotlinFacadeVersion !== swiftFacadeVersion) {
+    throw new PlatformFacadePinPolicyError("SDK_FACADE_VERSIONS_DIVERGE");
   }
 }
 
