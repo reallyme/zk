@@ -5,7 +5,7 @@
     {
       "path": "scripts/check_release_readiness.mjs",
       "role": "consumer release-readiness policy declaration",
-      "sha256": "acb8ba9f6228cbdb6ba683c19dbdebaf889f43a45cda0fbdeeecc671cf5af71b"
+      "sha256": "6f2836f9b31c1dc766624a38a004c503906f0d4c522d649fb6aaee26d0c50292"
     },
     {
       "path": "scripts/check-platform-facade-pins.mjs",
@@ -35,7 +35,7 @@
     {
       "path": "scripts/ci-workflow-policy.test.mjs",
       "role": "workflow policy tests",
-      "sha256": "1e92b4aadd346a2fc7c1cad958c9b9ad2ad8fba5ebdd40081f61e42738ff52c0"
+      "sha256": "ee4c9ff703352985c6df367fe20de579b12bfb9078fec6f84bfe393317ff8f0a"
     },
     {
       "path": "scripts/build_swift_xcframework.sh",
@@ -115,7 +115,7 @@
     {
       "path": ".github/workflows/swift-package-release.yml",
       "role": "Swift binary package release workflow",
-      "sha256": "5d3e87c0a87f9aa793b45ec36ce7422fdfefc52282a222e2708d2d003fff4473"
+      "sha256": "a368fe52a7afa2fbaa89f584e671904925f8cd416395fd241db954d699166345"
     },
     {
       "path": "scripts/test-modern-soundness-regressions.sh",
@@ -276,6 +276,21 @@
       "path": "scripts/normalize_xcframework_info.test.mjs",
       "role": "XCFramework metadata and ZIP timezone regressions",
       "sha256": "9009bc63c46d661a5281ec67dee23011e84bbb3565b7a197b93df709efac999f"
+    },
+    {
+      "path": ".github/workflows/crates-release.yml",
+      "role": "reviewed crate publication workflow",
+      "sha256": "1df7a830c0c3f1a4908761ea5d5474a4c1bee27b158a6cdd572b3b0f834cbf74"
+    },
+    {
+      "path": "scripts/publish_github_release.mjs",
+      "role": "canonical GitHub release publisher",
+      "sha256": "e87d3904570d611fd1c5b1e6854a26df13975675a42b581b4804357473cdb4ef"
+    },
+    {
+      "path": "scripts/publish_github_release.test.mjs",
+      "role": "canonical release identity and asset admission tests",
+      "sha256": "0976512a44ef5c64631cc5806d7f23d4716d296faa80cd01472056dc3fd066a8"
     }
   ],
   "requiredFragments": [
@@ -340,6 +355,15 @@
       "contains": [
         "scripts/generate-zk-platform-protos.sh",
         "diff -r -q"
+      ]
+    },
+    {
+      "path": "scripts/publish_github_release.mjs",
+      "contains": [
+        "reallyme-zk-v${version}",
+        "release-tag-target-mismatch",
+        "release-asset-conflict",
+        "legacy-release-exists"
       ]
     }
   ]

@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: crates-release-${{ github.sha }}
+  group: github-release-${{ github.repository }}
   cancel-in-progress: false
 
 permissions:
@@ -130,49 +130,21 @@ jobs:
       RELEASE_SHA: ${{ needs.verify-preflight.outputs.release_sha }}
       RELEASE_VERSION: ${{ needs.verify-preflight.outputs.release_version }}
     steps:
-      - name: Create or verify immutable release tag
-        id: release-tag
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-          tag="reallyme-zk-v${RELEASE_VERSION}"
-          existing_commit=''
-          if resolved_commit="$(gh api "repos/$GITHUB_REPOSITORY/commits/$tag" --jq '.sha' 2>/dev/null)"; then
-            existing_commit="$resolved_commit"
-          fi
-          if [[ -n "$existing_commit" && "$existing_commit" != "$RELEASE_SHA" ]]; then
-            echo "$tag already exists at a different commit" >&2
-            exit 1
-          fi
-          if [[ -z "$existing_commit" ]]; then
-            gh api --method POST "repos/$GITHUB_REPOSITORY/git/refs" \
-              --field ref="refs/tags/$tag" \
-              --field sha="$RELEASE_SHA" > /dev/null
-          fi
-          printf 'tag=%s\n' "$tag" >> "$GITHUB_OUTPUT"
+      - name: Checkout reviewed release source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.verify-preflight.outputs.release_sha }}
+          persist-credentials: false
 
-      - name: Create or verify draft GitHub release
+      - name: Install Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "26"
+
+      - name: Prepare the canonical release identity
         env:
           GH_TOKEN: ${{ github.token }}
-          RELEASE_TAG: ${{ steps.release-tag.outputs.tag }}
-        run: |
-          set -euo pipefail
-          if gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
-            existing_target="$(gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json targetCommitish --jq '.targetCommitish')"
-            if [[ "$existing_target" != "$RELEASE_SHA" && "$existing_target" != "$RELEASE_TAG" ]]; then
-              echo "$RELEASE_TAG release targets a different source identity" >&2
-              exit 1
-            fi
-            exit 0
-          fi
-          gh release create "$RELEASE_TAG" \
-            --repo "$GITHUB_REPOSITORY" \
-            --verify-tag \
-            --draft \
-            --target "$RELEASE_SHA" \
-            --title "$RELEASE_TAG" \
-            --notes $'- ReallyMe ZK public crate release'
+        run: node scripts/publish_github_release.mjs --prepare
 
   publish:
     name: publish ReallyMe ZK crates
@@ -290,6 +262,18 @@ jobs:
       RELEASE_SHA: ${{ needs.verify-preflight.outputs.release_sha }}
       RELEASE_VERSION: ${{ needs.verify-preflight.outputs.release_version }}
     steps:
+      - name: Checkout reviewed release source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.verify-preflight.outputs.release_sha }}
+          path: zk
+          persist-credentials: false
+
+      - name: Install Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "26"
+
       - name: Download reviewed package attestation
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
@@ -314,57 +298,13 @@ jobs:
           name: reallyme-zk-publication-ledger-${{ needs.verify-preflight.outputs.release_version }}-${{ needs.verify-preflight.outputs.release_sha }}
           path: release-evidence
 
-      - name: Verify immutable release tag
-        id: release-tag
+      - name: Publish reviewed crate evidence to the canonical release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          set -euo pipefail
-          tag="reallyme-zk-v${RELEASE_VERSION}"
-          existing_commit="$(gh api "repos/$GITHUB_REPOSITORY/commits/$tag" --jq '.sha')"
-          if [[ "$existing_commit" != "$RELEASE_SHA" ]]; then
-            echo "$tag already exists at a different commit" >&2
-            exit 1
-          fi
-          printf 'tag=%s\n' "$tag" >> "$GITHUB_OUTPUT"
-
-      - name: Publish prepared GitHub release
-        env:
-          GH_TOKEN: ${{ github.token }}
-          RELEASE_TAG: ${{ steps.release-tag.outputs.tag }}
-        run: |
-          set -euo pipefail
-          expected_assets=(
-            crates-preflight.json
-            crates-publication-ledger.json
-            "reallyme-zk-api-${RELEASE_VERSION}.crate"
-            "reallyme-zk-artifacts-${RELEASE_VERSION}.crate"
-            "reallyme-zk-proto-${RELEASE_VERSION}.crate"
-          )
-          is_draft="$(gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json isDraft --jq '.isDraft')"
-          if [[ "$is_draft" == 'false' ]]; then
-            existing_assets="$(gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name')"
-            for expected_asset in "${expected_assets[@]}"; do
-              if ! grep -Fxq "$expected_asset" <<<"$existing_assets"; then
-                echo "$RELEASE_TAG is already public but is missing $expected_asset" >&2
-                exit 1
-              fi
-            done
-            exit 0
-          fi
-          while IFS= read -r evidence; do
-            asset_name="${evidence##*/}"
-            if ! gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" \
-                --json assets --jq '.assets[].name' | grep -Fxq "$asset_name"; then
-              gh release upload "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" "$evidence"
-            fi
-          done < <(find release-evidence -maxdepth 1 -type f \
-            \( -name '*.json' -o -name '*.crate' \) -print | sort)
-          uploaded_assets="$(gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name')"
-          for expected_asset in "${expected_assets[@]}"; do
-            if ! grep -Fxq "$expected_asset" <<<"$uploaded_assets"; then
-              echo "$RELEASE_TAG is missing required release evidence $expected_asset" >&2
-              exit 1
-            fi
-          done
-          gh release edit "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --draft=false
+          node zk/scripts/publish_github_release.mjs --publish \
+            release-evidence/crates-preflight.json \
+            release-evidence/crates-publication-ledger.json \
+            "release-evidence/reallyme-zk-api-${RELEASE_VERSION}.crate" \
+            "release-evidence/reallyme-zk-artifacts-${RELEASE_VERSION}.crate" \
+            "release-evidence/reallyme-zk-proto-${RELEASE_VERSION}.crate"

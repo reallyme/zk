@@ -344,8 +344,29 @@ test("Swift binary release promotes the pinned XCFramework verified by preflight
     /actions\/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c/u,
   );
   assert.match(release, /scripts\/verify_swift_release_artifact[.]mjs/u);
-  assert.match(release, /git tag "v\$\{RELEASE_VERSION\}" "\$\{RELEASE_SHA\}"/u);
-  assert.match(release, /gh release create "v\$\{RELEASE_VERSION\}"/u);
+  assert.match(release, /node scripts\/publish_github_release[.]mjs --publish --swift/u);
+  assert.doesNotMatch(release, /gh release create|git tag|git push/u);
+});
+
+test("package publication shares one manual canonical release writer", () => {
+  for (const workflow of ["crates-release.yml", "swift-package-release.yml"]) {
+    const source = readWorkflow(workflow);
+    const triggers = source.slice(source.indexOf("on:"), source.indexOf("permissions:"));
+    assert.match(triggers, /workflow_dispatch:/u);
+    assert.doesNotMatch(triggers, /^  (?:push|pull_request|release|workflow_run|schedule):/mu);
+    assert.match(source, /group: github-release-\$\{\{ github[.]repository \}\}/u);
+    assert.match(source, /cancel-in-progress: false/u);
+    assert.doesNotMatch(source, /gh release (?:create|upload|edit)|git (?:tag|push)/u);
+    assert.match(source, /node (?:zk\/)?scripts\/publish_github_release[.]mjs --publish/u);
+  }
+  const crates = readWorkflow("crates-release.yml");
+  assert.match(jobSource(crates, "prepare-source-release"), /publish_github_release[.]mjs --prepare/u);
+  for (const evidence of ["crates-preflight.json", "crates-publication-ledger.json", ...PUBLIC_CRATES]) {
+    assert.ok(jobSource(crates, "finalize").includes(evidence));
+  }
+  for (const workflow of ["rust-ci.yml", "protobuf-ci.yml", "fuzz.yml", "crates-package-preflight.yml", "swift-package-preflight.yml"]) {
+    assert.doesNotMatch(readWorkflow(workflow), /publish_github_release[.]mjs (?:--prepare|--publish)|gh release (?:create|upload|edit)/u);
+  }
 });
 
 test("release gates use admitted inputs without probing public SDK download compatibility", () => {
