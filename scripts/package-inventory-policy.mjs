@@ -13,6 +13,10 @@ const MAX_PACKAGE_NAME_BYTES = 128;
 const PACKAGE_PATH_PATTERN = /^[A-Za-z0-9._/-]+$/u;
 const FORBIDDEN_PACKAGE_ROOTS = Object.freeze([".git", "gen", "packages", "target"]);
 const PUBLIC_PACKAGES = new Set(PUBLIC_CRATE_NAMES);
+// These suites use repository fixtures or unpublished native implementations.
+export const REPOSITORY_TEST_PACKAGES = Object.freeze([
+  "reallyme-zk-proto-codec", "reallyme-zk-backend-bb",
+]);
 const REQUIRED_PACKAGE_FILES = new Map([
   ["reallyme-zk-backend-bb", Object.freeze([
     "build.rs", "toolchain-lock.json", "native/reallyme_bbapi_shim.cc", "native/reallyme_bbapi_shim.h",
@@ -88,6 +92,9 @@ export const validatePackageInventory = (packageName, output) => {
   }
 
   const requiredFiles = REQUIRED_PACKAGE_FILES.get(packageName) ?? [];
+  if (REPOSITORY_TEST_PACKAGES.includes(packageName) && files.some((path) => path.startsWith("tests/"))) {
+    fail("repository-only-tests-in-package");
+  }
   if (
     PUBLIC_PACKAGES.has(packageName) &&
     (!uniqueFiles.has("LICENSE-MIT") || !uniqueFiles.has("LICENSE-APACHE"))

@@ -35,6 +35,15 @@ test("canonical proto schemas and fixtures are admitted", () => {
   assert.ok(Object.isFrozen(files));
 });
 
+test("repository-only codec and native test harnesses cannot enter public archives", () => {
+  for (const packageName of ["reallyme-zk-proto-codec", "reallyme-zk-backend-bb"]) {
+    assert.throws(
+      () => validatePackageInventory(packageName, "Cargo.toml\nLICENSE-MIT\nLICENSE-APACHE\ntests/bindings.rs"),
+      hasCode("repository-only-tests-in-package"),
+    );
+  }
+});
+
 test("every public crate carries both declared license texts", () => {
   for (const packageName of ["reallyme-zk-api", "reallyme-zk-artifacts", "reallyme-zk-proto", "reallyme-zk-proto-codec", "reallyme-zk-backend-bb"]) {
     assert.throws(

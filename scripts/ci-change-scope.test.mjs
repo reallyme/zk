@@ -63,7 +63,11 @@ test("CI evidence changes retain source validation without unrelated native buil
     "scripts/check-release-readiness-policy-lock.mjs", "scripts/check-release-readiness-policy-lock.test.mjs",
     "scripts/verify_release_source.mjs", "scripts/verify_release_source.test.mjs",
     "scripts/verify_release_attestation.mjs", "scripts/verify_release_attestation.test.mjs",
-    "scripts/write_release_attestation.mjs"];
+    "scripts/write_release_attestation.mjs", "scripts/package-diagnostics.mjs",
+    "scripts/package-diagnostics.test.mjs", "scripts/package-inventory-policy.mjs",
+    "scripts/crate-artifact-downloads.test.mjs",
+    "scripts/package-inventory-policy.test.mjs", "scripts/publish-crates-in-order.mjs",
+    "scripts/publish-crates-in-order.test.mjs"];
   for (const path of paths) {
     assert.deepEqual(classifyChangedPaths([path]), {
       source: true, swift: false, android: false, ios: false, circuits: false,

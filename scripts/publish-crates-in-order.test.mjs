@@ -72,6 +72,8 @@ childProcess.spawnSync = (command, args) => {
       { name: "reallyme-zk-proto", version: ${JSON.stringify(version)}, publish: null,
         dependencies: [] },
       { name: "reallyme-zk-proto-codec", version: ${JSON.stringify(version)}, publish: null,
+        manifest_path: "/workspace/codec/Cargo.toml",
+        targets: [{ name: "bindings", kind: ["test"], src_path: "/workspace/codec/tests/bindings.rs" }],
         dependencies: [{ name: "reallyme-zk-proto", source: null, path: "crates/proto", kind: null, req: "^" + ${JSON.stringify(version)} }] },
       { name: "reallyme-zk-backend-bb", version: ${JSON.stringify(version)}, publish: null,
         dependencies: [{ name: "reallyme-zk-api", source: null, path: "crates/api", kind: null, req: "^" + ${JSON.stringify(version)} }] },
@@ -80,6 +82,13 @@ childProcess.spawnSync = (command, args) => {
   }) };
   if (args[0] === "package") {
     const packageName = args[args.indexOf("-p") + 1];
+    if (scenario.startsWith("diagnostics") && (args.includes("--workspace") || packageName === "reallyme-zk-proto-codec")) {
+      return { ...ok, status: scenario === "diagnostics-failure" ? 101 : 0,
+        stderr: "   Packaging reallyme-zk-proto-codec v0.2.2 (/workspace/codec)\\n" +
+          "warning: ignoring test \\x60bindings\\x60 as \\x60tests/bindings.rs\\x60 is not included in the published package\\n" +
+          "warning: keep-package-warning\\n" +
+          (scenario === "diagnostics-failure" ? "error: package verification failed\\n" : "") };
+    }
     if (scenario === "package-index-lag" && packageName === "reallyme-zk-artifacts") {
       artifactPackageAttempts += 1;
       if (artifactPackageAttempts === 1) {
@@ -90,6 +99,11 @@ childProcess.spawnSync = (command, args) => {
     return ok;
   }
   if (args[0] !== "publish") return { ...ok, status: 99 };
+  if (scenario === "diagnostics" && args[args.indexOf("-p") + 1] === "reallyme-zk-proto-codec") {
+    return { ...ok, stderr:
+      "warning: ignoring test \\x60bindings\\x60 as \\x60tests/bindings.rs\\x60 is not included in the published package\\n" +
+      "warning: keep-publish-warning\\n" };
+  }
   attempts += 1;
   if (scenario === "exhausted" || (scenario === "retry" && attempts === 1)) {
     return { ...ok, status: 101, stderr: "too many requests" };
@@ -201,4 +215,30 @@ test("archive mode recreates package bytes without compiling or publishing", () 
       ["cargo", "package"],
     ],
   );
+});
+
+test("publication reports intentional omissions once and retains other Cargo warnings", () => {
+  const result = runFixture({ scenario: "diagnostics" });
+  assert.equal(result.status, 0, result.stderr);
+  assert.equal(result.stderr.match(/note: reallyme-zk-proto-codec:/gu).length, 1);
+  assert.doesNotMatch(result.stderr, /ignoring test/u);
+  assert.match(result.stderr, /warning: keep-package-warning/u);
+  assert.match(result.stderr, /warning: keep-publish-warning/u);
+});
+
+test("workspace packaging uses the same diagnostic policy without publishing", () => {
+  const result = runFixture({ mode: "archive", scenario: "diagnostics" });
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stderr, /note: reallyme-zk-proto-codec:/u);
+  assert.match(result.stderr, /warning: keep-package-warning/u);
+  assert.equal(result.calls.filter((call) => call[1] === "publish").length, 0);
+});
+
+test("diagnostic reporting preserves Cargo failure status and stops dependent uploads", () => {
+  const result = runFixture({ scenario: "diagnostics-failure" });
+  assert.equal(result.status, 101);
+  assert.match(result.stderr, /warning: keep-package-warning/u);
+  assert.match(result.stderr, /error: package verification failed/u);
+  assert.deepEqual(result.calls.filter((call) => call[1] === "publish").map((call) => call[3]),
+    PUBLIC_CRATE_NAMES.slice(0, 3));
 });

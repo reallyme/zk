@@ -100,7 +100,7 @@
     {
       "path": ".github/workflows/crates-package-preflight.yml",
       "role": "crates package preflight workflow",
-      "sha256": "852146c901d9d8cda5537dbd97c7ee1942728297293f1774f5125c910ab43763"
+      "sha256": "5c2f4d37e64bf28087f697afeb4e1113d9e681ae0a3ed8d7292b50dd82ed4198"
     },
     {
       "path": ".github/workflows/protobuf-ci.yml",
@@ -200,12 +200,12 @@
     {
       "path": "scripts/ci-change-scope.mjs",
       "role": "changed-source lane selection and fail-closed aggregation",
-      "sha256": "7a8439fcfe56a8b5f59a187344732fe92b42f5d184116e60cf931a14741aff7a"
+      "sha256": "93f2f6154301a40c404c1b246aa8a7d984f6daa2d257974912e68ba7a8f2e7c9"
     },
     {
       "path": "scripts/ci-change-scope.test.mjs",
       "role": "source scope and skipped-lane regression tests",
-      "sha256": "ac4a6ecb45c2c9d0c605ef3a70b7dbf108cc5ac423b805e5d5ede5c04368420d"
+      "sha256": "0d59b6e89c97b667bab0072de32d5098fe9f499c66daf8b942931e1ce77d6bc2"
     },
     {
       "path": "scripts/select-ci-scope.mjs",
@@ -280,7 +280,7 @@
     {
       "path": ".github/workflows/crates-release.yml",
       "role": "reviewed crate publication workflow",
-      "sha256": "28ef9a825d08740497341ced4bc2dbfe72ad6b90b975b2fc9151f70e2604cc21"
+      "sha256": "1e3f5f932785478e6123ae21818877940e6dd97e56dc3d5955ceaf4161ca4943"
     },
     {
       "path": "scripts/publish_github_release.mjs",
@@ -310,12 +310,12 @@
     {
       "path": "scripts/publish-crates-in-order.mjs",
       "role": "ordered package inspection and publication",
-      "sha256": "28632b9f05568674cd7bba4613831a10d1b86bf69c69e86ee7282f5c412cd11d"
+      "sha256": "da508f29849b4e4c5bdf4be80fee759c232089becc12df2bafacceed55c95d23"
     },
     {
       "path": "scripts/publish-crates-in-order.test.mjs",
       "role": "ordered publication rejection and retry tests",
-      "sha256": "10de45fde74f198b036741dbab3868e9e374b3421c6b6ccd0e92f915240e2ce2"
+      "sha256": "ffdf82eb74b344dad3e706954258ca71ba21ff96e15714efd839fc38b25eedcd"
     },
     {
       "path": "scripts/verify_release_source.mjs",
@@ -350,7 +350,27 @@
     {
       "path": "scripts/package-inventory-policy.mjs",
       "role": "bounded package inventory admission",
-      "sha256": "335a2eeacb06e31334899dcef2e99aec3a730ebcce90c427d3e7c1b1cf67fc46"
+      "sha256": "1d4f659b99d9591c15315eafe2a4accd9823ad9c01c92a84ab90a937e7ad4a14"
+    },
+    {
+      "path": "scripts/package-diagnostics.mjs",
+      "role": "metadata-bound reporting of intentional repository test omissions",
+      "sha256": "d99f24028c1842c2e734ba4d2a6d4f39082415c7daf5cd08575105165c47ba83"
+    },
+    {
+      "path": "scripts/package-diagnostics.test.mjs",
+      "role": "package diagnostic visibility and target identity tests",
+      "sha256": "d9da03ca414eea82d1f04d74a001780b20d6a55e24c979e2c598e6dfb982da2e"
+    },
+    {
+      "path": "scripts/package-inventory-policy.test.mjs",
+      "role": "package inventory boundary and malformed input tests",
+      "sha256": "a52e2c34d90d4529eeee110ca9195233fe2abc89ef244f7d4f00e0f4084fe419"
+    },
+    {
+      "path": "scripts/crate-artifact-downloads.test.mjs",
+      "role": "artifact download identity and command failure tests",
+      "sha256": "eabc709d842b0a8abe47163f839c24e82ac4209c5e7c9d6a1cf6f2ceffcbb2b9"
     }
   ],
   "requiredFragments": [

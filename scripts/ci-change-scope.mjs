@@ -24,6 +24,13 @@ const SOURCE_POLICY_PATHS = new Set([
   "scripts/verify_release_attestation.mjs",
   "scripts/verify_release_attestation.test.mjs",
   "scripts/write_release_attestation.mjs",
+  "scripts/package-diagnostics.mjs",
+  "scripts/package-diagnostics.test.mjs",
+  "scripts/crate-artifact-downloads.test.mjs",
+  "scripts/package-inventory-policy.mjs",
+  "scripts/package-inventory-policy.test.mjs",
+  "scripts/publish-crates-in-order.mjs",
+  "scripts/publish-crates-in-order.test.mjs",
 ]);
 
 export class CiScopeError extends Error {

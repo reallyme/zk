@@ -4,6 +4,7 @@
 
 import { PUBLIC_CRATE_NAMES } from "./public-crates.mjs";
 import { PublicPackageBoundaryError, validatePublicPackageBoundary } from "./public-package-boundary.mjs";
+import { createPackageDiagnosticReporter } from "./package-diagnostics.mjs";
 
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
@@ -21,6 +22,7 @@ const MODE_ARCHIVE = "archive";
 const MODE_PREFLIGHT = "preflight";
 const MODE_PUBLISH = "publish";
 const COMMAND_TIMEOUT_MILLISECONDS = 300_000;
+const MAX_COMMAND_OUTPUT_BYTES = 8 * 1024 * 1024;
 const MAX_PUBLISH_ATTEMPTS = 12;
 const CRATES_IO_DEFAULT_RATE_LIMIT_RETRY_MS = 60000;
 const CRATES_IO_INDEX_RETRY_BASE_MS = 15000;
@@ -38,6 +40,7 @@ const releaseVersion = process.env.RELEASE_VERSION ?? "";
 const releaseSha = process.env.RELEASE_SHA ?? "";
 const publicationLedgerPath = process.env.PUBLICATION_LEDGER_PATH ?? "";
 const reviewedCrateDirectory = process.env.REVIEWED_CRATE_DIRECTORY ?? "";
+let packageDiagnostics = (output) => output;
 
 if (
   (mode !== MODE_INSPECT &&
@@ -87,16 +90,26 @@ function run(command, args, options = {}) {
   if (options.registryCredential !== true) {
     delete environment.CARGO_REGISTRY_TOKEN;
   }
+  const packaging = command === "cargo" && (args[0] === "package" || args[0] === "publish");
   const result = spawnSync(command, args, {
     encoding: "utf8",
     env: environment,
-    stdio: options.capture ? "pipe" : "inherit",
+    stdio: options.capture || packaging ? "pipe" : "inherit",
+    maxBuffer: MAX_COMMAND_OUTPUT_BYTES,
     timeout: COMMAND_TIMEOUT_MILLISECONDS,
     killSignal: "SIGTERM",
   });
   if (result.error) {
     console.error("package command did not complete within the bounded execution policy");
     process.exit(1);
+  }
+  if (packaging) {
+    const packageIndex = args.indexOf("-p");
+    result.stderr = packageDiagnostics(result.stderr ?? "", packageIndex < 0 ? undefined : args[packageIndex + 1]);
+    if (!options.capture) {
+      process.stdout.write(result.stdout ?? "");
+      process.stderr.write(result.stderr);
+    }
   }
   return result;
 }
@@ -134,6 +147,7 @@ if (metadataResult.status !== 0) {
 }
 
 const metadata = JSON.parse(metadataResult.stdout);
+packageDiagnostics = createPackageDiagnosticReporter(metadata.packages);
 try {
   validatePublicPackageBoundary(metadata.packages);
 } catch (error) {
@@ -455,8 +469,8 @@ function inspectPackage(pkg) {
     listArgs.push("--allow-dirty");
   }
   const listResult = run("cargo", listArgs, { capture: true });
+  process.stderr.write(listResult.stderr);
   if (listResult.status !== 0) {
-    process.stderr.write(listResult.stderr);
     process.exit(listResult.status ?? 1);
   }
   process.stdout.write(listResult.stdout);

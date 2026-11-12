@@ -106,6 +106,18 @@ failure:
 node scripts/publish-crates-in-order.mjs inspect --allow-dirty
 ```
 
+Codec and backend integration tests use repository fixtures or unpublished native
+implementations and remain workspace test targets. Their archive allowlists omit
+those suites. Package inspection and publication report one informational notice
+per crate for Cargo's corresponding test-omission diagnostics. Only exact test
+names and paths confirmed by Cargo metadata qualify; other warnings and errors
+remain visible, and the inventory gate rejects repository-only test harnesses in
+these archives. Workspace CI continues to run the same test targets.
+
+The Rust release workflows download named artifacts with the GitHub CLI, using
+the selected preflight run ID. Provenance, source identity, and archive digest
+verification remain mandatory before publication.
+
 Ordinary CI runs the same inspection without `--allow-dirty`. Inspection may
 read the crates.io index and fetch locked dependencies; it compiles extracted
 archives offline and performs credential-free publication dry-runs without
