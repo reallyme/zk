@@ -2,6 +2,8 @@
 //
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
+#![cfg(not(feature = "native"))]
+
 use std::ptr;
 
 use reallyme_zk_api::errors::ZkErrorReason;

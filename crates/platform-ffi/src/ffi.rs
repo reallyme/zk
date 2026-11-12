@@ -33,7 +33,7 @@ use crate::{
 
 #[cfg(feature = "native")]
 mod context_create;
-#[cfg(all(test, not(feature = "native")))]
+#[cfg(test)]
 mod unsupported_tests;
 
 #[cfg(feature = "native")]

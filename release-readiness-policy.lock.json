@@ -30,7 +30,7 @@
     {
       "path": "scripts/check_release_readiness.test.mjs",
       "role": "consumer policy declaration tests",
-      "sha256": "01f106a71c48392fb1641a448681eeb460e47e751a1ab2a162c8efc1353dfb20"
+      "sha256": "321bd4e3f7c88ee87d3317ab8cffd1197d90dfeda77ed1ffed6af7c84e7a7a57"
     },
     {
       "path": "scripts/ci-workflow-policy.test.mjs",

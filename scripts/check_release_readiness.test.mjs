@@ -5,7 +5,7 @@
 
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
@@ -14,6 +14,39 @@ import test from "node:test";
 import {
   validateSwiftDemoBundleProjectBoundarySource,
 } from "./swift-demo-project-boundary.mjs";
+
+test("the Rust policy admits external feature-specific tests and rejects a combined parent gate", () => {
+  const temporary = mkdtempSync(join(tmpdir(), "zk-rust-test-policy-"));
+  try {
+    mkdirSync(join(temporary, "ffi"));
+    const source = readFileSync("crates/platform-ffi/src/ffi.rs", "utf8");
+    const testSource = readFileSync("crates/platform-ffi/src/ffi/unsupported_tests.rs", "utf8");
+    const declaration = "#[cfg(test)]\nmod unsupported_tests;";
+    assert.ok(source.includes(declaration));
+    writeFileSync(join(temporary, "ffi.rs"), source);
+    writeFileSync(join(temporary, "ffi/unsupported_tests.rs"), testSource);
+    for (const args of [["init", "--quiet", "--initial-branch=main"], ["add", "--", "ffi.rs", "ffi/unsupported_tests.rs"]]) {
+      const result = spawnSync("git", args, { cwd: temporary, encoding: "utf8" });
+      assert.equal(result.status, 0, result.stderr);
+    }
+    const coreUrl = process.env.RELEASE_READINESS_CORE_URL ?? new URL("./release-readiness/core.mjs", import.meta.url).href;
+    writeFileSync(join(temporary, "check.mjs"), `
+      import { createReleaseReadinessContext } from ${JSON.stringify(coreUrl)};
+      const policy = createReleaseReadinessContext({ scriptUrl: import.meta.url, repoRoot: "." });
+      policy.assertRustSourcePolicy({ roots: ["."] });
+    `);
+    const run = () => spawnSync(process.execPath, [join(temporary, "check.mjs")], { encoding: "utf8" });
+    const accepted = run();
+    assert.equal(accepted.status, 0, accepted.stderr);
+    writeFileSync(join(temporary, "ffi.rs"), source.replace(declaration,
+      '#[cfg(all(test, not(feature = "native")))]\nmod unsupported_tests;'));
+    const rejected = run();
+    assert.equal(rejected.status, 1);
+    assert.match(rejected.stderr, /must keep test implementations in a separate test file/u);
+  } finally {
+    rmSync(temporary, { recursive: true, force: true });
+  }
+});
 
 test("scoped readiness modes enforce platform source policy through CI delegation", () => {
   const temporary = mkdtempSync(join(tmpdir(), "zk-readiness-mode-"));
