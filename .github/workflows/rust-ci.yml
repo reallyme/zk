@@ -119,7 +119,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: reallyme/ssi
-          ref: 77f5c5874403599e64c1bc79fe40ed54cfcf2e77
+          ref: 78752d5dcd0184d4c8917308354ce5b932d55d4e
           path: ssi
           fetch-depth: 1
           persist-credentials: false

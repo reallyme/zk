@@ -185,7 +185,7 @@ test("Rust CI checks fuzz contracts and documentation misuse guards", () => {
   assert.match(rustCi, /node scripts\/check-release-readiness-policy-lock[.]mjs/u);
   assert.match(rustCi, /run-consumer-check[.]mjs --policy-only/u);
   assert.match(rustCi, /--exclude reallyme-zk-noir-witness-core[\s\S]*--target wasm32-unknown-unknown/u);
-  assert.match(audit, /repository: reallyme\/ssi[\s\S]*ref: 77f5c5874403599e64c1bc79fe40ed54cfcf2e77/u);
+  assert.match(audit, /repository: reallyme\/ssi[\s\S]*ref: 78752d5dcd0184d4c8917308354ce5b932d55d4e/u);
   assert.match(audit, /repository: reallyme\/openid4vci[\s\S]*ref: 9ba35e61057dbbe1c56515c400636721469ba4b7/u);
   assert.match(audit, /repository: reallyme\/openid4vp[\s\S]*ref: 90d5a5a7349268aed2d2945b1f9f96b7fe9bd8db/u);
   assert.match(audit, /REALLYME_ZK_REQUIRED_OPEN_STACK_CHECKOUTS: ssi,openid4vci,openid4vp/u);

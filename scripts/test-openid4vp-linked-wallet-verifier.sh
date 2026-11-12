@@ -93,10 +93,10 @@ openid4vci-issuer = { path = "../../../openid4vci/crates/issuer", features = ["i
 openid4vci-proto = { package = "reallyme-openid4vci-proto", path = "../../../openid4vci/crates/proto", features = ["generated"] }
 openid4vci-proto-codec = { path = "../../../openid4vci/crates/proto-codec" }
 openid4vci-types = { package = "reallyme-openid4vci-types", path = "../../../openid4vci/crates/types" }
-reallyme-credential = { version = "=0.6.1", features = ["proto"] }
-reallyme-credential-claims = { version = "=0.6.1" }
-reallyme-credential-status = { version = "=0.6.1", features = ["proto"] }
-reallyme-ssi-proto = { version = "=0.6.1" }
+reallyme-credential = { version = "=0.6.2", features = ["proto"] }
+reallyme-credential-claims = { version = "=0.6.2" }
+reallyme-credential-status = { version = "=0.6.2", features = ["proto"] }
+reallyme-ssi-proto = { version = "=0.6.2" }
 reallyme-identity = { path = "../../../identity/crates/identity" }
 reallyme-identity-openid4vp-product = { path = "../../../identity/crates/openid4vp-product" }
 reallyme-identity-openid4vp-product-store = { path = "../../../identity/crates/openid4vp-product-store" }
@@ -109,7 +109,7 @@ reallyme-crypto = { version = "=0.3.17", default-features = false, features = ["
 crypto-p256 = { package = "reallyme-crypto-p256", version = "=0.3.17", default-features = false, features = ["native"] }
 crypto-csprng = { package = "reallyme-crypto-csprng", version = "=0.3.17", default-features = false, features = ["native"] }
 reallyme-jose = { version = "=0.4.6", default-features = false, features = ["jose-crypto"] }
-reallyme-sd-jwt = { version = "=0.6.1", default-features = false, features = ["native"] }
+reallyme-sd-jwt = { version = "=0.6.2", default-features = false, features = ["native"] }
 reallyme-openid4vp-verifier = { path = "../../../openid4vp/crates/verifier", default-features = false, features = ["native"] }
 reallyme-zk-api = { path = "../../crates/api" }
 reallyme-zk-artifacts = { path = "../../crates/artifacts" }
@@ -146,24 +146,24 @@ reallyme-openid4vp-wallet = { path = "../../../openid4vp/crates/wallet" }
 
 [patch."https://github.com/reallyme/ssi"]
 # Source-only adapters share the published public types with this harness.
-reallyme-compression-brotli = { version = "=0.6.1" }
-reallyme-credential = { version = "=0.6.1" }
-reallyme-credential-audit = { version = "=0.6.1" }
-reallyme-credential-claims = { version = "=0.6.1" }
-reallyme-credential-status = { version = "=0.6.1" }
-reallyme-did-types = { version = "=0.6.1" }
-reallyme-disclosure-policy = { version = "=0.6.1" }
-reallyme-mdoc = { version = "=0.6.1" }
-reallyme-openid-oauth = { version = "=0.6.1" }
-reallyme-openid4vc-profiles = { version = "=0.6.1" }
-reallyme-revocation = { version = "=0.6.1" }
-reallyme-sd-jwt = { version = "=0.6.1" }
-reallyme-ssi-core = { version = "=0.6.1" }
-reallyme-ssi-proto = { version = "=0.6.1" }
-reallyme-ssi-proto-codec = { version = "=0.6.1" }
-reallyme-trust-core = { version = "=0.6.1" }
-reallyme-trust-x509 = { version = "=0.6.1" }
-reallyme-vp-core = { version = "=0.6.1" }
+reallyme-compression-brotli = { version = "=0.6.2" }
+reallyme-credential = { version = "=0.6.2" }
+reallyme-credential-audit = { version = "=0.6.2" }
+reallyme-credential-claims = { version = "=0.6.2" }
+reallyme-credential-status = { version = "=0.6.2" }
+reallyme-did-types = { version = "=0.6.2" }
+reallyme-disclosure-policy = { version = "=0.6.2" }
+reallyme-mdoc = { version = "=0.6.2" }
+reallyme-openid-oauth = { version = "=0.6.2" }
+reallyme-openid4vc-profiles = { version = "=0.6.2" }
+reallyme-revocation = { version = "=0.6.2" }
+reallyme-sd-jwt = { version = "=0.6.2" }
+reallyme-ssi-core = { version = "=0.6.2" }
+reallyme-ssi-proto = { version = "=0.6.2" }
+reallyme-ssi-proto-codec = { version = "=0.6.2" }
+reallyme-trust-core = { version = "=0.6.2" }
+reallyme-trust-x509 = { version = "=0.6.2" }
+reallyme-vp-core = { version = "=0.6.2" }
 HARNESS_CARGO_TOML
 
 if [[ ! -d "$REALLYME_PRIVATE_PERSONA_TWO_CREDENTIAL_ROOT" ]]; then

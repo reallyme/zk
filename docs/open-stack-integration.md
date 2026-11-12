@@ -11,10 +11,10 @@ and backend adapters. Identity provides the application SDKs.
 importing ZK circuit types, defining a second circuit registry, calling a
 prover or verifier, or linking `backend-bb` or Barretenberg.
 
-The private `reallyme-zk-proto-codec` crate can enable `stack-error` to map a
-typed ZK failure into SSI's shared error envelope. This transport adapter uses the
-published `reallyme-ssi-proto` 0.6.1 contract. It is not part of
-`reallyme-zk-api`, the public ZK crates, or the proving backend.
+The `reallyme-zk-proto-codec` crate can enable `stack-error` to map a
+typed ZK failure into SSI's shared error envelope. This optional transport adapter
+uses the published `reallyme-ssi-proto` 0.6.2 contract and remains outside
+`reallyme-zk-api` and the proving backend.
 
 ## OpenID4VCI
 

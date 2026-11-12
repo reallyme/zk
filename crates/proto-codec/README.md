@@ -10,7 +10,7 @@ lengths, inconsistent circuit identities, unsupported versions, and unsupported
 claims before passing values to a provider. Applications and protocol
 adapters normally map typed ZK failures into their own public error
 envelopes. The optional `stack-error` feature provides the canonical adapter to
-the shared `IdentityStackError` envelope from `reallyme-ssi-proto` 0.6.1. The
+the shared `IdentityStackError` envelope from `reallyme-ssi-proto` 0.6.2. The
 feature remains in this integration crate so the public ZK contracts
 stay independent of SSI.
 
