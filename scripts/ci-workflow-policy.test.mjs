@@ -6,6 +6,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
+import { publicManifestVersions } from "./check-public-crate-baselines.mjs";
 
 const readWorkflow = (name) => readFileSync(`.github/workflows/${name}`, "utf8");
 
@@ -109,6 +110,22 @@ test("package preflight consumes exact-commit CI evidence instead of rerunning C
   assert.match(preflight, /scripts\/audit_committed_lockfiles[.]sh/u);
   assert.match(preflight, /node [.]release-readiness\/scripts\/run-consumer-check[.]mjs/u);
   assert.match(preflight, /run-consumer-check[.]mjs --policy-only/u);
+});
+
+test("crates preflight prefills the current version from the public release wave", () => {
+  const versions = publicManifestVersions();
+  const preflight = readWorkflow("crates-package-preflight.yml");
+  const defaults = [...preflight.matchAll(
+    /^      version:\n(?: {8}[^\n]*\n)*? {8}default: ([^\n]+)$/gmu,
+  )];
+  assert.equal(defaults.length, 1, "preflight must have exactly one version default");
+  assert.ok(versions.every((version) => version === defaults[0][1]),
+    "preflight version default must match every public crate manifest");
+});
+
+test("Rust push evidence admission is scoped to crates preflight", () => {
+  assert.match(readWorkflow("crates-package-preflight.yml"), /REQUIRED_CI_ALLOW_RUST_PUSH: "1"/u);
+  assert.doesNotMatch(readWorkflow("swift-package-preflight.yml"), /REQUIRED_CI_ALLOW_RUST_PUSH/u);
 });
 
 test("credentialed release consumes reviewed archives without rerunning package preflight", () => {

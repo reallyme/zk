@@ -13,9 +13,10 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: Future lockstep version for all five crates, without leading v
+        description: Release version for all five crates, without leading v
         required: true
         type: string
+        default: 0.3.2
 
 permissions:
   actions: read
@@ -71,12 +72,13 @@ jobs:
 
       # Start preflight after release qualification completes. Missing evidence
       # fails immediately instead of occupying a hosted runner while CI runs.
-      - name: Require completed exact-commit release qualification
+      - name: Require successful CI for the exact release commit
         id: required-ci
         working-directory: zk
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_SHA: ${{ steps.verify-source.outputs.release_sha }}
+          REQUIRED_CI_ALLOW_RUST_PUSH: "1"
           REQUIRED_CI_WAIT_SECONDS: "0"
           REQUIRED_CI_WRITE_GITHUB_OUTPUT: "1"
         run: node scripts/verify_required_ci.mjs

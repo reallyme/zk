@@ -35,7 +35,7 @@
     {
       "path": "scripts/ci-workflow-policy.test.mjs",
       "role": "workflow policy tests",
-      "sha256": "945f1bec3ee1f8ab952c51767294ac0d0a996ca16182d7354e60ad6bf0dcc307"
+      "sha256": "ce5d00b448a531ace0a0fe36d8416448241de17a8a7c68e8c2225a1fbce3a150"
     },
     {
       "path": "scripts/build_swift_xcframework.sh",
@@ -100,7 +100,7 @@
     {
       "path": ".github/workflows/crates-package-preflight.yml",
       "role": "crates package preflight workflow",
-      "sha256": "d21c8a7401714de5ebb3dc38fc73488778cb48822e8432e773960c18ac6aead9"
+      "sha256": "2d8594a508dfe0a955eeebeeb7c271017e506847421f71f83e01c0ce62353fdf"
     },
     {
       "path": ".github/workflows/protobuf-ci.yml",
@@ -230,12 +230,12 @@
     {
       "path": "scripts/verify_required_ci.mjs",
       "role": "exact-commit release qualification admission",
-      "sha256": "8d8a953b32ffe1f6d60fcbd64f48171d3ed85272d123791fe732d32d1ad0ae4c"
+      "sha256": "4b9f0002c6400f8d3bae24391c7bc87fec6447144413ad6facd2ea56222ebd5b"
     },
     {
       "path": "scripts/verify_required_ci.test.mjs",
       "role": "release qualification and zero-wait evidence tests",
-      "sha256": "9637cd4558846d98f6ba487d75d2d81a9e078be01163fe7a58710092e1340643"
+      "sha256": "0fce76bba11f616d32136a1565a0eac6a3ae836586698f7d985e9c2bd4f9581a"
     },
     {
       "path": "scripts/test-modern-production-circuits.sh",

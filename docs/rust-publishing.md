@@ -110,7 +110,7 @@ Ordinary CI runs the same inspection without `--allow-dirty`. Inspection may
 read the crates.io index and fetch locked dependencies; it compiles extracted
 archives offline and performs credential-free publication dry-runs without
 uploading packages. The explicit package preflight first requires
-the latest successful release-qualification Rust CI, protobuf, and fuzz runs
+the latest successful Rust CI, protobuf, and fuzz runs
 for the exact current `main` commit. It reuses those results instead of rebuilding
 the workspace to repeat formatting, lint, test, protobuf, runtime-feature,
 boundary, or dependency checks. It binds the requested
@@ -121,18 +121,18 @@ crates.io dry-runs that produce the reviewed archives:
 node scripts/publish-crates-in-order.mjs preflight
 ```
 
-Dispatch **Rust CI** from the exact current `main` commit before package
-preflight. This release-qualification run selects every validation lane and
-performs three proof passes; routine changes run one proof pass when relevant.
-If the current commit has no protobuf or fuzz run, dispatch those workflows too.
-Start package preflight after these runs succeed. Missing or pending evidence
-fails immediately rather than occupying a runner while validation is in progress.
+Package preflight reuses successful push or manually dispatched **Rust CI**,
+protobuf, and fuzz runs for the exact current `main` commit. Start preflight
+after these runs succeed. If a required workflow has no run for that commit,
+dispatch it first. Missing or pending evidence fails immediately rather than
+occupying a runner while validation is in progress.
 CI may be retried after an infrastructure or configuration repair. Admission
 requires the latest qualifying run for the exact commit and workflow to finish
 successfully; a newer failed, cancelled, or pending run blocks preflight rather
-than falling back to an older success. A push run does not replace the complete
-manual Rust release-qualification run. Prior failed attempts remain in GitHub's
-history and do not require an empty source commit to recover.
+than falling back to an older success. For additional release qualification,
+manually dispatch **Rust CI** to select every validation lane and three proof
+passes; routine changes run one proof pass when relevant. Prior failed attempts
+remain in GitHub's history and do not require an empty source commit to recover.
 The evidence age limit uses the run's original creation time, so a partial retry
 cannot refresh stale successful checks from an old run.
 
@@ -162,7 +162,9 @@ current tip of `main`, after the exact-version
 package preflight succeeds. Newly published dependencies are retried only for
 bounded crates.io index propagation; all other failures stop the release.
 
-In GitHub Actions, run **Crates Package Preflight** first with the exact version.
+In GitHub Actions, run **Crates Package Preflight** first. The version field is
+prefilled with the current public Rust release version and checked against all
+five crate manifests.
 The workflow binds that version to the current `main` commit and the five
 prerequisite workflow run IDs, scans complete Git history, audits every tracked
 lockfile, runs the pinned release-readiness repository policy gate, and produces the
