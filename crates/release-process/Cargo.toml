@@ -14,9 +14,9 @@ description = "Pinned external-tool adapter for ReallyMe ZK release generation."
 
 [dependencies]
 libc = { workspace = true }
-reallyme-zk-api = { path = "../api", version = "0.3.0", default-features = false }
-reallyme-zk-artifacts = { path = "../artifacts", version = "0.3.0", default-features = false }
-reallyme-zk-backend-bb = { path = "../backend-bb", version = "0.3.1", default-features = false }
+reallyme-zk-api = { path = "../api", version = "0.3.2", default-features = false }
+reallyme-zk-artifacts = { path = "../artifacts", version = "0.3.2", default-features = false }
+reallyme-zk-backend-bb = { path = "../backend-bb", version = "0.3.2", default-features = false }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
 sha2 = { workspace = true }

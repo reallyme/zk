@@ -28,8 +28,8 @@ path = "src/generate-common-credential-root-mobile-fixtures.rs"
 base64.workspace = true
 buffa.workspace = true
 p256.workspace = true
-reallyme-zk-proto = { path = "../proto", version = "0.3.0", default-features = false, features = ["generated"] }
-reallyme-zk-proto-codec = { path = "../proto-codec", version = "0.3.1" }
+reallyme-zk-proto = { path = "../proto", version = "0.3.2", default-features = false, features = ["generated"] }
+reallyme-zk-proto-codec = { path = "../proto-codec", version = "0.3.2" }
 serde_json.workspace = true
 sha2.workspace = true
 thiserror.workspace = true

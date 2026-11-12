@@ -24,7 +24,7 @@ thiserror.workspace = true
 zeroize.workspace = true
 
 [dev-dependencies]
-reallyme-zk-api = { path = "../api", version = "0.3.0", default-features = false }
+reallyme-zk-api = { path = "../api", version = "0.3.2", default-features = false }
 toml.workspace = true
 
 [lints]

@@ -16,10 +16,10 @@ description = "Deterministic production artifact package builder and verifier fo
 libc = { workspace = true }
 buffa = { workspace = true }
 reallyme-codec = { workspace = true, features = ["hex"] }
-reallyme-zk-api = { path = "../api", version = "0.3.0", default-features = false }
-reallyme-zk-artifacts = { path = "../artifacts", version = "0.3.0", default-features = false }
-reallyme-zk-proto = { path = "../proto", version = "0.3.0", default-features = false, features = ["generated"] }
-reallyme-zk-proto-codec = { path = "../proto-codec", version = "0.3.1", default-features = false }
+reallyme-zk-api = { path = "../api", version = "0.3.2", default-features = false }
+reallyme-zk-artifacts = { path = "../artifacts", version = "0.3.2", default-features = false }
+reallyme-zk-proto = { path = "../proto", version = "0.3.2", default-features = false, features = ["generated"] }
+reallyme-zk-proto-codec = { path = "../proto-codec", version = "0.3.2", default-features = false }
 sha2 = { workspace = true }
 thiserror = { workspace = true }
 zeroize = { workspace = true }

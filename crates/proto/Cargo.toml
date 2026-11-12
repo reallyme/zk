@@ -4,7 +4,7 @@
 
 [package]
 name = "reallyme-zk-proto"
-version = "0.3.0"
+version = "0.3.2"
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true

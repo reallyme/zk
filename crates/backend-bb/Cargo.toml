@@ -4,7 +4,7 @@
 
 [package]
 name = "reallyme-zk-backend-bb"
-version = "0.3.1"
+version = "0.3.2"
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
@@ -43,8 +43,8 @@ required-features = ["native", "dev-cli"]
 base64 = { workspace = true }
 flate2 = { workspace = true }
 libc = { workspace = true }
-reallyme-zk-artifacts = { path = "../artifacts", version = "0.3.0", default-features = false }
-reallyme-zk-api = { path = "../api", version = "0.3.0", default-features = false }
+reallyme-zk-artifacts = { path = "../artifacts", version = "0.3.2", default-features = false }
+reallyme-zk-api = { path = "../api", version = "0.3.2", default-features = false }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
 thiserror = { workspace = true, optional = true }
@@ -55,7 +55,7 @@ crypto-p256 = { workspace = true, features = ["native"] }
 # The private witness harness is deliberately omitted from the normalized
 # registry manifest. It is never a runtime backend dependency.
 reallyme-zk-noir-witness-core = { path = "../noir-witness-core", default-features = false }
-reallyme-zk-proto-codec = { path = "../proto-codec", version = "0.3.1", default-features = false, features = ["native"] }
+reallyme-zk-proto-codec = { path = "../proto-codec", version = "0.3.2", default-features = false, features = ["native"] }
 thiserror = { workspace = true }
 
 [build-dependencies]

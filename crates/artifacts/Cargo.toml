@@ -4,7 +4,7 @@
 
 [package]
 name = "reallyme-zk-artifacts"
-version = "0.3.0"
+version = "0.3.2"
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
@@ -21,7 +21,7 @@ all-features = true
 rustdoc-args = ["--cfg", "docsrs"]
 
 [dependencies]
-reallyme-zk-api = { path = "../api", version = "0.3.0", default-features = false }
+reallyme-zk-api = { path = "../api", version = "0.3.2", default-features = false }
 sha2 = { workspace = true }
 
 [lints]

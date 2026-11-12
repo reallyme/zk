@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.2
+
+- Align API, artifacts, proto, proto-codec, and backend-bb Rust packages at
+  `0.3.2`, including their workspace and fuzz dependency versions.
+- Update the optional SSI stack-error contract and linked-wallet conformance
+  dependency pins to SSI `0.6.2`.
+
 ## 0.3.1
 
 - Swift and Kotlin retain their existing provider interfaces and Boolean

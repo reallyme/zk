@@ -168,10 +168,10 @@ for Rust, Swift, and Kotlin API names and acceptance requirements.
 
 ## Compatibility
 
-ReallyMe ZK is pre-1.0. Future public Rust release waves share one version; the additive codec and backend
-`0.3.1` publication retains the existing contract crates at `0.3.0`. Circuit
+ReallyMe ZK is pre-1.0. All five public Rust crates share version `0.3.2`.
+The optional stack-error adapter uses the published SSI `0.6.2` contract. Circuit
 semantics, protobuf contracts, artifact identities, and conformance vectors
-form one compatibility set.
+form one compatibility set. Swift and Kotlin SDK versions are managed separately.
 
 Use matching circuit artifacts and provider versions. A circuit listed in the
 API is not necessarily supported by every provider. See

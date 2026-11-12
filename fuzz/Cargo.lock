@@ -700,7 +700,7 @@ dependencies = [
 
 [[package]]
 name = "reallyme-zk-api"
-version = "0.3.0"
+version = "0.3.2"
 dependencies = [
  "reallyme-crypto-core",
  "reallyme-crypto-csprng",
@@ -716,7 +716,7 @@ dependencies = [
 
 [[package]]
 name = "reallyme-zk-artifacts"
-version = "0.3.0"
+version = "0.3.2"
 dependencies = [
  "reallyme-zk-api",
  "sha2",
@@ -724,7 +724,7 @@ dependencies = [
 
 [[package]]
 name = "reallyme-zk-backend-bb"
-version = "0.3.1"
+version = "0.3.2"
 dependencies = [
  "base64 0.23.1",
  "cc",
@@ -751,7 +751,7 @@ dependencies = [
 
 [[package]]
 name = "reallyme-zk-proto"
-version = "0.3.0"
+version = "0.3.2"
 dependencies = [
  "base64 0.23.1",
  "buffa",
@@ -762,7 +762,7 @@ dependencies = [
 
 [[package]]
 name = "reallyme-zk-proto-codec"
-version = "0.3.1"
+version = "0.3.2"
 dependencies = [
  "buffa",
  "reallyme-crypto-csprng",
