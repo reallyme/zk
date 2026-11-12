@@ -115,7 +115,11 @@ jobs:
               --deny-self-hosted-runners
             archive_count=$((archive_count + 1))
           done
-          test "$archive_count" -eq 3
+          expected_archive_count="$(node --input-type=module -e '
+            import { PUBLIC_CRATE_NAMES } from "./scripts/public-crates.mjs";
+            process.stdout.write(String(PUBLIC_CRATE_NAMES.length));
+          ')"
+          test "$archive_count" -eq "$expected_archive_count"
           node scripts/verify_release_attestation.mjs
 
   prepare-source-release:

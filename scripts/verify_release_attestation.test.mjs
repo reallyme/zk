@@ -6,6 +6,8 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import {
+  chmodSync,
+  copyFileSync,
   mkdirSync,
   mkdtempSync,
   readFileSync,
@@ -15,7 +17,7 @@ import {
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { delimiter, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
 
@@ -74,6 +76,96 @@ const listedWorkflowRun = (overrides = {}) => ({
   path: ".github/workflows/crates-package-preflight.yml",
   display_title: `Crates package preflight ${expected.releaseVersion} @ ${releaseSha}`,
   ...overrides,
+});
+
+test("release provenance shell gate admits the approved archive set and rejects incomplete or extra evidence", () => {
+  // CLI doubles isolate shell control flow; document validation is exercised
+  // independently below with the production verifier.
+  const workflow = readFileSync(".github/workflows/crates-release.yml", "utf8");
+  const command = workflow.match(
+    /      - name: Verify provenance, source identity, and reviewed bytes[\s\S]*?        run: \|\n((?: {10}[^\n]*\n|\n)+)/u,
+  )?.[1]?.replace(/^ {10}/gmu, "");
+  assert.ok(command, "the release verification step must be executable by this regression test");
+  const root = mkdtempSync(join(tmpdir(), "zk-release-shell-gate-"));
+  try {
+    mkdirSync(join(root, "bin"));
+    mkdirSync(join(root, "scripts"));
+    mkdirSync(join(root, "release-attestation"));
+    mkdirSync(join(root, "reviewed-crates"));
+    copyFileSync("scripts/public-crates.mjs", join(root, "scripts", "public-crates.mjs"));
+    writeFileSync(join(root, "release-attestation", "crates-preflight.json"), "{}");
+    const gh = join(root, "bin", "gh");
+    writeFileSync(gh, `#!${process.execPath}
+import { appendFileSync } from "node:fs";
+const args = process.argv.slice(2);
+if (args[0] !== "attestation" || args[1] !== "verify") process.exit(2);
+for (const flag of ["--repo", "--signer-workflow", "--source-digest", "--source-ref", "--deny-self-hosted-runners"]) {
+  if (!args.includes(flag)) process.exit(2);
+}
+if (args[2] === process.env.TEST_REJECT_PROVENANCE) process.exit(1);
+appendFileSync(process.env.TEST_VERIFICATION_LOG, args[2] + "\\n");
+`);
+    const node = join(root, "bin", "node");
+    writeFileSync(node, `#!${process.execPath}
+import { appendFileSync } from "node:fs";
+import { spawnSync } from "node:child_process";
+const args = process.argv.slice(2);
+if (args.length === 1 && args[0] === "scripts/verify_release_attestation.mjs") {
+  appendFileSync(process.env.TEST_VERIFICATION_LOG, "document-verified\\n");
+} else {
+  const result = spawnSync(process.env.TEST_NODE_EXECUTABLE, args, { stdio: "inherit" });
+  process.exitCode = result.status ?? 1;
+}
+`);
+    chmodSync(gh, 0o755);
+    chmodSync(node, 0o755);
+    const files = PUBLIC_CRATE_NAMES.map((name) => `reviewed-crates/${name}-${expected.releaseVersion}.crate`);
+    for (const file of files) writeFileSync(join(root, file), file);
+    const log = join(root, "verification.log");
+    const run = (overrides = {}) => {
+      writeFileSync(log, "");
+      const result = spawnSync("bash", ["-e", "-o", "pipefail", "-c", command], {
+        cwd: root,
+        encoding: "utf8",
+        env: {
+          ...process.env,
+          PATH: `${join(root, "bin")}${delimiter}${process.env.PATH}`,
+          GITHUB_REPOSITORY: expected.repository,
+          RELEASE_SHA: releaseSha,
+          TEST_NODE_EXECUTABLE: process.execPath,
+          TEST_VERIFICATION_LOG: log,
+          TEST_REJECT_PROVENANCE: "",
+          ...overrides,
+        },
+      });
+      return { ...result, calls: readFileSync(log, "utf8").trim().split("\n") };
+    };
+    const accepted = run();
+    assert.equal(accepted.status, 0, accepted.stderr);
+    assert.equal(accepted.calls[0], "release-attestation/crates-preflight.json");
+    assert.equal(accepted.calls.at(-1), "document-verified");
+    assert.deepEqual(accepted.calls.slice(1, -1).sort(), [...files].sort());
+    unlinkSync(join(root, files[0]));
+    const missing = run();
+    assert.notEqual(missing.status, 0);
+    assert.equal(missing.calls.includes("document-verified"), false);
+    writeFileSync(join(root, files[0]), files[0]);
+    const extraFile = join(root, "reviewed-crates", "unapproved.crate");
+    writeFileSync(extraFile, "extra");
+    assert.notEqual(run().status, 0);
+    unlinkSync(extraFile);
+    for (const file of ["release-attestation/crates-preflight.json", files[0]]) {
+      const rejected = run({ TEST_REJECT_PROVENANCE: file });
+      assert.notEqual(rejected.status, 0);
+      assert.equal(rejected.calls.includes("document-verified"), false);
+    }
+    for (const file of files) unlinkSync(join(root, file));
+    const empty = run();
+    assert.notEqual(empty.status, 0);
+    assert.equal(empty.calls.includes("document-verified"), false);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
 });
 
 test("reviewed attestation accepts the exact run, SHA, and version", () => {

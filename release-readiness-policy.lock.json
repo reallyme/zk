@@ -280,7 +280,7 @@
     {
       "path": ".github/workflows/crates-release.yml",
       "role": "reviewed crate publication workflow",
-      "sha256": "663c95c5c6edb3c75b3268f05110e527a32cdc57249f533ebb02bd0f5adb132b"
+      "sha256": "f9d68fa39caaa30e3ade953abe7b4f522b492412f7d828366f49b7a0d10e4ee0"
     },
     {
       "path": "scripts/publish_github_release.mjs",
@@ -335,7 +335,7 @@
     {
       "path": "scripts/verify_release_attestation.test.mjs",
       "role": "package attestation rejection tests",
-      "sha256": "7569ee74c758ae2261802a0183cb052ba5472e4088aad037a5c00b503af771c5"
+      "sha256": "0995ac470a347197eaaa8ef512688e165b85c8b7388c5a0d05c9eb18ddf22a69"
     },
     {
       "path": "scripts/check-public-crate-baselines.mjs",
