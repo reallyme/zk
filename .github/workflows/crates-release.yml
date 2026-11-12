@@ -29,6 +29,7 @@ jobs:
       contents: read
     outputs:
       preflight_run_id: ${{ steps.resolve-attestation.outputs.preflight_run_id }}
+      preflight_run_attempt: ${{ steps.resolve-attestation.outputs.preflight_run_attempt }}
       release_sha: ${{ steps.verify-source.outputs.release_sha }}
       release_version: ${{ steps.verify-source.outputs.release_version }}
     steps:
@@ -62,8 +63,7 @@ jobs:
           RELEASE_SHA: ${{ steps.verify-source.outputs.release_sha }}
           RELEASE_VERSION: ${{ steps.verify-source.outputs.release_version }}
           RELEASE_ATTESTATION_RESOLVE_ONLY: "1"
-          RELEASE_ATTESTATION_WAIT_SECONDS: "3600"
-          RELEASE_ATTESTATION_POLL_SECONDS: "20"
+          RELEASE_ATTESTATION_WAIT_SECONDS: "0"
           RELEASE_ATTESTATION_WRITE_GITHUB_OUTPUT: "1"
         run: node scripts/verify_release_attestation.mjs
 
@@ -90,10 +90,10 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           PREFLIGHT_RUN_ID: ${{ steps.resolve-attestation.outputs.preflight_run_id }}
+          PREFLIGHT_RUN_ATTEMPT: ${{ steps.resolve-attestation.outputs.preflight_run_attempt }}
           RELEASE_SHA: ${{ steps.verify-source.outputs.release_sha }}
           RELEASE_VERSION: ${{ steps.verify-source.outputs.release_version }}
-          RELEASE_ATTESTATION_WAIT_SECONDS: "60"
-          RELEASE_ATTESTATION_POLL_SECONDS: "10"
+          RELEASE_ATTESTATION_WAIT_SECONDS: "0"
           RELEASE_ATTESTATION_CRATE_DIRECTORY: reviewed-crates
         run: |
           gh attestation verify release-attestation/crates-preflight.json \
@@ -215,8 +215,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           PREFLIGHT_RUN_ID: ${{ needs.verify-preflight.outputs.preflight_run_id }}
-          RELEASE_ATTESTATION_WAIT_SECONDS: "60"
-          RELEASE_ATTESTATION_POLL_SECONDS: "10"
+          PREFLIGHT_RUN_ATTEMPT: ${{ needs.verify-preflight.outputs.preflight_run_attempt }}
+          RELEASE_ATTESTATION_WAIT_SECONDS: "0"
           RELEASE_ATTESTATION_CRATE_DIRECTORY: reviewed-crates
         run: node scripts/verify_release_attestation.mjs
 
@@ -232,6 +232,7 @@ jobs:
             exit 1
           fi
           node scripts/publish-crates-in-order.mjs publish
+          test -s "$PUBLICATION_LEDGER_PATH"
 
       - name: Preserve machine-readable publication ledger
         if: ${{ always() }}
@@ -239,7 +240,9 @@ jobs:
         with:
           name: reallyme-zk-publication-ledger-${{ needs.verify-preflight.outputs.release_version }}-${{ needs.verify-preflight.outputs.release_sha }}
           path: ${{ runner.temp }}/crates-publication-ledger.json
-          if-no-files-found: error
+          # An early failure may precede ledger creation. Keep partial ledgers
+          # when present without replacing the original error with upload noise.
+          if-no-files-found: warn
           retention-days: 90
           overwrite: true
 
@@ -303,6 +306,16 @@ jobs:
         with:
           name: reallyme-zk-publication-ledger-${{ needs.verify-preflight.outputs.release_version }}-${{ needs.verify-preflight.outputs.release_sha }}
           path: release-evidence
+
+      - name: Revalidate reviewed evidence before finalization
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PREFLIGHT_RUN_ID: ${{ needs.verify-preflight.outputs.preflight_run_id }}
+          PREFLIGHT_RUN_ATTEMPT: ${{ needs.verify-preflight.outputs.preflight_run_attempt }}
+          RELEASE_ATTESTATION_PATH: release-evidence/crates-preflight.json
+          RELEASE_ATTESTATION_CRATE_DIRECTORY: release-evidence
+          RELEASE_ATTESTATION_WAIT_SECONDS: "0"
+        run: node zk/scripts/verify_release_attestation.mjs
 
       - name: Publish reviewed crate evidence to the canonical release
         env:

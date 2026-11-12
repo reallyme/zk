@@ -154,6 +154,28 @@ test("credentialed release consumes reviewed archives without rerunning package 
   assert.match(release, /finalize:/u);
 });
 
+test("crates release retries preserve evidence identity without polling failed preflights", () => {
+  const preflight = readWorkflow("crates-package-preflight.yml");
+  for (const label of ["Upload reviewed package attestation", "Upload reviewed crate archives"]) {
+    const step = preflight.slice(preflight.indexOf(`      - name: ${label}\n`)).split(/\n      - name: /u)[0];
+    assert.match(step, /overwrite: true/u);
+  }
+  const release = readWorkflow("crates-release.yml");
+  assert.doesNotMatch(release, /RELEASE_ATTESTATION_WAIT_SECONDS: "[1-9]/u);
+  assert.match(release, /preflight_run_attempt: \$\{\{ steps[.]resolve-attestation[.]outputs[.]preflight_run_attempt \}\}/u);
+  for (const job of ["verify-preflight", "publish", "finalize"]) {
+    const source = jobSource(release, job);
+    assert.match(source, /PREFLIGHT_RUN_ATTEMPT:/u, job);
+    assert.match(source, /verify_release_attestation[.]mjs/u, job);
+  }
+  const publish = jobSource(release, "publish");
+  assert.match(publish, /test -s "\$PUBLICATION_LEDGER_PATH"/u);
+  const ledgerUpload = publish.slice(publish.indexOf("      - name: Preserve machine-readable publication ledger\n"))
+    .split(/\n      - name: /u)[0];
+  assert.match(ledgerUpload, /if: \$\{\{ always\(\) \}\}/u);
+  assert.match(ledgerUpload, /if-no-files-found: warn/u);
+});
+
 test("maintainer and release jobs use Rust 1.99.0 while one narrow job proves the public MSRV", () => {
   const repositoryToolchain = readFileSync("rust-toolchain.toml", "utf8");
   const workspaceManifest = readFileSync("Cargo.toml", "utf8");

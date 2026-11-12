@@ -89,6 +89,7 @@ const runJson = (arguments_, code) => {
   const result = spawnSync("gh", arguments_, {
     encoding: "utf8",
     maxBuffer: MAX_COMMAND_OUTPUT_BYTES,
+    timeout: 30_000,
     stdio: ["ignore", "pipe", "ignore"],
   });
   if (result.error !== undefined || result.status !== 0 || typeof result.stdout !== "string") {
@@ -129,6 +130,7 @@ const readAttestation = (path) => {
 };
 
 const isRecord = (value) => value !== null && typeof value === "object" && !Array.isArray(value);
+const isRunAttempt = (value) => Number.isSafeInteger(value) && value > 0;
 
 export const verifyAttestationDocument = (value, expected) => {
   if (!isRecord(value)) {
@@ -143,7 +145,9 @@ export const verifyAttestationDocument = (value, expected) => {
     value.repository !== expected.repository ||
     value.workflow !== PREFLIGHT_WORKFLOW ||
     value.run_id !== expected.runId ||
-    value.run_attempt !== 1 ||
+    !isRunAttempt(expected.runAttempt) ||
+    !isRunAttempt(value.run_attempt) ||
+    value.run_attempt > expected.runAttempt ||
     value.release_sha !== expected.releaseSha ||
     value.version !== expected.releaseVersion
   ) {
@@ -227,7 +231,8 @@ export const verifyWorkflowRun = (value, expected) => {
     value.head_sha !== expected.releaseSha ||
     value.status !== "completed" ||
     value.conclusion !== "success" ||
-    value.run_attempt !== 1 ||
+    !isRunAttempt(expected.runAttempt) ||
+    value.run_attempt !== expected.runAttempt ||
     value.path !== PREFLIGHT_PATH
   ) {
     fail("preflight-run-mismatch");
@@ -306,11 +311,11 @@ export const selectLatestPreflightRun = (value, expected) => {
   if (latest.displayTitle !== expectedTitle) {
     fail("preflight-version-mismatch");
   }
-  if (latest.status !== "completed" || latest.conclusion !== "success") {
-    fail("latest-preflight-run-not-successful");
+  if (latest.status !== "completed") {
+    fail("latest-preflight-run-pending");
   }
-  if (latest.runAttempt !== 1) {
-    fail("preflight-rerun-not-accepted");
+  if (latest.conclusion !== "success") {
+    fail("latest-preflight-run-not-successful");
   }
   return latest;
 };
@@ -326,7 +331,7 @@ const resolvePreflightRun = ({ repository, releaseSha, releaseVersion }) => {
   const runs = runJson(
     [
       "api",
-      `repos/${repository}/actions/workflows/${workflow.id}/runs?branch=main&event=workflow_dispatch&per_page=100`,
+      `repos/${repository}/actions/workflows/${workflow.id}/runs?branch=main&event=workflow_dispatch&head_sha=${releaseSha}&per_page=100`,
     ],
     "preflight-run-list-query-failed",
   );
@@ -335,7 +340,7 @@ const resolvePreflightRun = ({ repository, releaseSha, releaseVersion }) => {
     releaseSha,
     releaseVersion,
   });
-  return { runId: latest.id, workflowId: workflow.id };
+  return { runId: latest.id, runAttempt: latest.runAttempt, workflowId: workflow.id };
 };
 
 const resolvePreflightRunWithWait = ({
@@ -353,7 +358,7 @@ const resolvePreflightRunWithWait = ({
       const waitable =
         error instanceof ReleaseAttestationError &&
         (error.code === "missing-preflight-run" ||
-          error.code === "latest-preflight-run-not-successful");
+          error.code === "latest-preflight-run-pending");
       if (!waitable || Date.now() >= deadline) {
         throw error;
       }
@@ -413,15 +418,22 @@ export const verifyReleaseAttestation = ({ env = process.env } = {}) => {
   if (runId !== resolved.runId) {
     fail("preflight-run-id-changed");
   }
+  const suppliedAttempt = env.PREFLIGHT_RUN_ATTEMPT;
+  if (suppliedAttempt !== undefined &&
+      parsePositiveInteger(suppliedAttempt, "invalid-preflight-run-attempt") !== resolved.runAttempt) {
+    fail("preflight-run-attempt-changed");
+  }
   const resolvesOnly = env.RELEASE_ATTESTATION_RESOLVE_ONLY === "1";
   if (resolvesOnly) {
-    return { releaseSha, releaseVersion, runId };
+    return { releaseSha, releaseVersion, runId, runAttempt: resolved.runAttempt };
   }
   const run = runJson(
     ["api", `repos/${repository}/actions/runs/${runId}`],
     "preflight-run-query-failed",
   );
-  verifyWorkflowRun(run, { workflowId: resolved.workflowId, runId, releaseSha });
+  verifyWorkflowRun(run, {
+    workflowId: resolved.workflowId, runId, runAttempt: resolved.runAttempt, releaseSha,
+  });
   const mainRef = runJson(
     ["api", `repos/${repository}/git/ref/heads/main`],
     "main-ref-query-failed",
@@ -445,10 +457,14 @@ export const verifyReleaseAttestation = ({ env = process.env } = {}) => {
     packageArchives: documentOnly ? undefined : localPackageArchives(releaseVersion, env),
     repository,
     runId,
+    // Failed-job reruns retain successful package jobs and their signed evidence.
+    // The producing attempt may be earlier, but must belong to this same run,
+    // source commit, version, and exact archive bytes.
+    runAttempt: resolved.runAttempt,
     releaseSha,
     releaseVersion,
   });
-  return { releaseSha, releaseVersion, runId };
+  return { releaseSha, releaseVersion, runId, runAttempt: resolved.runAttempt };
 };
 
 const isMain = process.argv[1] !== undefined && fileURLToPath(import.meta.url) === process.argv[1];
@@ -462,7 +478,7 @@ if (isMain) {
       }
       appendFileSync(
         outputPath,
-        `release_sha=${attestation.releaseSha}\nrelease_version=${attestation.releaseVersion}\npreflight_run_id=${attestation.runId}\n`,
+        `release_sha=${attestation.releaseSha}\nrelease_version=${attestation.releaseVersion}\npreflight_run_id=${attestation.runId}\npreflight_run_attempt=${attestation.runAttempt}\n`,
         { encoding: "utf8" },
       );
     }
@@ -470,6 +486,14 @@ if (isMain) {
   } catch (error) {
     const code = error instanceof ReleaseAttestationError ? error.code : "unexpected-failure";
     console.error(`release attestation verification failed: ${code}`);
+    const hints = new Map([
+      ["missing-preflight-run", "Run Crates Package Preflight for this main commit before starting release."],
+      ["latest-preflight-run-pending", "Wait for Crates Package Preflight to finish, then retry release."],
+      ["latest-preflight-run-not-successful", "Repair and rerun the failed preflight before retrying release."],
+      ["preflight-run-attempt-changed", "Preflight was rerun during release; restart release to review the latest evidence."],
+    ]);
+    const hint = hints.get(code);
+    if (hint !== undefined) console.error(hint);
     process.exit(1);
   }
 }

@@ -35,7 +35,7 @@
     {
       "path": "scripts/ci-workflow-policy.test.mjs",
       "role": "workflow policy tests",
-      "sha256": "868f37248ea529e0439097945f589ffbac86ab0ffc7af82f9d1d958f325ef985"
+      "sha256": "0b76ada3c928db8379fe508201453023d8323c2f019669eaeac7e5d08c5c05af"
     },
     {
       "path": "scripts/build_swift_xcframework.sh",
@@ -100,7 +100,7 @@
     {
       "path": ".github/workflows/crates-package-preflight.yml",
       "role": "crates package preflight workflow",
-      "sha256": "f4d8ef8dbb01758fdfda854d9a7edb91992bc7f8d04d4034faf7d69c8bfe50a1"
+      "sha256": "852146c901d9d8cda5537dbd97c7ee1942728297293f1774f5125c910ab43763"
     },
     {
       "path": ".github/workflows/protobuf-ci.yml",
@@ -280,7 +280,7 @@
     {
       "path": ".github/workflows/crates-release.yml",
       "role": "reviewed crate publication workflow",
-      "sha256": "f9d68fa39caaa30e3ade953abe7b4f522b492412f7d828366f49b7a0d10e4ee0"
+      "sha256": "28ef9a825d08740497341ced4bc2dbfe72ad6b90b975b2fc9151f70e2604cc21"
     },
     {
       "path": "scripts/publish_github_release.mjs",
@@ -325,17 +325,17 @@
     {
       "path": "scripts/write_release_attestation.mjs",
       "role": "approved package archive attestation writer",
-      "sha256": "2234f7e80351b87d443db3204b1fa51294de19821d59b11fa5233cc97175d3db"
+      "sha256": "4f93f52383e243284fca4f9371e68fd9ad8851414c768f60eb15dc62fad4ab3d"
     },
     {
       "path": "scripts/verify_release_attestation.mjs",
       "role": "approved package archive attestation verifier",
-      "sha256": "0068b1e0e67b3f402ba01fb6e8b95b79d65822037596db67fda895ebba8ea242"
+      "sha256": "13e59f71fd895e1b3edf6f78200c1c5827484ca517f9a54d26a2ad6ca70a2b35"
     },
     {
       "path": "scripts/verify_release_attestation.test.mjs",
       "role": "package attestation rejection tests",
-      "sha256": "0995ac470a347197eaaa8ef512688e165b85c8b7388c5a0d05c9eb18ddf22a69"
+      "sha256": "d15c095c911dea5fd7b028c3e61bce85a1ecde457a4c74c997792298048b292f"
     },
     {
       "path": "scripts/check-public-crate-baselines.mjs",

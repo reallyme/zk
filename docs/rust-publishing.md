@@ -166,7 +166,7 @@ archives to the preflight workflow and source commit.
 
 Then run **Crates.io Release** from that same current `main` commit. Before any
 credentialed work, the release workflow verifies the GitHub provenance, exact
-first-attempt preflight run, current `main` identity, manifest, and all five
+successful preflight run and attempt, current `main` identity, manifest, and all five
 reviewed archives. After approval in the protected `crates-io` environment, it
 creates or verifies the immutable `reallyme-zk-v<version>` tag and a draft
 GitHub release. The protected publication job reverifies the reviewed bytes before requesting the
@@ -174,6 +174,15 @@ GitHub release. The protected publication job reverifies the reviewed bytes befo
 to the reviewed preflight archive before it can be uploaded. Normalized crate
 compilation and dry-run publication remain the responsibility of the
 credential-free preflight and are not repeated with the token in scope.
+
+Preflight supports [failed-job retries](https://docs.github.com/en/actions/how-tos/manage-workflow-runs/re-run-workflows-and-jobs)
+after infrastructure failures without a new source commit. Successful package jobs retained by a retry may supply their
+existing evidence for the same run, commit, version, and archive hashes. Rebuilt
+evidence replaces that run's earlier artifact uploads. Release pins the current
+successful preflight attempt and rechecks it before publication and finalization;
+a later preflight retry requires restarting release with the new evidence.
+Failed or pending preflights produce an immediate diagnostic and recovery
+instruction instead of holding a release runner in a polling loop.
 
 Publication maintains an atomic machine-readable ledger across retries and
 recovery from partial publication. After every successful upload—or byte-identical

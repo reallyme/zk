@@ -47,9 +47,6 @@ if (typeof version !== "string" || !VERSION_PATTERN.test(version)) {
 }
 const runId = parsePositiveInteger(process.env.GITHUB_RUN_ID, "invalid-run-id");
 const runAttempt = parsePositiveInteger(process.env.GITHUB_RUN_ATTEMPT, "invalid-run-attempt");
-if (runAttempt !== 1) {
-  fail("rerun-cannot-create-release-attestation");
-}
 
 const targetDirectory = process.env.CARGO_TARGET_DIR ?? "target";
 const packageArchives = PUBLIC_CRATES.map((name) => {
