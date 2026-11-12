@@ -11,7 +11,7 @@ claims before passing values to a provider. Applications and protocol
 adapters normally map typed ZK failures into their own public error
 envelopes. The optional `stack-error` feature provides the canonical adapter to
 the shared `IdentityStackError` envelope from `reallyme-ssi-proto` 0.6.1. The
-feature remains in this private integration crate so the public ZK contracts
+feature remains in this integration crate so the public ZK contracts
 stay independent of SSI.
 
 The `operation` module validates provider requests. It applies named

@@ -2,6 +2,8 @@
 //
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
+import { PUBLIC_CRATE_NAMES } from "./public-crates.mjs";
+
 import { Buffer } from "node:buffer";
 
 const MAX_INVENTORY_BYTES = 1_048_576;
@@ -10,12 +12,11 @@ const MAX_PACKAGE_PATH_BYTES = 512;
 const MAX_PACKAGE_NAME_BYTES = 128;
 const PACKAGE_PATH_PATTERN = /^[A-Za-z0-9._/-]+$/u;
 const FORBIDDEN_PACKAGE_ROOTS = Object.freeze([".git", "gen", "packages", "target"]);
-const PUBLIC_PACKAGES = new Set([
-  "reallyme-zk-api",
-  "reallyme-zk-artifacts",
-  "reallyme-zk-proto",
-]);
+const PUBLIC_PACKAGES = new Set(PUBLIC_CRATE_NAMES);
 const REQUIRED_PACKAGE_FILES = new Map([
+  ["reallyme-zk-backend-bb", Object.freeze([
+    "build.rs", "toolchain-lock.json", "native/reallyme_bbapi_shim.cc", "native/reallyme_bbapi_shim.h",
+  ])],
   [
     "reallyme-zk-proto",
     Object.freeze([

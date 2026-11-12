@@ -67,6 +67,8 @@ if (rustReleasePackagesMode) {
     "../crates/api/Cargo.toml",
     "../crates/artifacts/Cargo.toml",
     "../crates/proto/Cargo.toml",
+    "../crates/proto-codec/Cargo.toml",
+    "../crates/backend-bb/Cargo.toml",
   ]) {
     const manifest = readFileSync(new URL(manifestPath, import.meta.url), "utf8");
     if (!manifest.includes(`version = "${releaseVersion}"`)) {
@@ -592,7 +594,7 @@ readiness.assertTextPolicy({
     {
       path: "crates/backend-bb/Cargo.toml",
       required: [
-        "publish = false",
+        "publish = true",
         "wasm = []",
       ],
       forbidden: [

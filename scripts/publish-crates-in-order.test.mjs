@@ -10,6 +10,8 @@ import { join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import test from "node:test";
 
+import { PUBLIC_CRATE_NAMES } from "./public-crates.mjs";
+
 const script = fileURLToPath(new URL("./publish-crates-in-order.mjs", import.meta.url));
 
 function runFixture({ mode = "publish", scenario = "success", requirement = "^0.2.2", version = "0.2.2" } = {}) {
@@ -21,7 +23,7 @@ function runFixture({ mode = "publish", scenario = "success", requirement = "^0.
     const reviewedDirectory = join(directory, "reviewed");
     mkdirSync(packageDirectory);
     mkdirSync(reviewedDirectory);
-    for (const name of ["reallyme-zk-api", "reallyme-zk-artifacts", "reallyme-zk-proto"]) {
+    for (const name of PUBLIC_CRATE_NAMES) {
       const file = `${name}-${version}.crate`;
       const archive = Buffer.from(`reviewed:${file}`);
       writeFileSync(join(packageDirectory, file), archive);
@@ -69,6 +71,11 @@ childProcess.spawnSync = (command, args) => {
           kind: null, req: ${JSON.stringify(requirement)} }] },
       { name: "reallyme-zk-proto", version: ${JSON.stringify(version)}, publish: null,
         dependencies: [] },
+      { name: "reallyme-zk-proto-codec", version: ${JSON.stringify(version)}, publish: null,
+        dependencies: [{ name: "reallyme-zk-proto", source: null, path: "crates/proto", kind: null, req: "^" + ${JSON.stringify(version)} }] },
+      { name: "reallyme-zk-backend-bb", version: ${JSON.stringify(version)}, publish: null,
+        dependencies: [{ name: "reallyme-zk-api", source: null, path: "crates/api", kind: null, req: "^" + ${JSON.stringify(version)} }] },
+
     ],
   }) };
   if (args[0] === "package") {
@@ -122,13 +129,9 @@ test("successful publication respects dependency order", () => {
   const result = runFixture();
   assert.equal(result.status, 0, result.stderr);
   assert.deepEqual(result.calls.filter((call) => call[1] === "publish").map((call) => call[3]),
-    ["reallyme-zk-api", "reallyme-zk-artifacts", "reallyme-zk-proto"]);
+    PUBLIC_CRATE_NAMES);
   assert.equal(result.ledger.state, "completed");
-  assert.deepEqual(result.ledger.crates.map((crate) => crate.state), [
-    "published",
-    "published",
-    "published",
-  ]);
+  assert.deepEqual(result.ledger.crates.map((crate) => crate.state), PUBLIC_CRATE_NAMES.map(() => "published"));
 });
 
 test("publication rejects package bytes that differ from the reviewed archives", () => {
@@ -163,7 +166,7 @@ test("registry index lag during dependent archive creation retries without parti
   assert.deepEqual(result.calls.filter((call) => call[0] === "wait"), [["wait", 15000]]);
   assert.deepEqual(
     result.calls.filter((call) => call[1] === "publish").map((call) => call[3]),
-    ["reallyme-zk-api", "reallyme-zk-artifacts", "reallyme-zk-proto"],
+    PUBLIC_CRATE_NAMES,
   );
 });
 

@@ -2,6 +2,9 @@
 
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
+import { PUBLIC_CRATE_NAMES } from "./public-crates.mjs";
+import { PublicPackageBoundaryError, validatePublicPackageBoundary } from "./public-package-boundary.mjs";
+
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import fs from "node:fs";
@@ -24,14 +27,9 @@ const CRATES_IO_INDEX_RETRY_BASE_MS = 15000;
 const CRATES_IO_ARCHIVE_VERIFY_RETRIES = "12";
 const CRATES_IO_ARCHIVE_VERIFY_RETRY_DELAY_SECONDS = "10";
 const CRATES_IO_ARCHIVE_VERIFY_MAX_SECONDS = "180";
-const APPROVED_PUBLIC_PACKAGES = new Set([
-  "reallyme-zk-api",
-  "reallyme-zk-artifacts",
-  "reallyme-zk-proto",
-]);
-const REQUIRED_PUBLISH_ORDER_EDGES = [
-  ["reallyme-zk-api", "reallyme-zk-artifacts"],
-];
+const APPROVED_PUBLIC_PACKAGES = new Set(PUBLIC_CRATE_NAMES);
+const REQUIRED_PUBLISH_ORDER_EDGES = PUBLIC_CRATE_NAMES.slice(1).map((name, index) =>
+  [PUBLIC_CRATE_NAMES[index], name]);
 const args = process.argv.slice(2);
 const mode = args[0] ?? MODE_INSPECT;
 const allowDirty = args.includes("--allow-dirty");
@@ -136,6 +134,13 @@ if (metadataResult.status !== 0) {
 }
 
 const metadata = JSON.parse(metadataResult.stdout);
+try {
+  validatePublicPackageBoundary(metadata.packages);
+} catch (error) {
+  const code = error instanceof PublicPackageBoundaryError ? error.code : "invalid-package-metadata";
+  console.error(`public package boundary rejected: ${code}`);
+  process.exit(1);
+}
 const packageDirectory = path.join(metadata.target_directory, "package");
 
 function isPublishablePackage(pkg) {
@@ -330,8 +335,8 @@ function visit(pkg) {
   ordered.push(pkg);
 }
 
-for (const pkg of publishable.values()) {
-  visit(pkg);
+for (const name of PUBLIC_CRATE_NAMES) {
+  visit(publishable.get(name));
 }
 
 console.log(`Publish order (${ordered.length} crates):`);
@@ -468,12 +473,8 @@ function inspectPackage(pkg) {
 
   const manifestPath = path.join(unpackDirectory, `${pkg.name}-${pkg.version}`, "Cargo.toml");
   const patchArgs = [];
-  for (const dep of pkg.dependencies) {
-    const depName = dep.package ?? dep.name;
-    if (!isEarlierWorkspaceDependency(pkg, depName)) {
-      continue;
-    }
-    const dependency = publishable.get(depName);
+  for (const dependency of ordered) {
+    if (dependency.name === pkg.name) continue;
     const dependencyPath = path.join(unpackDirectory, `${dependency.name}-${dependency.version}`);
     patchArgs.push(
       "--config",

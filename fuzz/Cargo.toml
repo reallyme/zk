@@ -18,9 +18,9 @@ cargo-fuzz = true
 [dependencies]
 libfuzzer-sys = "=0.4.13"
 reallyme-zk-api = { version = "0.3.0", path = "../crates/api", default-features = false }
-reallyme-zk-backend-bb = { version = "0.1.0", path = "../crates/backend-bb", default-features = false }
+reallyme-zk-backend-bb = { version = "0.3.1", path = "../crates/backend-bb", default-features = false }
 reallyme-zk-proto = { version = "0.3.0", path = "../crates/proto", default-features = false, features = ["generated"] }
-reallyme-zk-proto-codec = { version = "0.1.0", path = "../crates/proto-codec", default-features = false }
+reallyme-zk-proto-codec = { version = "0.3.1", path = "../crates/proto-codec", default-features = false }
 
 [[bin]]
 name = "provider_operation"

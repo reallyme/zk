@@ -2,32 +2,39 @@
 
 > Release maintainer reference for crates.io publication.
 
-The public Rust crates share one version. Only the protocol contracts and
-artifact-validation types are published to crates.io. Proof implementations,
-conformance harnesses, release assembly, external-tool runners, and integration
-adapters remain unpublished.
+The approved public Rust crates cover contracts, artifact validation, strict
+protobuf conversion, and the injectable Barretenberg backend. Witness execution
+and the platform ABI implementation remain private native implementation crates.
+Conformance harnesses, release assembly, and external-tool runners also remain
+unpublished. Publishing the backend does not enable it by default or make it an
+identity or policy dependency.
 
 ## Public crates
 
-The crates.io package set contains exactly three crates:
+The crates.io package set contains exactly five crates, in publication order:
 
 | Package | Public role |
 | --- | --- |
 | `reallyme-zk-api` | Proof-system-independent circuit semantics, capabilities, typed proof owners, and injected prover/verifier traits. |
 | `reallyme-zk-proto` | Canonical versioned protobuf schema and hardened generated Rust message bindings. |
+| `reallyme-zk-proto-codec` | Strict validation and conversion between protobuf and domain contracts. |
+| `reallyme-zk-backend-bb` | Injectable backend contract and optional linked native Barretenberg implementation. |
 | `reallyme-zk-artifacts` | Bounded artifact owners and hash-pinned manifest validation over `reallyme-zk-api`. |
 
 `reallyme-zk-proto` is a schema and generated-message package. Its generic
 decode methods do not validate executable provider operations. The bounded
-validator is in the unpublished
+validator is in the published
 `reallyme-zk-proto-codec` crate; external consumers need an equivalent
 reviewed validator before dispatching untrusted operations.
 
 `reallyme-zk-api` and `reallyme-zk-proto` are independent leaf packages.
 `reallyme-zk-artifacts` is released only after the matching
-`reallyme-zk-api` version is visible from crates.io. The three packages retain
-the same version because schema, circuit semantics, and artifact identity are
-reviewed as one compatibility set.
+`reallyme-zk-api` version is visible from crates.io. Future automated releases
+use one version for all five approved packages.
+The additive publication of codec and backend at `0.3.1` leaves the existing API,
+artifacts, and proto packages at `0.3.0` and does not modify the existing GitHub
+release. The next automated release requires all five manifests to agree; the
+bootstrap version split is accepted only for ordinary source and API checks.
 
 ## Public API compatibility policy
 
@@ -57,10 +64,11 @@ repository root does not retain a second schema copy.
 
 The following crates retain `publish = false`:
 
-- `reallyme-zk-proto-codec`: bounded conversion and provider-operation handling
-  outside the public package set.
-- `reallyme-zk-backend-bb`: private Barretenberg adapter, linked native
-  implementation, and artifact-admission contract.
+- `reallyme-zk-noir-witness-core`: pinned Noir ABI, artifact parsing, and ACVM
+  witness execution. Its upstream compiler dependencies are not on crates.io.
+- `reallyme-zk-platform-ffi`: native ABI composition; the `native` feature enables
+  its optional witness-core and backend dependencies. Without that feature,
+  native operations return typed unsupported results.
 - `reallyme-zk-conformance`: repository and provider certification tooling.
 - `reallyme-zk-artifact-package`: sealed-release construction and promotion
   tooling rather than an application dependency.
@@ -87,7 +95,7 @@ workspace without native Barretenberg.
 
 Repository development, package preflight, and publication use the pinned Rust
 1.99.0 toolchain. The public manifests declare `rust-version = "1.99"`. A
-separate CI job checks exactly the three approved public crates at that minimum
+separate CI job checks exactly the five approved public crates at that minimum
 supported version.
 
 ## Inspection And Release Order
@@ -158,7 +166,7 @@ package preflight succeeds. Newly published dependencies are retried only for
 bounded crates.io index propagation; all other failures stop the release.
 
 In GitHub Actions, run **Crates Package Preflight** first with the exact version.
-The workflow binds that version to the current `main` commit and the three
+The workflow binds that version to the current `main` commit and the five
 prerequisite workflow run IDs, scans complete Git history, audits every tracked
 lockfile, runs the pinned release-readiness repository policy gate, and produces the
 normalized crate archives without registry credentials. It uploads the exact
@@ -168,7 +176,7 @@ archives to the preflight workflow and source commit.
 
 Then run **Crates.io Release** from that same current `main` commit. Before any
 credentialed work, the release workflow verifies the GitHub provenance, exact
-first-attempt preflight run, current `main` identity, manifest, and all three
+first-attempt preflight run, current `main` identity, manifest, and all five
 reviewed archives. After approval in the protected `crates-io` environment, it
 creates or verifies the immutable `reallyme-zk-v<version>` tag and a draft
 GitHub release. The protected publication job reverifies the reviewed bytes before requesting the
@@ -249,3 +257,33 @@ preflight consumes successful exact-commit evidence; the credentialed publisher
 consumes the attested archives and verifies uploaded registry bytes without
 repeating the workspace tests. Noir soundness, linked proving, cross-verification,
 mobile targets, and SDK packages remain additional ZK-specific gates.
+
+
+## Additive codec and backend publication
+
+The `0.3.1` codec and backend additions are published manually without retagging,
+recreating, or uploading assets to the existing GitHub release. From the clean
+commit, publish in this order and wait for Cargo's registry confirmation before
+continuing:
+
+```sh
+cargo publish --locked --registry crates-io -p reallyme-zk-proto-codec
+cargo publish --locked --registry crates-io -p reallyme-zk-backend-bb
+```
+
+Cargo verifies each package before uploading. Backend's integration-test codec
+dependency requires the first crate to be visible in the registry. Its private
+witness test harness is omitted from the published manifest. Native package
+validation additionally uses `--all-features` and the already approved library
+specified by `REALLYME_BARRETENBERG_LIB_DIR`; no upstream library rebuild is
+required.
+
+## Public and native dependency boundary
+
+The publishable API, artifacts, proto, codec, and backend packages do not depend
+on witness-core or platform-ffi at runtime or build time, including optional
+features. Backend integration tests may use private workspace crates as
+versionless development dependencies; Cargo removes those dependencies from
+the registry manifest. Package checks compile the extracted archives with all
+features and admit the backend's bundled toolchain lock before native linking.
+No native libraries or circuit binaries are included in these crate archives.

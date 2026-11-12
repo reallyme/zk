@@ -5,7 +5,7 @@
     {
       "path": "scripts/check_release_readiness.mjs",
       "role": "consumer release-readiness policy declaration",
-      "sha256": "f897f991682697beda2e4d9024e5a81434436778257bf3f0ab3e9d358231db92"
+      "sha256": "20422603061db8c05d96847e609064c63a4723899ac60f349de665f0fe569f6d"
     },
     {
       "path": "scripts/check-platform-facade-pins.mjs",
@@ -30,12 +30,12 @@
     {
       "path": "scripts/check_release_readiness.test.mjs",
       "role": "consumer policy declaration tests",
-      "sha256": "230f0992924d692aaec6feeeed8e835dcac7b89a5d2d3b7844f34efff6435a44"
+      "sha256": "01f106a71c48392fb1641a448681eeb460e47e751a1ab2a162c8efc1353dfb20"
     },
     {
       "path": "scripts/ci-workflow-policy.test.mjs",
       "role": "workflow policy tests",
-      "sha256": "ee4c9ff703352985c6df367fe20de579b12bfb9078fec6f84bfe393317ff8f0a"
+      "sha256": "96ed74e3ec93989e3ab394ef9c6a7134d88468fcbda7716916f95cc9c8689323"
     },
     {
       "path": "scripts/build_swift_xcframework.sh",
@@ -85,7 +85,7 @@
     {
       "path": ".github/workflows/rust-ci.yml",
       "role": "primary policy and exact-commit CI workflow",
-      "sha256": "62eb51688aab0bdd942b820e822465ce9ea830836dacd9adb6e358f4dd7ccabc"
+      "sha256": "0f0a2c7e9f96e410f1f29ee3489484fd294e0105234a94c58fb2789bf57afdb7"
     },
     {
       "path": ".github/workflows/fuzz.yml",
@@ -100,7 +100,7 @@
     {
       "path": ".github/workflows/crates-package-preflight.yml",
       "role": "crates package preflight workflow",
-      "sha256": "a7bad6af7835b047396e7414a990e28e98239b6a174b278920a232cb54a7b608"
+      "sha256": "d21c8a7401714de5ebb3dc38fc73488778cb48822e8432e773960c18ac6aead9"
     },
     {
       "path": ".github/workflows/protobuf-ci.yml",
@@ -280,7 +280,7 @@
     {
       "path": ".github/workflows/crates-release.yml",
       "role": "reviewed crate publication workflow",
-      "sha256": "1df7a830c0c3f1a4908761ea5d5474a4c1bee27b158a6cdd572b3b0f834cbf74"
+      "sha256": "663c95c5c6edb3c75b3268f05110e527a32cdc57249f533ebb02bd0f5adb132b"
     },
     {
       "path": "scripts/publish_github_release.mjs",
@@ -291,6 +291,66 @@
       "path": "scripts/publish_github_release.test.mjs",
       "role": "canonical release identity and asset admission tests",
       "sha256": "7669d255b7815f3b5cf47d2ad21f082d91db2f2e45665ec250143e67d747435e"
+    },
+    {
+      "path": "scripts/public-crates.mjs",
+      "role": "approved public crate set and publication order",
+      "sha256": "dc8c2648433238fe8d8247bd53087755199ab28d71eb85696444c184a2afdf07"
+    },
+    {
+      "path": "scripts/public-package-boundary.mjs",
+      "role": "public package native implementation boundary",
+      "sha256": "a65caa9c7ec77a1cdd347e93bc5b10d277c1efdd34e2e3bccc68ba0ec766dc13"
+    },
+    {
+      "path": "scripts/public-package-boundary.test.mjs",
+      "role": "public and native feature boundary regression tests",
+      "sha256": "225cde6cc1058fb752fa732fbcf1b87bd3af3221d24448d59f598c2e586e2ca5"
+    },
+    {
+      "path": "scripts/publish-crates-in-order.mjs",
+      "role": "ordered package inspection and publication",
+      "sha256": "28632b9f05568674cd7bba4613831a10d1b86bf69c69e86ee7282f5c412cd11d"
+    },
+    {
+      "path": "scripts/publish-crates-in-order.test.mjs",
+      "role": "ordered publication rejection and retry tests",
+      "sha256": "10de45fde74f198b036741dbab3868e9e374b3421c6b6ccd0e92f915240e2ce2"
+    },
+    {
+      "path": "scripts/verify_release_source.mjs",
+      "role": "exact release source and approved package version binding",
+      "sha256": "4d2bb042ecc6e4ee6f49809680ac8d47f1c8abc999ab6400b7fa3d478e8b8ab0"
+    },
+    {
+      "path": "scripts/write_release_attestation.mjs",
+      "role": "approved package archive attestation writer",
+      "sha256": "6455fd9e4fc56a3f83863483ae734207f6f96cbb61d340891b4db981f4e157e4"
+    },
+    {
+      "path": "scripts/verify_release_attestation.mjs",
+      "role": "approved package archive attestation verifier",
+      "sha256": "74f956c20f299ec8962bfbc05529184a9aae73b1c1180876f30991bf2c4885a6"
+    },
+    {
+      "path": "scripts/verify_release_attestation.test.mjs",
+      "role": "package attestation rejection tests",
+      "sha256": "ecc3f1e014325cb2b8a5895db2f216437012ba6107c2eb4e92a7529ffa49aa1c"
+    },
+    {
+      "path": "scripts/check-public-crate-baselines.mjs",
+      "role": "public crate compatibility baselines",
+      "sha256": "9067b2c8d0ba6c843bdf7f856dc3b50ef6fe9df07051cfdc0685f929a6f2f44d"
+    },
+    {
+      "path": "scripts/check-public-crate-baselines.test.mjs",
+      "role": "public crate version and baseline tests",
+      "sha256": "58d06a008c0d41ed90ee5daa5e1daa3794407ed37014d6721f8a10a9ca2d8d7d"
+    },
+    {
+      "path": "scripts/package-inventory-policy.mjs",
+      "role": "bounded package inventory admission",
+      "sha256": "335a2eeacb06e31334899dcef2e99aec3a730ebcce90c427d3e7c1b1cf67fc46"
     }
   ],
   "requiredFragments": [

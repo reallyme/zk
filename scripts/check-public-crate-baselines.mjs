@@ -3,6 +3,8 @@
 
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
+import { PUBLIC_CRATES } from "./public-crates.mjs";
+
 import { spawnSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
@@ -11,16 +13,7 @@ const REQUEST_TIMEOUT_MILLISECONDS = 30_000;
 const SEMVER_CHECK_TIMEOUT_MILLISECONDS = 600_000;
 const CRATES_IO_API_ROOT = "https://crates.io/api/v1/crates";
 const RELEASE_VERSION_PATTERN = /^(?:0|[1-9][0-9]*)[.](?:0|[1-9][0-9]*)[.](?:0|[1-9][0-9]*)$/u;
-// The new artifact and proto crates join the already published API crate in
-// one versioned release wave. Their first registry publication is 0.3.0.
-const FIRST_PUBLICATION_VERSION = Object.freeze({ major: 0, minor: 3, patch: 0 });
-const FIRST_PUBLICATION_PACKAGES = new Set(["reallyme-zk-artifacts", "reallyme-zk-proto"]);
-
-export const PUBLIC_CRATES = Object.freeze([
-  Object.freeze({ name: "reallyme-zk-api", manifest: "crates/api/Cargo.toml" }),
-  Object.freeze({ name: "reallyme-zk-artifacts", manifest: "crates/artifacts/Cargo.toml" }),
-  Object.freeze({ name: "reallyme-zk-proto", manifest: "crates/proto/Cargo.toml" }),
-]);
+export { PUBLIC_CRATES } from "./public-crates.mjs";
 
 export class PublicCrateBaselineError extends Error {
   constructor(code) {
@@ -30,13 +23,10 @@ export class PublicCrateBaselineError extends Error {
   }
 }
 
-export function plannedPublicReleaseVersion({ readManifest = (path) => readFileSync(path, "utf8") } = {}) {
-  let planned = null;
-  for (const crate of PUBLIC_CRATES) {
+export function publicManifestVersions({ readManifest = (path) => readFileSync(path, "utf8") } = {}) {
+  return PUBLIC_CRATES.map((crate) => {
     let source;
-    try {
-      source = readManifest(crate.manifest);
-    } catch {
+    try { source = readManifest(crate.manifest); } catch {
       throw new PublicCrateBaselineError("public-manifest-unavailable");
     }
     if (typeof source !== "string" || Buffer.byteLength(source, "utf8") > 65_536) {
@@ -46,13 +36,17 @@ export function plannedPublicReleaseVersion({ readManifest = (path) => readFileS
     if (versions.length !== 1 || !RELEASE_VERSION_PATTERN.test(versions[0][1])) {
       throw new PublicCrateBaselineError("invalid-public-manifest-version");
     }
-    const version = versions[0][1];
-    if (planned !== null && planned !== version) {
-      throw new PublicCrateBaselineError("public-manifest-version-mismatch");
-    }
-    planned = version;
-  }
-  return planned;
+    return versions[0][1];
+  });
+}
+
+export function plannedPublicReleaseVersion(options = {}) {
+  const versions = publicManifestVersions(options);
+  if (versions.every((version) => version === versions[0])) return versions[0];
+  // Adding providers must not rename or recreate the existing SDK release.
+  const bootstrap = versions.every((version, index) => version === (index < 3 ? "0.3.0" : "0.3.1"));
+  if (bootstrap) return "0.3.0";
+  throw new PublicCrateBaselineError("public-manifest-version-mismatch");
 }
 
 function parseReleaseVersion(version) {
@@ -158,16 +152,21 @@ export async function checkPublicCrateBaselines({
   releaseVersion,
   fetchImpl = fetch,
   semverCheck = runSemverCheck,
+  manifestVersions,
 } = {}) {
-  const requested = parseReleaseVersion(releaseVersion ?? "");
+  const versions = manifestVersions ?? PUBLIC_CRATES.map(() => releaseVersion);
+  if (!Array.isArray(versions) || versions.length !== PUBLIC_CRATES.length) {
+    throw new PublicCrateBaselineError("public-manifest-version-mismatch");
+  }
   const results = [];
-  for (const crate of PUBLIC_CRATES) {
+  for (const [index, crate] of PUBLIC_CRATES.entries()) {
+    const requested = parseReleaseVersion(versions[index] ?? "");
     const baseline = await registryBaseline(crate.name, fetchImpl);
     if (baseline === null) {
-      if (!FIRST_PUBLICATION_PACKAGES.has(crate.name)) {
+      if (crate.firstVersion === null) {
         throw new PublicCrateBaselineError("published-baseline-missing");
       }
-      if (compareReleaseVersions(requested, FIRST_PUBLICATION_VERSION) !== 0) {
+      if (compareReleaseVersions(requested, parseReleaseVersion(crate.firstVersion)) !== 0) {
         throw new PublicCrateBaselineError("first-publication-version-mismatch");
       }
       results.push(Object.freeze({ name: crate.name, status: "first-publication" }));
@@ -201,7 +200,8 @@ export async function checkPublicCrateBaselines({
 async function main() {
   try {
     const results = await checkPublicCrateBaselines({
-      releaseVersion: process.env.RELEASE_VERSION ?? plannedPublicReleaseVersion(),
+      releaseVersion: process.env.RELEASE_VERSION,
+      manifestVersions: process.env.RELEASE_VERSION === undefined ? publicManifestVersions() : undefined,
     });
     for (const result of results) {
       if (result.status === "checked") {

@@ -124,12 +124,14 @@ for the upstream sources and CRS.
 | [`reallyme-zk-api`](crates/api) | Circuit registry, bounded proof owners, typed errors, and injected provider traits. |
 | [`reallyme-zk-artifacts`](crates/artifacts) | Bounded artifacts and hash-pinned manifest validation. |
 | [`reallyme-zk-proto`](crates/proto) | Canonical schemas and generated messages; untrusted operations require a validated boundary. |
+| [`reallyme-zk-proto-codec`](crates/proto-codec) | Strict protobuf/domain conversion and provider request validation. |
+| [`reallyme-zk-backend-bb`](crates/backend-bb) | Injectable backend with optional linked native Barretenberg support. |
 | [Swift](packages/swift) and [Kotlin](packages/kotlin) | Native provider packages over linked Barretenberg bindings. |
 | [bb.js provider](packages/bbjs-provider) | Optional browser and Node adapter over an explicitly installed runtime. |
 
 Providers are injected explicitly. Missing providers, unsupported circuits,
 suite mismatches, and incompatible artifacts fail closed with typed errors.
-The backend, strict protobuf codec, and release tooling are unpublished Rust
+The witness core, platform FFI, and release tooling are unpublished Rust
 crates. Generated protobuf decoding alone does not validate provider requests.
 
 ### Verification and OpenID4VP
@@ -166,7 +168,8 @@ for Rust, Swift, and Kotlin API names and acceptance requirements.
 
 ## Compatibility
 
-ReallyMe ZK is pre-1.0. The public Rust crates share one version. Circuit
+ReallyMe ZK is pre-1.0. Future public Rust release waves share one version; the additive codec and backend
+`0.3.1` publication retains the existing contract crates at `0.3.0`. Circuit
 semantics, protobuf contracts, artifact identities, and conformance vectors
 form one compatibility set.
 

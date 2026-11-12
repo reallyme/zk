@@ -17,7 +17,7 @@ libc = { workspace = true }
 reallyme-zk-api = { path = "../api", version = "0.3.0", default-features = false }
 reallyme-zk-artifact-package = { path = "../artifact-package", version = "0.1.0", default-features = false }
 reallyme-zk-artifacts = { path = "../artifacts", version = "0.3.0", default-features = false }
-reallyme-zk-proto-codec = { path = "../proto-codec", version = "0.1.0", default-features = false }
+reallyme-zk-proto-codec = { path = "../proto-codec", version = "0.3.1", default-features = false }
 reallyme-zk-release-process = { path = "../release-process", version = "0.1.0", default-features = false }
 thiserror = { workspace = true }
 toml = { workspace = true }

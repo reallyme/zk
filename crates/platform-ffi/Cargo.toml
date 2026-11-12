@@ -17,7 +17,12 @@ crate-type = ["rlib", "staticlib"]
 
 [features]
 default = []
-native = ["reallyme-zk-backend-bb/native"]
+native = [
+    "dep:reallyme-zk-backend-bb",
+    "reallyme-zk-backend-bb/native",
+    "dep:reallyme-zk-noir-witness-core",
+    "reallyme-zk-proto-codec/native",
+]
 diagnostic-stage-verification = ["native"]
 diagnostic-exact-source = ["diagnostic-stage-verification"]
 
@@ -27,10 +32,10 @@ crypto-sha2-256 = { workspace = true }
 libc = { workspace = true }
 reallyme-zk-api = { path = "../api", version = "0.3.0", default-features = false }
 reallyme-zk-artifacts = { path = "../artifacts", version = "0.3.0", default-features = false }
-reallyme-zk-backend-bb = { path = "../backend-bb", version = "0.1.0", default-features = false }
-reallyme-zk-noir-witness-core = { path = "../noir-witness-core", version = "0.1.0", default-features = false }
+reallyme-zk-backend-bb = { path = "../backend-bb", version = "0.3.1", default-features = false, optional = true }
+reallyme-zk-noir-witness-core = { path = "../noir-witness-core", version = "0.1.0", default-features = false, optional = true }
 reallyme-zk-proto = { path = "../proto", version = "0.3.0", default-features = false, features = ["generated"] }
-reallyme-zk-proto-codec = { path = "../proto-codec", version = "0.1.0", default-features = false, features = ["native"] }
+reallyme-zk-proto-codec = { path = "../proto-codec", version = "0.3.1", default-features = false }
 zeroize = { workspace = true }
 
 [dev-dependencies]

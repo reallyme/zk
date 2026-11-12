@@ -13,6 +13,8 @@ const PUBLIC_CRATES = [
   "reallyme-zk-api",
   "reallyme-zk-artifacts",
   "reallyme-zk-proto",
+  "reallyme-zk-proto-codec",
+  "reallyme-zk-backend-bb",
 ];
 
 const workflows = [

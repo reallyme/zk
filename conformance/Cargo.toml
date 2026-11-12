@@ -14,7 +14,7 @@ description = "Typed cross-provider conformance harness for ReallyMe ZK vectors.
 
 [dependencies]
 reallyme-zk-api = { path = "../crates/api", version = "0.3.0", default-features = false }
-reallyme-zk-proto-codec = { path = "../crates/proto-codec", version = "0.1.0", default-features = false }
+reallyme-zk-proto-codec = { path = "../crates/proto-codec", version = "0.3.1", default-features = false }
 thiserror = { workspace = true }
 
 [dev-dependencies]

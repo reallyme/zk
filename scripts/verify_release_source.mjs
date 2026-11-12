@@ -3,6 +3,8 @@
 
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
+import { PUBLIC_CRATES } from "./public-crates.mjs";
+
 import { appendFileSync, lstatSync, readFileSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
@@ -11,11 +13,7 @@ const FULL_SHA_PATTERN = /^[0-9a-f]{40}$/u;
 const VERSION_PATTERN = /^(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)$/u;
 const MAX_COMMAND_OUTPUT_BYTES = 1_048_576;
 const MAX_MANIFEST_BYTES = 65_536;
-const PUBLISHABLE_MANIFESTS = Object.freeze([
-  "crates/api/Cargo.toml",
-  "crates/artifacts/Cargo.toml",
-  "crates/proto/Cargo.toml",
-]);
+const PUBLISHABLE_MANIFESTS = Object.freeze(PUBLIC_CRATES.map((crate) => crate.manifest));
 
 export class ReleaseSourceError extends Error {
   constructor(code) {

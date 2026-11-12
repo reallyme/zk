@@ -13,10 +13,9 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: Release version without leading v
+        description: Future lockstep version for all five crates, without leading v
         required: true
         type: string
-        default: 0.3.0
 
 permissions:
   actions: read
@@ -87,6 +86,8 @@ jobs:
     needs: verify-source-sha
     runs-on: ubuntu-24.04
     timeout-minutes: 120
+    env:
+      CXX: clang++-20
     steps:
       - name: Checkout exact ZK source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -136,6 +137,27 @@ jobs:
           RELEASE_VERSION: ${{ needs.verify-source-sha.outputs.release_version }}
         working-directory: zk
         run: node .release-readiness/scripts/run-consumer-check.mjs --policy-only
+
+      - name: Install native archive verification prerequisites
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes clang-20 libc++-20-dev libc++abi-20-dev
+      - name: Admit pinned Linux Barretenberg static library
+        shell: bash
+        run: |
+          set -euo pipefail
+          bb_dir="${RUNNER_TEMP}/bb-v6.0.0-static"
+          archive="${RUNNER_TEMP}/barretenberg-static-amd64-linux.tar.gz"
+          install -d -m 0755 "${bb_dir}"
+          curl --proto '=https' --tlsv1.2 --fail --silent --show-error --location \
+            --output "${archive}" \
+            https://github.com/AztecProtocol/aztec-packages/releases/download/v6.0.0/barretenberg-static-amd64-linux.tar.gz
+          printf '%s  %s\n' \
+            '4040c25d374f20d0641824642db328abaf3847959e503a835060fb03a5a95d9f' \
+            "${archive}" | sha256sum --check --strict
+          tar -xzf "${archive}" -C "${bb_dir}"
+          test -f "${bb_dir}/libbb-external.a"
+          echo "REALLYME_BARRETENBERG_LIB_DIR=${bb_dir}" >>"${GITHUB_ENV}"
 
       - name: Install pinned Rust API compatibility checker
         uses: taiki-e/install-action@41049aa56687c35e0afa74eed4f09cec4f9afabf # v2.85.2
@@ -223,6 +245,6 @@ jobs:
             echo
             echo "- Version: \`${RELEASE_VERSION}\`"
             echo "- Commit: \`${RELEASE_SHA}\`"
-            echo "- Publish set: \`reallyme-zk-api\`, \`reallyme-zk-artifacts\`, and \`reallyme-zk-proto\`"
+            echo "- Publish set: five approved Rust crates, in dependency order"
             echo "- Attestation run ID: \`${GITHUB_RUN_ID}\`"
           } >> "$GITHUB_STEP_SUMMARY"

@@ -36,7 +36,7 @@ test("canonical proto schemas and fixtures are admitted", () => {
 });
 
 test("every public crate carries both declared license texts", () => {
-  for (const packageName of ["reallyme-zk-api", "reallyme-zk-artifacts", "reallyme-zk-proto"]) {
+  for (const packageName of ["reallyme-zk-api", "reallyme-zk-artifacts", "reallyme-zk-proto", "reallyme-zk-proto-codec", "reallyme-zk-backend-bb"]) {
     assert.throws(
       () => validatePackageInventory(packageName, "Cargo.toml\nLICENSE-MIT"),
       hasCode("required-package-license-missing"),

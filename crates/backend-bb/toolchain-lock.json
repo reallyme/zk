@@ -1,0 +1,287 @@
+{
+  "schemaVersion": 2,
+  "candidateMatchedPair": {
+    "status": "promoted",
+    "source": "official_aztec_packages_release",
+    "proofSuite": "barretenberg_ultra_honk_keccak_zk_no_ipa",
+    "expectedCircuitCount": 20,
+    "gateExecutableIdentityPlatforms": [
+      "darwinArm64",
+      "linuxX86_64"
+    ],
+    "localBinaryIdentities": {
+      "darwinArm64": {
+        "nargoExecutableSha256": "f675c85e512d8bead65cf876d5e32bed3d394db3653f6feb90ccef2b2d2f34c9",
+        "barretenbergExecutableSha256": "f3af6634d08980744f6c9d18010f65b4fd2bbcf23f99e62fd81078ca9b35aa7e"
+      },
+      "linuxX86_64": {
+        "nargoExecutableSha256": "30707a7f7b372413a07c54a6376ac408418b4453901b3c479d3590eb1ec47842",
+        "barretenbergExecutableSha256": "97242cb29cab39f22f001dfd9d7fa5937d414fd0ae326b000759ffb7a4544f31"
+      }
+    },
+    "noir": {
+      "version": "1.0.0",
+      "repository": "noir-lang/noir",
+      "releaseUrl": "https://github.com/noir-lang/noir/releases/tag/v1.0.0",
+      "downloadBaseUrl": "https://github.com/noir-lang/noir/releases/download/v1.0.0/",
+      "revision": "275d3ab1a5c916c6ea73e8d6b943f685f574500c",
+      "revisionVerification": "github_verified_valid",
+      "publishedAt": "2026-10-29T16:12:56Z",
+      "archives": {
+        "noir-aarch64-apple-darwin.tar.gz": {
+          "size": 28435655,
+          "sha256": "ac2166fc06fe289fd2524f9eb9da228550159c976e88c1013bfc6d0e0b4a2309"
+        },
+        "noir-aarch64-unknown-linux-gnu.tar.gz": {
+          "size": 31726944,
+          "sha256": "b4ad6521a580c576548f1fc8240d7f2b245ab569a9e8dde33ec0dd6b8cd55056"
+        },
+        "noir-x86_64-apple-darwin.tar.gz": {
+          "size": 30008205,
+          "sha256": "a68f08c656d7b2e0160feee4194feea790d49e582b40b873a72dc8473d73d64f"
+        },
+        "noir-x86_64-unknown-linux-gnu.tar.gz": {
+          "size": 33665669,
+          "sha256": "a62f5b44a6db8ca8f0c20f841aa788ea56776e5aaf2ebd672c02dcf397901264"
+        },
+        "noir-x86_64-unknown-linux-musl.tar.gz": {
+          "size": 33406076,
+          "sha256": "4574920052e483b5fb66ab8b892f27ed2be715b8be884b161c4d68b9f7dcabbe"
+        }
+      }
+    },
+    "barretenberg": {
+      "aztecPackagesVersion": "6.0.0",
+      "aztecPackagesTag": "v6.0.0",
+      "repository": "AztecProtocol/aztec-packages",
+      "releaseUrl": "https://github.com/AztecProtocol/aztec-packages/releases/tag/v6.0.0",
+      "downloadBaseUrl": "https://github.com/AztecProtocol/aztec-packages/releases/download/v6.0.0/",
+      "releaseTagObjectSha": "0219f11d8133970df3974fe5ae65e006bf8c193a",
+      "releaseTagVerification": "lightweight_ref_to_github_verified_commit",
+      "releaseCommit": "0219f11d8133970df3974fe5ae65e006bf8c193a",
+      "releaseCommitVerification": "github_verified_valid",
+      "publishedAt": "2026-10-22T12:20:46Z",
+      "releaseNotesNoirCompiler": "1.0.0-rc.3",
+      "cliArchives": {
+        "barretenberg-arm64-darwin.tar.gz": {
+          "size": 8865873,
+          "sha256": "48bd18a7d53781a2820e7538dfd89584ca5b4d76c7908e8be4910ce994e7c35e"
+        },
+        "barretenberg-amd64-linux.tar.gz": {
+          "size": 10562528,
+          "sha256": "6a310ede6457cf47e6dcf11f8d6b59dd709328c272a70c03afb1417c5a798b67"
+        }
+      },
+      "archives": {
+        "barretenberg-static-amd64-darwin.tar.gz": {
+          "size": 16927289,
+          "sha256": "9321bff6c6f68036d8ed651cdf4d09824892c9f7ccfed37e255115fb60b7716d"
+        },
+        "barretenberg-static-amd64-linux.tar.gz": {
+          "size": 18573700,
+          "sha256": "4040c25d374f20d0641824642db328abaf3847959e503a835060fb03a5a95d9f"
+        },
+        "barretenberg-static-arm64-android.tar.gz": {
+          "size": 20854945,
+          "sha256": "f861c899bc617807b3b55dddbf0e88cb80297e356831ca813f32b3c3115112d3"
+        },
+        "barretenberg-static-arm64-darwin.tar.gz": {
+          "size": 17930689,
+          "sha256": "310b2baaee0f8c8a96725d9cc246ffd41243ed8606965ad0c87f99428288d964"
+        },
+        "barretenberg-static-arm64-ios.tar.gz": {
+          "size": 17901605,
+          "sha256": "c7350fb21963da64d59d1b94835dfcdf71a78ea05752ed56af7004e5fa7f671d"
+        },
+        "barretenberg-static-arm64-ios-sim.tar.gz": {
+          "size": 17904144,
+          "sha256": "5ca108540b0cf88731cb6e6c3017eb630efbcfa3091c234971b78f0fb012f494"
+        },
+        "barretenberg-static-arm64-linux.tar.gz": {
+          "size": 20710168,
+          "sha256": "1e66295cd42ebaa62112c13ae9e689b1818d493deff7fea63a14408a7044fa19"
+        },
+        "barretenberg-static-x86_64-android.tar.gz": {
+          "size": 19428666,
+          "sha256": "85fba8c73d66206f1b2322a92fd854c98bfe9bc6b17b63e453d9532069516f76"
+        }
+      },
+      "extractedStaticLibraries": {
+        "darwinArm64": {
+          "fileName": "libbb-external.a",
+          "size": 72002016,
+          "sha256": "c554fc906e3d306946cb0620b2f5ee1d434fc0f7c02d9b2a56abd6b64b65ef87"
+        },
+        "darwinX86_64": {
+          "fileName": "libbb-external.a",
+          "size": 113381848,
+          "sha256": "442ba823c8f5e9ab1ebfc7838344f0c935b72ce52adb7829a1b4efb9dfcd9106"
+        },
+        "linuxAmd64": {
+          "fileName": "libbb-external.a",
+          "size": 133641198,
+          "sha256": "942e3da3c37ed78835834f82e13496a83e9bd1bf506e9db2839ad61a565df973"
+        },
+        "iosArm64": {
+          "fileName": "libbb-external.a",
+          "size": 72229800,
+          "sha256": "5f6fce5ef64354e0307a1adcde0e7ac7349ddc6164c43d75f1471b39ae1fdde3"
+        },
+        "iosSimulatorArm64": {
+          "fileName": "libbb-external.a",
+          "size": 72229800,
+          "sha256": "68ac9359b2a859a8e975e2db4c91e188280711b13b4bf70e632a96497520511b"
+        },
+        "androidX86_64": {
+          "fileName": "libbb-external.a",
+          "size": 101717870,
+          "sha256": "0635a168bfdda0bf9b0fc09b99f87c344f5a11f115d7c2b5a901890f6123ea65"
+        }
+      },
+      "linkableStaticLibraries": {
+        "androidArm64": {
+          "fileName": "libbb-external.a",
+          "size": 103270542,
+          "sha256": "cc13d44bba54876d8d1faff871e41182865f09bdf0980c53ca61f3963d589033",
+          "source": "verified_source_archive",
+          "sourceCommit": "0219f11d8133970df3974fe5ae65e006bf8c193a",
+          "sourceArchiveName": "aztec-packages-v6.0.0.tar.gz",
+          "sourceArchiveUrl": "https://codeload.github.com/AztecProtocol/aztec-packages/tar.gz/refs/tags/v6.0.0",
+          "sourceArchiveSha256": "740199f8752d94639172803ea62f4e5e4be501b2eb73690736615b751d227f03",
+          "sourceArchiveSize": 15958428,
+          "sourceArchiveRootDirectory": "aztec-packages-6.0.0",
+          "sourceSubdirectory": "barretenberg/cpp",
+          "generatedConstantsSha256": "6367ab71dbdf5d3362289ed1cf3dd4517a94c9e8113f5fed10378aa49a730873",
+          "androidNdkVersion": "28.2.13676358",
+          "androidApiLevel": 26,
+          "androidAbi": "arm64-v8a",
+          "androidStl": "c++_shared",
+          "cmakeVersion": "4.4.5",
+          "ninjaVersion": "1.13.2",
+          "cmakeGenerator": "Ninja",
+          "buildType": "Release",
+          "buildOptions": {
+            "AVM": false,
+            "BB_LITE": true,
+            "ENABLE_PIC": true
+          },
+          "postProcessing": "android_ndk_llvm_strip_strip_debug",
+          "fetchContentPins": [
+            {
+              "name": "benchmark",
+              "commit": "7638387d2727853d970fc9420dcf95cf3e9bd112"
+            },
+            {
+              "name": "googletest",
+              "commit": "b796f7d44681514f58a683a3a71ff17c94edb0c1"
+            },
+            {
+              "name": "httplib",
+              "commit": "5c00bbf36ba8ff47b4fb97712fc38cb2884e5b98"
+            },
+            {
+              "name": "libdeflate",
+              "commit": "96836d7d9d10e3e0d53e6edb54eb908514e336c4"
+            },
+            {
+              "name": "msgpack-c",
+              "commit": "c0334576ed657fb3b3c49e8e61402989fb84146d"
+            },
+            {
+              "name": "nlohmann_json",
+              "commit": "9cca280a4d0ccf0c08f47a99aa71d1b0e52f8d03"
+            },
+            {
+              "name": "tracy",
+              "commit": "5d542dc09f3d9378d005092a4ad446bd405f819a"
+            }
+          ],
+          "reproducibleBuildScript": "scripts/build_android_barretenberg_static_archive.sh",
+          "companionStaticLibraries": [
+            {
+              "fileName": "libdeflate.a",
+              "size": 118274,
+              "sha256": "5cbcdd3829708e3235985f582d06ba92f3088544ffa0855b8dcfa49e457cd25b",
+              "source": "verified_source_archive",
+              "repository": "https://github.com/ebiggers/libdeflate.git",
+              "tag": "v1.24",
+              "commit": "96836d7d9d10e3e0d53e6edb54eb908514e336c4",
+              "sourceArchiveName": "libdeflate-v1.24.tar.gz",
+              "sourceArchiveUrl": "https://github.com/ebiggers/libdeflate/archive/refs/tags/v1.24.tar.gz",
+              "sourceArchiveSize": 197668,
+              "sourceArchiveSha256": "ad8d3723d0065c4723ab738be9723f2ff1cb0f1571e8bfcf0301ff9661f475e8",
+              "buildTarget": "libdeflate_static",
+              "pathMapFlags": "-ffile-prefix-map=<build-root>=. -fmacro-prefix-map=<build-root>=. -fdebug-prefix-map=<build-root>=.",
+              "reproducibleBuildEvidence": {
+                "independentBuilds": 2,
+                "result": "byte_identical"
+              },
+              "postProcessing": "android_ndk_llvm_strip_strip_debug"
+            }
+          ],
+          "reproducibleBuildEvidence": {
+            "independentBuilds": 2,
+            "result": "byte_identical"
+          },
+          "status": "verified_reproducible_android_ndk_source_build",
+          "linuxSourceBuild": {
+            "size": 103270542,
+            "sha256": "b96bea854cec9079a2427ba7edac3f36c92cba91be1b809dea84abbffc6b1f8f",
+            "companionStaticLibraries": [
+              {
+                "fileName": "libdeflate.a",
+                "size": 118274,
+                "sha256": "b498017ff17aa277f09fb7f0913c087404c0739bf6323b18ab44b118b5efc51a"
+              }
+            ],
+            "reviewedDifference": "Only ELF compiler comments differ: Linux NDK records +bolt/+mlgo; Darwin NDK records -bolt/-mlgo. All other archive bytes are identical.",
+            "independentBuilds": 1
+          }
+        }
+      },
+      "crsIdentities": {
+        "bn254VerifierOnlyOnePoint": {
+          "g1PrefixBytes": 64,
+          "g1PrefixSha256": "d6ba9329f8932c12192b37849f772104d20048f76434a3290512d9d814e4116f",
+          "g2Bytes": 128,
+          "g2Sha256": "01797bfc4de5a96f0e516a9ea4537d18786dc30cb991aca4274c95822b69c32f",
+          "bbapiNumPoints": 1,
+          "admission": "verifier_only_processes_may_initialize_this_before_verify; prover_processes_must_initialize_a_full_prover_crs_before_any_verify"
+        },
+        "bn254FullProver1048577Points": {
+          "g1PrefixBytes": 67108928,
+          "g1PrefixSha256": "0f238856e55722f15a4d64ef0de12b4260e218245590bd3a6c900aee188de8e5",
+          "g1SourceBytes": 134217792,
+          "g1SourceSha256": "ea6069e3563ad79f186d1c0088499309cbdaeb54254346760ffec7fe15ae49cd",
+          "g2Bytes": 128,
+          "g2Sha256": "01797bfc4de5a96f0e516a9ea4537d18786dc30cb991aca4274c95822b69c32f",
+          "bbapiNumPoints": 1048577,
+          "admission": "prover_processes_must_initialize_this_full_crs_before_any_prove_or_verify; verifier_only_crs_reinitialization_is_rejected"
+        }
+      }
+    },
+    "requiredPromotionGate": [
+      "compile_all_20_circuits",
+      "generate_all_20_witnesses",
+      "prove_all_20_positive_vectors",
+      "verify_all_20_positive_vectors",
+      "reject_mutated_proofs",
+      "reject_mutated_public_inputs",
+      "reject_wrong_verification_keys",
+      "reject_wrong_circuit_bindings",
+      "reject_wrong_session_nonce",
+      "reject_wrong_verifier_identity",
+      "reject_wrong_transaction_data_hash",
+      "reject_stale_or_mixed_artifact_generation",
+      "exercise_minimum_maximum_empty_oversized_and_malformed_inputs",
+      "pass_bounded_hash_tail_noninterference_vectors",
+      "match_existing_public_input_fixtures_byte_for_byte",
+      "pass_acir_expression_lowering_regression",
+      "pass_field_to_u128_regression",
+      "map_applicable_noir_security_advisories_to_fixed_commits_or_regressions",
+      "repeat_all_20_prove_verify_runs_three_times",
+      "verify_all_20_in_one_process_with_verifier_only_crs",
+      "record_maximum_prover_crs_and_memory_by_circuit"
+    ]
+  }
+}

@@ -17,7 +17,7 @@ use sha2::{Digest, Sha256};
 const BARRETENBERG_LIB_DIR_ENV: &str = "REALLYME_BARRETENBERG_LIB_DIR";
 const NATIVE_FEATURE_ENV: &str = "CARGO_FEATURE_NATIVE";
 const LIBBB_FILE_NAME: &str = "libbb-external.a";
-const TOOLCHAIN_LOCK_RELATIVE_PATH: &str = "../../circuits/toolchain-lock.json";
+const TOOLCHAIN_LOCK_RELATIVE_PATH: &str = "toolchain-lock.json";
 
 fn main() {
     println!("cargo:rerun-if-env-changed={BARRETENBERG_LIB_DIR_ENV}");

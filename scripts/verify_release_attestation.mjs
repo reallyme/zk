@@ -3,6 +3,8 @@
 
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
+import { PUBLIC_CRATE_NAMES as PUBLIC_CRATES } from "./public-crates.mjs";
+
 import { createHash } from "node:crypto";
 import { appendFileSync, lstatSync, readFileSync } from "node:fs";
 import path from "node:path";
@@ -23,11 +25,7 @@ const MAX_COMMAND_OUTPUT_BYTES = 1_048_576;
 const MAX_ATTESTATION_BYTES = 16_384;
 const MAX_CRATE_ARCHIVE_BYTES = 32 * 1024 * 1024;
 const SHA256_PATTERN = /^[0-9a-f]{64}$/u;
-const PUBLIC_CRATES = Object.freeze([
-  "reallyme-zk-api",
-  "reallyme-zk-artifacts",
-  "reallyme-zk-proto",
-]);
+
 const PREREQUISITE_KEYS = Object.freeze([
   "fuzz",
   "protobuf_ci",

@@ -350,6 +350,8 @@ jobs:
     name: Inspect and test normalized crate archives
     runs-on: ubuntu-24.04
     timeout-minutes: 90
+    env:
+      CXX: clang++-20
     steps:
       - name: Checkout ZK
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -373,6 +375,27 @@ jobs:
           workspaces: zk
           cache-bin: false
 
+      - name: Install native archive verification prerequisites
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes clang-20 libc++-20-dev libc++abi-20-dev
+      - name: Admit pinned Linux Barretenberg static library
+        shell: bash
+        run: |
+          set -euo pipefail
+          bb_dir="${RUNNER_TEMP}/bb-v6.0.0-static"
+          archive="${RUNNER_TEMP}/barretenberg-static-amd64-linux.tar.gz"
+          install -d -m 0755 "${bb_dir}"
+          curl --proto '=https' --tlsv1.2 --fail --silent --show-error --location \
+            --output "${archive}" \
+            https://github.com/AztecProtocol/aztec-packages/releases/download/v6.0.0/barretenberg-static-amd64-linux.tar.gz
+          printf '%s  %s\n' \
+            '4040c25d374f20d0641824642db328abaf3847959e503a835060fb03a5a95d9f' \
+            "${archive}" | sha256sum --check --strict
+          tar -xzf "${archive}" -C "${bb_dir}"
+          test -f "${bb_dir}/libbb-external.a"
+          echo "REALLYME_BARRETENBERG_LIB_DIR=${bb_dir}" >>"${GITHUB_ENV}"
+
       - name: Inspect publishable Rust package sources
         working-directory: zk
         run: node scripts/publish-crates-in-order.mjs inspect
@@ -383,6 +406,8 @@ jobs:
     name: Public API semver
     runs-on: ubuntu-24.04
     timeout-minutes: 60
+    env:
+      CXX: clang++-20
     steps:
       - name: Checkout ZK
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -410,6 +435,27 @@ jobs:
         uses: taiki-e/install-action@41049aa56687c35e0afa74eed4f09cec4f9afabf # v2.85.2
         with:
           tool: cargo-semver-checks@${{ env.CARGO_SEMVER_CHECKS_VERSION }}
+
+      - name: Install native archive verification prerequisites
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes clang-20 libc++-20-dev libc++abi-20-dev
+      - name: Admit pinned Linux Barretenberg static library
+        shell: bash
+        run: |
+          set -euo pipefail
+          bb_dir="${RUNNER_TEMP}/bb-v6.0.0-static"
+          archive="${RUNNER_TEMP}/barretenberg-static-amd64-linux.tar.gz"
+          install -d -m 0755 "${bb_dir}"
+          curl --proto '=https' --tlsv1.2 --fail --silent --show-error --location \
+            --output "${archive}" \
+            https://github.com/AztecProtocol/aztec-packages/releases/download/v6.0.0/barretenberg-static-amd64-linux.tar.gz
+          printf '%s  %s\n' \
+            '4040c25d374f20d0641824642db328abaf3847959e503a835060fb03a5a95d9f' \
+            "${archive}" | sha256sum --check --strict
+          tar -xzf "${archive}" -C "${bb_dir}"
+          test -f "${bb_dir}/libbb-external.a"
+          echo "REALLYME_BARRETENBERG_LIB_DIR=${bb_dir}" >>"${GITHUB_ENV}"
 
       - name: Check planned public crate versions against crates.io
         working-directory: zk
@@ -683,6 +729,8 @@ jobs:
     name: public crate MSRV (Rust 1.99)
     runs-on: ubuntu-24.04
     timeout-minutes: 60
+    env:
+      CXX: clang++-20
     steps:
       - name: Checkout ZK
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -706,6 +754,27 @@ jobs:
           workspaces: zk
           shared-key: public-crate-msrv-1.99
 
+      - name: Install native archive verification prerequisites
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes clang-20 libc++-20-dev libc++abi-20-dev
+      - name: Admit pinned Linux Barretenberg static library
+        shell: bash
+        run: |
+          set -euo pipefail
+          bb_dir="${RUNNER_TEMP}/bb-v6.0.0-static"
+          archive="${RUNNER_TEMP}/barretenberg-static-amd64-linux.tar.gz"
+          install -d -m 0755 "${bb_dir}"
+          curl --proto '=https' --tlsv1.2 --fail --silent --show-error --location \
+            --output "${archive}" \
+            https://github.com/AztecProtocol/aztec-packages/releases/download/v6.0.0/barretenberg-static-amd64-linux.tar.gz
+          printf '%s  %s\n' \
+            '4040c25d374f20d0641824642db328abaf3847959e503a835060fb03a5a95d9f' \
+            "${archive}" | sha256sum --check --strict
+          tar -xzf "${archive}" -C "${bb_dir}"
+          test -f "${bb_dir}/libbb-external.a"
+          echo "REALLYME_BARRETENBERG_LIB_DIR=${bb_dir}" >>"${GITHUB_ENV}"
+
       - name: Check exact crates.io publish set on MSRV
         working-directory: zk
         run: >-
@@ -713,6 +782,8 @@ jobs:
           --package reallyme-zk-api
           --package reallyme-zk-artifacts
           --package reallyme-zk-proto
+          --package reallyme-zk-proto-codec
+          --package reallyme-zk-backend-bb
 
   ios-target:
     name: warning-denied iOS arm64 target

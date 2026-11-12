@@ -724,7 +724,7 @@ dependencies = [
 
 [[package]]
 name = "reallyme-zk-backend-bb"
-version = "0.1.0"
+version = "0.3.1"
 dependencies = [
  "base64 0.23.1",
  "cc",
@@ -762,7 +762,7 @@ dependencies = [
 
 [[package]]
 name = "reallyme-zk-proto-codec"
-version = "0.1.0"
+version = "0.3.1"
 dependencies = [
  "buffa",
  "reallyme-crypto-csprng",

@@ -24,9 +24,9 @@ wasm = []
 [dependencies]
 reallyme-zk-artifacts = { path = "../artifacts", version = "0.3.0", default-features = false }
 reallyme-zk-api = { path = "../api", version = "0.3.0", default-features = false }
-reallyme-zk-backend-bb = { path = "../backend-bb", version = "0.1.0", default-features = false }
+reallyme-zk-backend-bb = { path = "../backend-bb", version = "0.3.1", default-features = false }
 reallyme-zk-noir-witness-core = { path = "../noir-witness-core", version = "0.1.0", default-features = false }
-reallyme-zk-proto-codec = { path = "../proto-codec", version = "0.1.0", default-features = false }
+reallyme-zk-proto-codec = { path = "../proto-codec", version = "0.3.1", default-features = false }
 thiserror = { workspace = true }
 zeroize = { workspace = true }
 

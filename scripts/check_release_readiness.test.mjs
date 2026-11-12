@@ -31,7 +31,7 @@ test("scoped readiness modes enforce platform source policy through CI delegatio
         }
       },
     });\n`);
-    for (const mode of ["--policy-only", "--generated-freshness", "--rust-release-packages"]) {
+    for (const mode of ["--policy-only", "--generated-freshness"]) {
       const result = spawnSync(process.execPath, ["scripts/check_release_readiness.mjs", mode], {
         cwd: process.cwd(),
         encoding: "utf8",

@@ -4,12 +4,24 @@
 
 [package]
 name = "reallyme-zk-backend-bb"
-version = "0.1.0"
+version = "0.3.1"
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
-publish = false
+publish = true
+include = [
+    "/src/**/*.rs",
+    "/Cargo.toml",
+    "/README.md",
+    "/LICENSE-MIT",
+    "/LICENSE-APACHE",
+    "/build.rs",
+    "/native/*.cc",
+    "/native/*.h",
+    "/toolchain-lock.json",
+]
+description = "Hash-pinned linked Barretenberg prover and verifier adapter for ReallyMe ZK."
 
 [features]
 default = []
@@ -40,8 +52,10 @@ zeroize = { workspace = true }
 
 [dev-dependencies]
 crypto-p256 = { workspace = true, features = ["native"] }
-reallyme-zk-noir-witness-core = { path = "../noir-witness-core", version = "0.1.0", default-features = false }
-reallyme-zk-proto-codec = { path = "../proto-codec", version = "0.1.0", default-features = false, features = ["native"] }
+# The private witness harness is deliberately omitted from the normalized
+# registry manifest. It is never a runtime backend dependency.
+reallyme-zk-noir-witness-core = { path = "../noir-witness-core", default-features = false }
+reallyme-zk-proto-codec = { path = "../proto-codec", version = "0.3.1", default-features = false, features = ["native"] }
 thiserror = { workspace = true }
 
 [build-dependencies]

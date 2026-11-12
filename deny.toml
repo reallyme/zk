@@ -38,6 +38,10 @@ registries = []
 [bans]
 multiple-versions = "deny"
 wildcards = "deny"
+# Cargo omits versionless development-only paths from published manifests.
+# The backend's private witness test harness uses this boundary; registry
+# wildcards and public runtime/build path wildcards remain denied.
+allow-wildcard-paths = true
 highlight = "all"
 workspace-default-features = "allow"
 external-default-features = "allow"

@@ -24,6 +24,8 @@ import {
   verifyReleaseAttestation,
 } from "./verify_release_attestation.mjs";
 
+import { PUBLIC_CRATE_NAMES } from "./public-crates.mjs";
+
 const releaseSha = "a".repeat(40);
 const expected = Object.freeze({
   repository: "reallyme/zk",
@@ -33,11 +35,9 @@ const expected = Object.freeze({
 });
 const attestation = (overrides = {}) => ({
   schema: "reallyme.zk.crates_preflight.v3",
-  crates: [
-    { file: "reallyme-zk-api-0.2.1.crate", sha256: "1".repeat(64), size: 101 },
-    { file: "reallyme-zk-artifacts-0.2.1.crate", sha256: "2".repeat(64), size: 102 },
-    { file: "reallyme-zk-proto-0.2.1.crate", sha256: "3".repeat(64), size: 103 },
-  ],
+  crates: PUBLIC_CRATE_NAMES.map((name, index) => ({
+    file: `${name}-${expected.releaseVersion}.crate`, sha256: String(index + 1).repeat(64), size: 101 + index,
+  })),
   prerequisites: {
     fuzz: 11,
     protobuf_ci: 12,
@@ -107,13 +107,13 @@ test("attestation rejects mismatched inputs and unreviewed fields", () => {
 test("reviewed archive loading rejects symbolic links", () => {
   const directory = mkdtempSync(join(tmpdir(), "zk-reviewed-archives-"));
   try {
-    for (const name of ["reallyme-zk-api", "reallyme-zk-artifacts", "reallyme-zk-proto"]) {
+    for (const name of PUBLIC_CRATE_NAMES) {
       writeFileSync(join(directory, `${name}-${expected.releaseVersion}.crate`), name);
     }
     const archives = localPackageArchives(expected.releaseVersion, {
       RELEASE_ATTESTATION_CRATE_DIRECTORY: directory,
     });
-    assert.equal(archives.length, 3);
+    assert.equal(archives.length, 5);
     assert.ok(archives.every((archive) => archive.size > 0));
 
     const linkedArchive = join(directory, `reallyme-zk-api-${expected.releaseVersion}.crate`);

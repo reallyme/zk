@@ -247,6 +247,8 @@ jobs:
             echo "- [reallyme-zk-api ${RELEASE_VERSION}](https://crates.io/crates/reallyme-zk-api/${RELEASE_VERSION})"
             echo "- [reallyme-zk-artifacts ${RELEASE_VERSION}](https://crates.io/crates/reallyme-zk-artifacts/${RELEASE_VERSION})"
             echo "- [reallyme-zk-proto ${RELEASE_VERSION}](https://crates.io/crates/reallyme-zk-proto/${RELEASE_VERSION})"
+            echo "- [reallyme-zk-proto-codec ${RELEASE_VERSION}](https://crates.io/crates/reallyme-zk-proto-codec/${RELEASE_VERSION})"
+            echo "- [reallyme-zk-backend-bb ${RELEASE_VERSION}](https://crates.io/crates/reallyme-zk-backend-bb/${RELEASE_VERSION})"
           } >> "$GITHUB_STEP_SUMMARY"
 
   finalize:
@@ -307,4 +309,6 @@ jobs:
             release-evidence/crates-publication-ledger.json \
             "release-evidence/reallyme-zk-api-${RELEASE_VERSION}.crate" \
             "release-evidence/reallyme-zk-artifacts-${RELEASE_VERSION}.crate" \
-            "release-evidence/reallyme-zk-proto-${RELEASE_VERSION}.crate"
+            "release-evidence/reallyme-zk-proto-${RELEASE_VERSION}.crate" \
+            "release-evidence/reallyme-zk-proto-codec-${RELEASE_VERSION}.crate" \
+            "release-evidence/reallyme-zk-backend-bb-${RELEASE_VERSION}.crate"

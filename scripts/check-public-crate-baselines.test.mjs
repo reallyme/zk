@@ -8,6 +8,7 @@ import test from "node:test";
 
 import {
   checkPublicCrateBaselines,
+  publicManifestVersions,
   plannedPublicReleaseVersion,
   PublicCrateBaselineError,
 } from "./check-public-crate-baselines.mjs";
@@ -25,14 +26,14 @@ function response(status, versions = []) {
 test("a registry 404 is the only first-publication response", async () => {
   const calls = [];
   const results = await checkPublicCrateBaselines({
-    releaseVersion: "0.3.0",
+    manifestVersions: ["0.3.0", "0.3.0", "0.3.0", "0.3.1", "0.3.1"],
     fetchImpl: async (url) => url.endsWith("/reallyme-zk-api")
       ? response(200, [{ num: "0.2.1", yanked: false }]) : response(404),
     semverCheck: (crate, version) => calls.push([crate.name, version]),
   });
   assert.deepEqual(
     results.map(({ status }) => status),
-    ["checked", "first-publication", "first-publication"],
+    ["checked", ...new Array(4).fill("first-publication")],
   );
   assert.deepEqual(calls, [["reallyme-zk-api", "0.2.1"]]);
 });
@@ -97,7 +98,7 @@ test("every version advance uses the latest non-yanked exact baseline", async ()
       ]),
     semverCheck: (crate, baselineVersion) => calls.push([crate.name, baselineVersion]),
   });
-  assert.equal(calls.length, 3);
+  assert.equal(calls.length, 5);
   assert.ok(calls.every(([, baselineVersion]) => baselineVersion === "0.1.0"));
   assert.ok(results.every(({ status }) => status === "checked"));
 });
@@ -130,7 +131,7 @@ test("ordinary CI derives a single lockstep version from all public manifests", 
     seen.push(path);
     return '[package]\nversion = "0.3.0"\n';
   } }), "0.3.0");
-  assert.equal(seen.length, 3);
+  assert.equal(seen.length, 5);
 });
 
 test("public manifest drift and malformed versions fail before registry access", () => {
@@ -142,4 +143,11 @@ test("public manifest drift and malformed versions fail before registry access",
   }), (error) => error instanceof PublicCrateBaselineError && error.code === "public-manifest-version-mismatch");
   assert.throws(() => plannedPublicReleaseVersion({ readManifest: () => { throw new TypeError("unavailable"); } }),
     (error) => error instanceof PublicCrateBaselineError && error.code === "public-manifest-unavailable");
+});
+
+
+test("provider bootstrap keeps the existing release version without accepting arbitrary version drift", () => {
+  const readManifest = (path) => `[package]\nversion = "${["crates/api/", "crates/artifacts/", "crates/proto/"].some((prefix) => path.startsWith(prefix)) ? "0.3.0" : "0.3.1"}"\n`;
+  assert.equal(plannedPublicReleaseVersion({ readManifest }), "0.3.0");
+  assert.deepEqual(publicManifestVersions({ readManifest }), ["0.3.0", "0.3.0", "0.3.0", "0.3.1", "0.3.1"]);
 });

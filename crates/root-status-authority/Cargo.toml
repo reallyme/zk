@@ -17,7 +17,7 @@ buffa = { workspace = true }
 libc = { workspace = true }
 reallyme-zk-api = { path = "../api", version = "0.3.0", default-features = false, features = ["native"] }
 reallyme-zk-proto = { path = "../proto", version = "0.3.0", default-features = false, features = ["generated"] }
-reallyme-zk-proto-codec = { path = "../proto-codec", version = "0.1.0", default-features = false, features = ["native"] }
+reallyme-zk-proto-codec = { path = "../proto-codec", version = "0.3.1", default-features = false, features = ["native"] }
 thiserror = { workspace = true }
 zeroize = { workspace = true }
 

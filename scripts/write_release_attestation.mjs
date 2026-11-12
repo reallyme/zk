@@ -3,6 +3,8 @@
 
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
+import { PUBLIC_CRATE_NAMES as PUBLIC_CRATES } from "./public-crates.mjs";
+
 import { createHash } from "node:crypto";
 import { lstatSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
@@ -14,11 +16,7 @@ const VERSION_PATTERN = /^(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*
 const OUTPUT_DIRECTORY = "release-attestation";
 const OUTPUT_PATH = `${OUTPUT_DIRECTORY}/crates-preflight.json`;
 const MAX_CRATE_ARCHIVE_BYTES = 32 * 1024 * 1024;
-const PUBLIC_CRATES = Object.freeze([
-  "reallyme-zk-api",
-  "reallyme-zk-artifacts",
-  "reallyme-zk-proto",
-]);
+
 const PREREQUISITE_RUNS = Object.freeze({
   fuzz: "FUZZ_RUN_ID",
   protobuf_ci: "PROTOBUF_CI_RUN_ID",
