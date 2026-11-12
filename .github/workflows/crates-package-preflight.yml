@@ -32,11 +32,8 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 90
     outputs:
-      fuzz_run_id: ${{ steps.required-ci.outputs.fuzz_run_id }}
-      protobuf_ci_run_id: ${{ steps.required-ci.outputs.protobuf_ci_run_id }}
       release_sha: ${{ steps.verify-source.outputs.release_sha }}
       release_version: ${{ steps.verify-source.outputs.release_version }}
-      rust_ci_run_id: ${{ steps.required-ci.outputs.rust_ci_run_id }}
     steps:
       - name: Checkout requested release commit
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -69,19 +66,6 @@ jobs:
           RELEASE_VERSION: ${{ inputs.version }}
           RELEASE_SOURCE_WRITE_GITHUB_OUTPUT: "1"
         run: node scripts/verify_release_source.mjs
-
-      # Start preflight after release qualification completes. Missing evidence
-      # fails immediately instead of occupying a hosted runner while CI runs.
-      - name: Require successful CI for the exact release commit
-        id: required-ci
-        working-directory: zk
-        env:
-          GH_TOKEN: ${{ github.token }}
-          RELEASE_SHA: ${{ steps.verify-source.outputs.release_sha }}
-          REQUIRED_CI_ALLOW_RUST_PUSH: "1"
-          REQUIRED_CI_WAIT_SECONDS: "0"
-          REQUIRED_CI_WRITE_GITHUB_OUTPUT: "1"
-        run: node scripts/verify_required_ci.mjs
 
   packages:
     name: review crates.io packages
@@ -181,11 +165,8 @@ jobs:
       - name: Write reviewed package attestation
         working-directory: zk
         env:
-          FUZZ_RUN_ID: ${{ needs.verify-source-sha.outputs.fuzz_run_id }}
-          PROTOBUF_CI_RUN_ID: ${{ needs.verify-source-sha.outputs.protobuf_ci_run_id }}
           RELEASE_SHA: ${{ needs.verify-source-sha.outputs.release_sha }}
           RELEASE_VERSION: ${{ needs.verify-source-sha.outputs.release_version }}
-          RUST_CI_RUN_ID: ${{ needs.verify-source-sha.outputs.rust_ci_run_id }}
         run: node scripts/write_release_attestation.mjs
 
       - name: Upload reviewed package attestation

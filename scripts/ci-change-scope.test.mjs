@@ -57,7 +57,13 @@ test("shared source, tools, locks, fixtures, and unknown roots select every lane
 test("CI evidence changes retain source validation without unrelated native builds", () => {
   const paths = ["release-readiness-policy.lock.json", "scripts/verify_required_ci.mjs",
     "scripts/verify_required_ci.test.mjs", "scripts/ci-change-scope.mjs", "scripts/ci-change-scope.test.mjs",
-    "scripts/select-ci-scope.mjs", "scripts/require-ci-results.mjs", "scripts/ci-workflow-policy.test.mjs"];
+    "scripts/select-ci-scope.mjs", "scripts/require-ci-results.mjs", "scripts/ci-workflow-policy.test.mjs",
+    ".github/workflows/crates-package-preflight.yml", ".github/workflows/crates-release.yml",
+    "scripts/check_release_readiness.mjs", "scripts/check_release_readiness.test.mjs",
+    "scripts/check-release-readiness-policy-lock.mjs", "scripts/check-release-readiness-policy-lock.test.mjs",
+    "scripts/verify_release_source.mjs", "scripts/verify_release_source.test.mjs",
+    "scripts/verify_release_attestation.mjs", "scripts/verify_release_attestation.test.mjs",
+    "scripts/write_release_attestation.mjs"];
   for (const path of paths) {
     assert.deepEqual(classifyChangedPaths([path]), {
       source: true, swift: false, android: false, ios: false, circuits: false,

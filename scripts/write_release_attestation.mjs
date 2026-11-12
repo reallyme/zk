@@ -17,12 +17,6 @@ const OUTPUT_DIRECTORY = "release-attestation";
 const OUTPUT_PATH = `${OUTPUT_DIRECTORY}/crates-preflight.json`;
 const MAX_CRATE_ARCHIVE_BYTES = 32 * 1024 * 1024;
 
-const PREREQUISITE_RUNS = Object.freeze({
-  fuzz: "FUZZ_RUN_ID",
-  protobuf_ci: "PROTOBUF_CI_RUN_ID",
-  rust_ci: "RUST_CI_RUN_ID",
-});
-
 const fail = (code) => {
   console.error(`release attestation creation failed: ${code}`);
   process.exit(1);
@@ -84,14 +78,8 @@ const packageArchives = PUBLIC_CRATES.map((name) => {
 });
 
 const attestation = {
-  schema: "reallyme.zk.crates_preflight.v3",
+  schema: "reallyme.zk.crates_preflight.v4",
   crates: packageArchives,
-  prerequisites: Object.fromEntries(
-    Object.entries(PREREQUISITE_RUNS).map(([name, environmentName]) => [
-      name,
-      parsePositiveInteger(process.env[environmentName], `invalid-${name}-run-id`),
-    ]),
-  ),
   repository,
   workflow: "crates-package-preflight.yml",
   run_id: runId,

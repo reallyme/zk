@@ -7,13 +7,11 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
-  CRATES_REQUIRED_WORKFLOWS,
   REQUIRED_WORKFLOWS,
   RequiredCiError,
   formatRequiredCiOutputs,
   resolveRequiredCiWithWait,
   selectRequiredCiRun,
-  verifyRequiredCi,
 } from "./verify_required_ci.mjs";
 
 const RELEASE_SHA = "0123456789abcdef0123456789abcdef01234567";
@@ -35,27 +33,6 @@ const workflowRun = (overrides = {}) => ({
   ...overrides,
 });
 
-test("crates preflight reuses successful Rust push or manual evidence", () => {
-  const rust = CRATES_REQUIRED_WORKFLOWS.find((requirement) => requirement.workflowFile === "rust-ci.yml");
-  assert.ok(rust);
-  assert.deepEqual(rust.allowedEvents, ["push", "workflow_dispatch"]);
-  const expected = { ...rust, releaseSha: RELEASE_SHA, workflowId: WORKFLOW_ID };
-  assert.equal(selectRequiredCiRun({ workflow_runs: [workflowRun()] }, expected, NOW_MS).id, 100);
-  const manual = workflowRun({ id: 101, event: "workflow_dispatch" });
-  assert.equal(selectRequiredCiRun({ workflow_runs: [manual] }, expected, NOW_MS).id, 101);
-  assert.equal(selectRequiredCiRun({ workflow_runs: [
-    workflowRun({ conclusion: "failure" }), manual,
-  ] }, expected, NOW_MS).id, 101);
-  assert.throws(() => selectRequiredCiRun({ workflow_runs: [
-    manual, workflowRun({ id: 102, conclusion: "failure" }),
-  ] }, expected, NOW_MS),
-  (error) => error instanceof RequiredCiError && error.code === "required-ci-run-failed:rust-ci.yml");
-  assert.throws(() => selectRequiredCiRun({ workflow_runs: [
-    workflowRun({ event: "pull_request" }),
-  ] }, expected, NOW_MS),
-  (error) => error instanceof RequiredCiError && error.code === "missing-required-ci-run:rust-ci.yml");
-});
-
 test("native SDK qualification retains its complete manual Rust run", () => {
   const rust = REQUIRED_WORKFLOWS.find((requirement) => requirement.workflowFile === "rust-ci.yml");
   assert.ok(rust);
@@ -63,32 +40,11 @@ test("native SDK qualification retains its complete manual Rust run", () => {
   const expected = { ...rust, releaseSha: RELEASE_SHA, workflowId: WORKFLOW_ID };
   assert.throws(() => selectRequiredCiRun({ workflow_runs: [workflowRun()] }, expected, NOW_MS),
     (error) => error instanceof RequiredCiError && error.code === "missing-required-ci-run:rust-ci.yml");
+  const manual = workflowRun({ id: 101, event: "workflow_dispatch" });
+  assert.equal(selectRequiredCiRun({ workflow_runs: [manual] }, expected, NOW_MS).id, 101);
   assert.equal(selectRequiredCiRun({ workflow_runs: [
-    workflowRun({ event: "workflow_dispatch" }),
-  ] }, expected, NOW_MS).id, 100);
-});
-
-test("only an explicit crates workflow policy admits Rust push evidence", () => {
-  const base = {
-    GITHUB_REPOSITORY: "reallyme/zk", GITHUB_SHA: RELEASE_SHA,
-    RELEASE_SHA, GH_TOKEN: "fixture-token",
-  };
-  for (const [flag, expected] of [
-    [undefined, REQUIRED_WORKFLOWS], ["0", REQUIRED_WORKFLOWS], ["1", CRATES_REQUIRED_WORKFLOWS],
-  ]) {
-    const runs = verifyRequiredCi({
-      env: { ...base, REQUIRED_CI_ALLOW_RUST_PUSH: flag },
-      resolve: ({ requirements }) => {
-        assert.deepEqual(requirements, expected);
-        return expected.map((requirement, index) => ({ id: index + 1 }));
-      },
-    });
-    assert.equal(runs.length, expected.length);
-  }
-  assert.throws(() => verifyRequiredCi({
-    env: { ...base, REQUIRED_CI_ALLOW_RUST_PUSH: "yes" },
-    resolve: () => assert.fail("invalid policy must fail before querying GitHub"),
-  }), (error) => error instanceof RequiredCiError && error.code === "invalid-required-ci-rust-push-policy");
+    workflowRun({ conclusion: "failure" }), manual,
+  ] }, expected, NOW_MS).id, 101);
 });
 
 test("zero-wait release admission never sleeps or polls pending evidence", () => {

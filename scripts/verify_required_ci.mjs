@@ -20,7 +20,7 @@ const MAX_CLOCK_SKEW_MS = 5 * 60 * 1_000;
 
 export const REQUIRED_WORKFLOWS = Object.freeze([
   Object.freeze({
-    // Native SDK qualification selects every lane and three proof passes.
+    // Native SDK qualification selects every validation lane.
     allowedEvents: Object.freeze(["workflow_dispatch"]),
     outputName: "rust_ci_run_id",
     workflowFile: "rust-ci.yml",
@@ -36,15 +36,6 @@ export const REQUIRED_WORKFLOWS = Object.freeze([
     workflowFile: "fuzz.yml",
   }),
 ]);
-
-// Crates preflight follows the shared Rust publication policy. Native SDK
-// callers retain their existing full-lane qualification requirement.
-export const CRATES_REQUIRED_WORKFLOWS = Object.freeze(
-  REQUIRED_WORKFLOWS.map((requirement) => Object.freeze({
-    ...requirement,
-    allowedEvents: PUSH_OR_DISPATCH,
-  })),
-);
 
 export class RequiredCiError extends Error {
   constructor(code) {
@@ -214,8 +205,8 @@ export const selectRequiredCiRun = (value, expected, nowMs = Date.now()) => {
   return latest;
 };
 
-const resolveRequiredCi = ({ repository, releaseSha, requirements }) =>
-  requirements.map((requirement) => {
+const resolveRequiredCi = ({ repository, releaseSha }) =>
+  REQUIRED_WORKFLOWS.map((requirement) => {
     const workflow = runJson(
       ["api", `repos/${repository}/actions/workflows/${requirement.workflowFile}`],
       `required-ci-workflow-query-failed:${requirement.workflowFile}`,
@@ -248,7 +239,6 @@ export const resolveRequiredCiWithWait = ({
   releaseSha,
   repository,
   waitSeconds,
-  requirements = REQUIRED_WORKFLOWS,
   now = Date.now,
   onWait = () => {},
   resolve = resolveRequiredCi,
@@ -257,7 +247,7 @@ export const resolveRequiredCiWithWait = ({
   const deadline = now() + waitSeconds * 1_000;
   for (;;) {
     try {
-      return resolve({ repository, releaseSha, requirements });
+      return resolve({ repository, releaseSha });
     } catch (error) {
       if (!isWaitableRequiredCiError(error) || now() >= deadline) {
         throw error;
@@ -270,7 +260,7 @@ export const resolveRequiredCiWithWait = ({
   }
 };
 
-export const verifyRequiredCi = ({ env = process.env, onWait, resolve = resolveRequiredCi } = {}) => {
+export const verifyRequiredCi = ({ env = process.env, onWait } = {}) => {
   const repository = env.GITHUB_REPOSITORY;
   const releaseSha = env.RELEASE_SHA;
   if (typeof repository !== "string" || !REPOSITORY_PATTERN.test(repository)) {
@@ -284,10 +274,6 @@ export const verifyRequiredCi = ({ env = process.env, onWait, resolve = resolveR
   }
   if (typeof env.GH_TOKEN !== "string" || env.GH_TOKEN.length === 0) {
     fail("missing-github-token");
-  }
-  const allowRustPush = env.REQUIRED_CI_ALLOW_RUST_PUSH;
-  if (allowRustPush !== undefined && allowRustPush !== "0" && allowRustPush !== "1") {
-    fail("invalid-required-ci-rust-push-policy");
   }
   const waitSeconds = parseSeconds(
     env.REQUIRED_CI_WAIT_SECONDS,
@@ -309,8 +295,6 @@ export const verifyRequiredCi = ({ env = process.env, onWait, resolve = resolveR
     pollSeconds,
     releaseSha,
     repository,
-    requirements: allowRustPush === "1" ? CRATES_REQUIRED_WORKFLOWS : REQUIRED_WORKFLOWS,
-    resolve,
     waitSeconds,
   });
 };

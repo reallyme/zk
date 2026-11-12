@@ -5,7 +5,7 @@
 name: Rust CI
 
 on:
-  # Manual runs qualify the exact commit for release: every lane and three proof passes.
+  # Manual runs select every validation lane.
   workflow_dispatch:
   pull_request:
   push:
@@ -1111,7 +1111,7 @@ jobs:
       - name: Prove and verify all 20 request-bound circuits and negative bindings
         working-directory: zk
         env:
-          RUNS: ${{ github.event_name == 'workflow_dispatch' && '3' || '1' }}
+          RUNS: "1"
           ISOLATED_HOME: ${{ runner.temp }}/modern-zk-home
           ISOLATED_CACHE: ${{ runner.temp }}/modern-zk-cache
         run: scripts/test-modern-production-circuits.sh

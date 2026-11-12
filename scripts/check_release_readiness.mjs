@@ -1723,7 +1723,7 @@ readiness.assertTextPolicy({
       required: [
         "toolchain: 1.99.0",
         '= "1.99.0"',
-        "REQUIRED_CI_WRITE_GITHUB_OUTPUT",
+        "node scripts/verify_release_source.mjs",
         "scripts/run-gitleaks.sh",
         "scripts/audit_committed_lockfiles.sh",
         "ref: 18a6d91d99837e80f92e41fe04effb0b043d754e",
@@ -1731,7 +1731,7 @@ readiness.assertTextPolicy({
         "actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8",
         "subject-path: reviewed-crates/*.crate",
       ],
-      forbidden: ["toolchain: 1.98.1"],
+      forbidden: ["toolchain: 1.98.1", "scripts/verify_required_ci.mjs"],
     },
     {
       path: ".github/workflows/crates-release.yml",

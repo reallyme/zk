@@ -4,8 +4,11 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
 import {
+  mkdirSync,
   mkdtempSync,
+  readFileSync,
   rmSync,
   symlinkSync,
   unlinkSync,
@@ -13,6 +16,7 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import test from "node:test";
 
 import {
@@ -34,15 +38,10 @@ const expected = Object.freeze({
   releaseVersion: "0.2.1",
 });
 const attestation = (overrides = {}) => ({
-  schema: "reallyme.zk.crates_preflight.v3",
+  schema: "reallyme.zk.crates_preflight.v4",
   crates: PUBLIC_CRATE_NAMES.map((name, index) => ({
     file: `${name}-${expected.releaseVersion}.crate`, sha256: String(index + 1).repeat(64), size: 101 + index,
   })),
-  prerequisites: {
-    fuzz: 11,
-    protobuf_ci: 12,
-    rust_ci: 13,
-  },
   repository: expected.repository,
   workflow: "crates-package-preflight.yml",
   run_id: expected.runId,
@@ -88,12 +87,45 @@ test("reviewed attestation accepts the exact run, SHA, and version", () => {
   );
 });
 
+test("package attestation is produced without global CI prerequisite run IDs", () => {
+  const root = mkdtempSync(join(tmpdir(), "zk-package-attestation-"));
+  try {
+    const packageDirectory = join(root, "target", "package");
+    mkdirSync(packageDirectory, { recursive: true });
+    for (const name of PUBLIC_CRATE_NAMES) {
+      writeFileSync(join(packageDirectory, `${name}-${expected.releaseVersion}.crate`), name);
+    }
+    const env = {
+      ...process.env,
+      CARGO_TARGET_DIR: join(root, "target"),
+      GITHUB_REPOSITORY: expected.repository,
+      GITHUB_RUN_ID: String(expected.runId),
+      GITHUB_RUN_ATTEMPT: "1",
+      RELEASE_SHA: releaseSha,
+      RELEASE_VERSION: expected.releaseVersion,
+    };
+    for (const key of ["FUZZ_RUN_ID", "PROTOBUF_CI_RUN_ID", "RUST_CI_RUN_ID"]) delete env[key];
+    const script = fileURLToPath(new URL("./write_release_attestation.mjs", import.meta.url));
+    const result = spawnSync(process.execPath, [script], { cwd: root, env, encoding: "utf8" });
+    assert.equal(result.status, 0, result.stderr);
+    const document = JSON.parse(readFileSync(join(root, "release-attestation", "crates-preflight.json"), "utf8"));
+    assert.equal(Object.hasOwn(document, "prerequisites"), false);
+    verifyAttestationDocument(document, {
+      ...expected,
+      packageArchives: localPackageArchives(expected.releaseVersion, { CARGO_TARGET_DIR: join(root, "target") }),
+    });
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
 test("attestation rejects mismatched inputs and unreviewed fields", () => {
   for (const candidate of [
     attestation({ version: "0.1.0" }),
     attestation({ release_sha: "b".repeat(40) }),
     attestation({ run_id: 124 }),
     attestation({ extra: true }),
+    attestation({ schema: "reallyme.zk.crates_preflight.v3" }),
     attestation({ prerequisites: { fuzz: 11 } }),
     attestation({ crates: [{ file: "wrong.crate", sha256: "1".repeat(64), size: 1 }] }),
   ]) {

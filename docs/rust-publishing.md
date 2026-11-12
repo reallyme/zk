@@ -109,32 +109,23 @@ node scripts/publish-crates-in-order.mjs inspect --allow-dirty
 Ordinary CI runs the same inspection without `--allow-dirty`. Inspection may
 read the crates.io index and fetch locked dependencies; it compiles extracted
 archives offline and performs credential-free publication dry-runs without
-uploading packages. The explicit package preflight first requires
-the latest successful Rust CI, protobuf, and fuzz runs
-for the exact current `main` commit. It reuses those results instead of rebuilding
-the workspace to repeat formatting, lint, test, protobuf, runtime-feature,
-boundary, or dependency checks. It binds the requested
-release version, applies the release-package policy, and runs the bounded locked
-crates.io dry-runs that produce the reviewed archives:
+uploading packages. The explicit package preflight validates the current `main`
+commit and all five public manifest versions, scans Git history, audits locked
+dependencies, checks the public protobuf baseline and Rust API compatibility,
+and compiles normalized crate archives with all features. It runs bounded
+crates.io dry-runs and attests the exact package bytes:
 
 ```sh
 node scripts/publish-crates-in-order.mjs preflight
 ```
 
-Package preflight reuses successful push or manually dispatched **Rust CI**,
-protobuf, and fuzz runs for the exact current `main` commit. Start preflight
-after these runs succeed. If a required workflow has no run for that commit,
-dispatch it first. Missing or pending evidence fails immediately rather than
-occupying a runner while validation is in progress.
-CI may be retried after an infrastructure or configuration repair. Admission
-requires the latest qualifying run for the exact commit and workflow to finish
-successfully; a newer failed, cancelled, or pending run blocks preflight rather
-than falling back to an older success. For additional release qualification,
-manually dispatch **Rust CI** to select every validation lane and three proof
-passes; routine changes run one proof pass when relevant. Prior failed attempts
-remain in GitHub's history and do not require an empty source commit to recover.
-The evidence age limit uses the run's original creation time, so a partial retry
-cannot refresh stale successful checks from an old run.
+Package preflight runs independently of Rust CI, protobuf CI, and fuzzing.
+It does not wait for those workflows or require their run IDs. Source tests,
+security mutations, mobile validation, and circuit checks remain in Rust CI;
+manual Rust CI selects every validation lane and runs one production proof pass.
+Fuzz smoke runs cover Rust and fuzz inputs and the existing native SDK
+qualification inputs. Scheduled and manually dispatched fuzz campaigns retain
+their longer runs.
 
 During a first release, an expected lookup failure is accepted only when the
 missing package is an earlier crate in the derived release order. No upload
@@ -165,9 +156,9 @@ bounded crates.io index propagation; all other failures stop the release.
 In GitHub Actions, run **Crates Package Preflight** first. The version field is
 prefilled with the current public Rust release version and checked against all
 five crate manifests.
-The workflow binds that version to the current `main` commit and the five
-prerequisite workflow run IDs, scans complete Git history, audits every tracked
-lockfile, runs the pinned release-readiness repository policy gate, and produces the
+The workflow binds that version to the current `main` commit, scans complete Git
+history, audits every tracked lockfile, runs the pinned release-readiness
+repository policy gate, and produces the
 normalized crate archives without registry credentials. It uploads the exact
 archives plus a manifest containing each filename, size, and SHA-256 digest.
 GitHub artifact attestations cryptographically bind both the manifest and the
@@ -252,7 +243,7 @@ fuzz dependency graphs have separate strict, locked audits. Mutation checks requ
 a nonempty target selection and isolate build directories between workers.
 
 Manual release-qualification runs are not cancelled by unrelated pushes. Package
-preflight consumes successful exact-commit evidence; the credentialed publisher
+preflight validates and attests the exact package sources; the credentialed publisher
 consumes the attested archives and verifies uploaded registry bytes without
 repeating the workspace tests. Noir soundness, linked proving, cross-verification,
 mobile targets, and SDK packages remain additional ZK-specific gates.

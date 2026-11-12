@@ -19,24 +19,18 @@ const VERSION_PATTERN = /^(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*
 const PREFLIGHT_WORKFLOW = "crates-package-preflight.yml";
 const PREFLIGHT_PATH = `.github/workflows/${PREFLIGHT_WORKFLOW}`;
 const PREFLIGHT_TITLE = "Crates package preflight";
-const ATTESTATION_SCHEMA = "reallyme.zk.crates_preflight.v3";
+const ATTESTATION_SCHEMA = "reallyme.zk.crates_preflight.v4";
 const DEFAULT_ATTESTATION_PATH = "release-attestation/crates-preflight.json";
 const MAX_COMMAND_OUTPUT_BYTES = 1_048_576;
 const MAX_ATTESTATION_BYTES = 16_384;
 const MAX_CRATE_ARCHIVE_BYTES = 32 * 1024 * 1024;
 const SHA256_PATTERN = /^[0-9a-f]{64}$/u;
 
-const PREREQUISITE_KEYS = Object.freeze([
-  "fuzz",
-  "protobuf_ci",
-  "rust_ci",
-]);
 const MAX_WAIT_SECONDS = 7_200;
 const MAX_POLL_SECONDS = 300;
 const DEFAULT_POLL_SECONDS = 20;
 const ATTESTATION_KEYS = Object.freeze([
   "crates",
-  "prerequisites",
   "release_sha",
   "repository",
   "run_attempt",
@@ -160,16 +154,6 @@ export const verifyAttestationDocument = (value, expected) => {
     value.crates.length !== PUBLIC_CRATES.length
   ) {
     fail("invalid-package-archive-attestation");
-  }
-  if (
-    !isRecord(value.prerequisites) ||
-    Object.keys(value.prerequisites).sort().join(",") !== PREREQUISITE_KEYS.join(",") ||
-    PREREQUISITE_KEYS.some(
-      (key) =>
-        !Number.isSafeInteger(value.prerequisites[key]) || value.prerequisites[key] < 1,
-    )
-  ) {
-    fail("invalid-prerequisite-attestation");
   }
   for (const [index, expectedName] of PUBLIC_CRATES.entries()) {
     const archive = value.crates[index];

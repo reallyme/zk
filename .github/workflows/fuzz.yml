@@ -10,14 +10,31 @@ on:
       - ".github/workflows/fuzz.yml"
       - "Cargo.toml"
       - "Cargo.lock"
+      - ".cargo/**"
+      - "rust-toolchain.toml"
       - "crates/**"
       - "fuzz/**"
       - "scripts/run-fuzz-smoke.sh"
       - "!**/*.md"
   push:
     branches: [main]
-    paths-ignore:
-      - "**/*.md"
+    # Preserve evidence for the existing native SDK qualification flow.
+    paths:
+      - ".github/workflows/fuzz.yml"
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - ".cargo/**"
+      - "rust-toolchain.toml"
+      - "Package.swift"
+      - "Package.resolved"
+      - "packages/swift/**"
+      - "packages/kotlin/**"
+      - ".github/workflows/swift-package-preflight.yml"
+      - ".github/workflows/swift-package-release.yml"
+      - "crates/**"
+      - "fuzz/**"
+      - "scripts/run-fuzz-smoke.sh"
+      - "!**/*.md"
   schedule:
     - cron: "23 4 * * 2"
   workflow_dispatch:

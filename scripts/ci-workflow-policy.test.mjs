@@ -91,9 +91,12 @@ test("Rust CI tests the public API without backend features", () => {
   );
 });
 
-test("package preflight consumes exact-commit CI evidence instead of rerunning CI", () => {
+test("package preflight owns package checks without waiting for unrelated workflows", () => {
   const preflight = readWorkflow("crates-package-preflight.yml");
-  assert.match(preflight, /node scripts\/verify_required_ci[.]mjs/u);
+  assert.doesNotMatch(preflight, /verify_required_ci|REQUIRED_CI|steps[.]required-ci|FUZZ_RUN_ID|RUST_CI_RUN_ID|PROTOBUF_CI_RUN_ID/u);
+  assert.match(preflight, /node scripts\/verify_release_source[.]mjs/u);
+  assert.match(preflight, /node scripts\/check-public-crate-baselines[.]mjs/u);
+  assert.match(preflight, /node scripts\/publish-crates-in-order[.]mjs preflight/u);
   for (const duplicate of [
     "cargo fmt",
     "cargo clippy",
@@ -123,9 +126,22 @@ test("crates preflight prefills the current version from the public release wave
     "preflight version default must match every public crate manifest");
 });
 
-test("Rust push evidence admission is scoped to crates preflight", () => {
-  assert.match(readWorkflow("crates-package-preflight.yml"), /REQUIRED_CI_ALLOW_RUST_PUSH: "1"/u);
-  assert.doesNotMatch(readWorkflow("swift-package-preflight.yml"), /REQUIRED_CI_ALLOW_RUST_PUSH/u);
+test("native SDK preflight retains its existing qualification flow", () => {
+  assert.match(readWorkflow("swift-package-preflight.yml"), /node scripts\/verify_required_ci[.]mjs/u);
+  assert.doesNotMatch(readWorkflow("crates-package-preflight.yml"), /node scripts\/verify_required_ci[.]mjs/u);
+});
+
+test("push fuzzing is scoped to source and SDK qualification inputs", () => {
+  const fuzz = readWorkflow("fuzz.yml");
+  const push = fuzz.slice(fuzz.indexOf("  push:\n"), fuzz.indexOf("  schedule:\n"));
+  assert.match(push, /    paths:\n/u);
+  assert.doesNotMatch(push, /paths-ignore|crates-package-preflight|crates-release/u);
+  for (const path of ["Cargo.toml", "Cargo.lock", ".cargo/**", "rust-toolchain.toml",
+    "crates/**", "fuzz/**", "scripts/run-fuzz-smoke.sh", "packages/swift/**", "packages/kotlin/**"]) {
+    assert.ok(push.includes(`      - "${path}"`), path);
+  }
+  assert.match(fuzz, /workflow_dispatch:/u);
+  assert.match(fuzz, /schedule:/u);
 });
 
 test("credentialed release consumes reviewed archives without rerunning package preflight", () => {
@@ -547,7 +563,7 @@ test("Rust CI proves the hash-pinned toolchain and Noir regressions", () => {
     /cargo test --locked -p reallyme-zk-noir-witness-core[\s\S]*execution::tests::opt_in_all_circuits_v1_fixture_witness_parity[\s\S]*-- --ignored --exact --nocapture/u,
   );
   assert.match(rustCi, /scripts\/check-poseidon2-crypto-contract[.]sh/u);
-  assert.match(rustCi, /RUNS: \$\{\{ github[.]event_name == 'workflow_dispatch' && '3' \|\| '1' \}\}/u);
+  assert.match(rustCi, /RUNS: "1"/u);
   assert.match(rustCi, /scripts\/test-modern-soundness-regressions[.]sh/u);
   assert.match(rustCi, /scripts\/test-modern-linked-all30-matrix[.]sh/u);
   assert.match(rustCi, /scripts\/test-modern-linked-cli-cross-verify[.]sh/u);

@@ -5,7 +5,7 @@
     {
       "path": "scripts/check_release_readiness.mjs",
       "role": "consumer release-readiness policy declaration",
-      "sha256": "cfc5f83e576abf8da945e25cf081c1b7889b563e1899b486b06d69e5ae79cc5f"
+      "sha256": "e1a7cc470b7e2e60dc0ee1979c6c0b58c121afcfba4fb54d1af369330067be9c"
     },
     {
       "path": "scripts/check-platform-facade-pins.mjs",
@@ -35,7 +35,7 @@
     {
       "path": "scripts/ci-workflow-policy.test.mjs",
       "role": "workflow policy tests",
-      "sha256": "ce5d00b448a531ace0a0fe36d8416448241de17a8a7c68e8c2225a1fbce3a150"
+      "sha256": "868f37248ea529e0439097945f589ffbac86ab0ffc7af82f9d1d958f325ef985"
     },
     {
       "path": "scripts/build_swift_xcframework.sh",
@@ -85,12 +85,12 @@
     {
       "path": ".github/workflows/rust-ci.yml",
       "role": "primary policy and exact-commit CI workflow",
-      "sha256": "8f8db471f560935fecca30dbea34b20c0c2e5cfb43a8823479119bcb01049858"
+      "sha256": "14fe83f7cdb1568a9ef0767bb1b8768a9c18256a9f9d0d996224f94b2151d87e"
     },
     {
       "path": ".github/workflows/fuzz.yml",
       "role": "fuzz policy workflow",
-      "sha256": "d40a4a6cdac07b349b7832032cfee68da9a39d015991afbb783b9f79c5daa156"
+      "sha256": "9d7ca2c2c1736c94977bcdff29f96fa93bdce48556a9b3ca3dfde3238612fb49"
     },
     {
       "path": ".github/workflows/sealed-release-attestation-policy.yml",
@@ -100,7 +100,7 @@
     {
       "path": ".github/workflows/crates-package-preflight.yml",
       "role": "crates package preflight workflow",
-      "sha256": "2d8594a508dfe0a955eeebeeb7c271017e506847421f71f83e01c0ce62353fdf"
+      "sha256": "f4d8ef8dbb01758fdfda854d9a7edb91992bc7f8d04d4034faf7d69c8bfe50a1"
     },
     {
       "path": ".github/workflows/protobuf-ci.yml",
@@ -200,12 +200,12 @@
     {
       "path": "scripts/ci-change-scope.mjs",
       "role": "changed-source lane selection and fail-closed aggregation",
-      "sha256": "9d77948a5a5283dbb4674fea02062b85f56887ed8b9d33dca9dd98f90cfbfa63"
+      "sha256": "7a8439fcfe56a8b5f59a187344732fe92b42f5d184116e60cf931a14741aff7a"
     },
     {
       "path": "scripts/ci-change-scope.test.mjs",
       "role": "source scope and skipped-lane regression tests",
-      "sha256": "1fd8a02578b2e72c0ae651d44cc433592752d4c9bc14f99efbd33b2836f0b647"
+      "sha256": "ac4a6ecb45c2c9d0c605ef3a70b7dbf108cc5ac423b805e5d5ede5c04368420d"
     },
     {
       "path": "scripts/select-ci-scope.mjs",
@@ -230,12 +230,12 @@
     {
       "path": "scripts/verify_required_ci.mjs",
       "role": "exact-commit release qualification admission",
-      "sha256": "4b9f0002c6400f8d3bae24391c7bc87fec6447144413ad6facd2ea56222ebd5b"
+      "sha256": "93f89ae458bb75652db9526ed356af3ff0322283c6fb4b10eb4a68d757c61b96"
     },
     {
       "path": "scripts/verify_required_ci.test.mjs",
       "role": "release qualification and zero-wait evidence tests",
-      "sha256": "0fce76bba11f616d32136a1565a0eac6a3ae836586698f7d985e9c2bd4f9581a"
+      "sha256": "19ebdbd9fb575f79587b8a8bdf1c91c9aa41acb1d9322ff451ba6f2a7d315760"
     },
     {
       "path": "scripts/test-modern-production-circuits.sh",
@@ -325,17 +325,17 @@
     {
       "path": "scripts/write_release_attestation.mjs",
       "role": "approved package archive attestation writer",
-      "sha256": "6455fd9e4fc56a3f83863483ae734207f6f96cbb61d340891b4db981f4e157e4"
+      "sha256": "2234f7e80351b87d443db3204b1fa51294de19821d59b11fa5233cc97175d3db"
     },
     {
       "path": "scripts/verify_release_attestation.mjs",
       "role": "approved package archive attestation verifier",
-      "sha256": "74f956c20f299ec8962bfbc05529184a9aae73b1c1180876f30991bf2c4885a6"
+      "sha256": "0068b1e0e67b3f402ba01fb6e8b95b79d65822037596db67fda895ebba8ea242"
     },
     {
       "path": "scripts/verify_release_attestation.test.mjs",
       "role": "package attestation rejection tests",
-      "sha256": "ecc3f1e014325cb2b8a5895db2f216437012ba6107c2eb4e92a7529ffa49aa1c"
+      "sha256": "7569ee74c758ae2261802a0183cb052ba5472e4088aad037a5c00b503af771c5"
     },
     {
       "path": "scripts/check-public-crate-baselines.mjs",
@@ -383,7 +383,7 @@
         "node .release-readiness/scripts/run-consumer-check.mjs --policy-only",
         "node scripts/select-ci-scope.mjs",
         "node scripts/require-ci-results.mjs",
-        "RUNS: ${{ github.event_name == 'workflow_dispatch' && '3' || '1' }}"
+        "RUNS: \"1\""
       ]
     },
     {

@@ -5,6 +5,8 @@
 const MAX_CHANGED_PATHS = 100_000;
 const MAX_PATH_BYTES = 4_096;
 const SOURCE_POLICY_PATHS = new Set([
+  ".github/workflows/crates-package-preflight.yml",
+  ".github/workflows/crates-release.yml",
   "release-readiness-policy.lock.json",
   "scripts/verify_required_ci.mjs",
   "scripts/verify_required_ci.test.mjs",
@@ -13,6 +15,15 @@ const SOURCE_POLICY_PATHS = new Set([
   "scripts/select-ci-scope.mjs",
   "scripts/require-ci-results.mjs",
   "scripts/ci-workflow-policy.test.mjs",
+  "scripts/check_release_readiness.mjs",
+  "scripts/check_release_readiness.test.mjs",
+  "scripts/check-release-readiness-policy-lock.mjs",
+  "scripts/check-release-readiness-policy-lock.test.mjs",
+  "scripts/verify_release_source.mjs",
+  "scripts/verify_release_source.test.mjs",
+  "scripts/verify_release_attestation.mjs",
+  "scripts/verify_release_attestation.test.mjs",
+  "scripts/write_release_attestation.mjs",
 ]);
 
 export class CiScopeError extends Error {
@@ -40,8 +51,8 @@ export function classifyChangedPaths(paths) {
     }
     if (path.endsWith(".md")) continue;
     scope.source = true;
-    // These files govern validation and release evidence, not runtime or
-    // circuit inputs. Source policy tests cover them; a manual qualification
+    // Source policy tests cover validation and release evidence changes.
+    // They do not change runtime or circuit inputs; a manual qualification
     // still selects every lane. Mixed runtime changes retain full coverage.
     if (SOURCE_POLICY_PATHS.has(path)) continue;
     if (path.startsWith("packages/swift/") || path === "Package.swift" || path === "Package.resolved") {
